@@ -5,6 +5,18 @@
 class ShadersLoader
 {
 public:
+    static Microsoft::WRL::ComPtr<ID3DBlob> LoadBlob(ID3D11Device* device, const wchar_t* filename)
+    {
+        Microsoft::WRL::ComPtr<ID3DBlob> shaderBlob;
+        HRESULT result = D3DReadFileToBlob(filename, &shaderBlob);
+        if (result != S_OK)
+        {
+            throw std::runtime_error("Failed to read file"); // TODO add filename
+        }
+
+        return shaderBlob;
+    }
+
     static Microsoft::WRL::ComPtr<ID3D11VertexShader> LoadVertexShader(ID3D11Device* device, const wchar_t* filename)
     {
         Microsoft::WRL::ComPtr<ID3DBlob> shaderBlob;
@@ -12,7 +24,6 @@ public:
         if (result != S_OK)
         {
             throw std::runtime_error("Failed to read vertex shader"); // TODO add filename
-            return nullptr;
         }
 
         Microsoft::WRL::ComPtr<ID3D11VertexShader> vertexShader;
@@ -20,7 +31,6 @@ public:
         if (result != S_OK)
         {
             throw std::runtime_error("Failed to create vertex shader"); // TODO add filename
-            return nullptr;
         }
 
         return vertexShader;
@@ -33,7 +43,6 @@ public:
         if (result != S_OK)
         {
             throw std::runtime_error("Failed to read pixel shader"); // TODO add filename
-            return nullptr;
         }
 
         Microsoft::WRL::ComPtr<ID3D11PixelShader> pixelShader;
@@ -41,7 +50,6 @@ public:
         if (result != S_OK)
         {
             throw std::runtime_error("Failed to create pixel shader"); // TODO add filename
-            return nullptr;
         }
 
         return pixelShader;

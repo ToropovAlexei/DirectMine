@@ -6,6 +6,7 @@
 
 #include "DeviceResources.h"
 #include "StepTimer.h"
+#include "TestCube.h"
 
 
 // A basic game implementation that creates a D3D11 device and
@@ -55,11 +56,17 @@ private:
     void CreateDeviceDependentResources();
     void CreateWindowSizeDependentResources();
 
+    void CreateInputLayout();
+
     // Device resources.
     std::unique_ptr<DX::DeviceResources>    m_deviceResources;
 
     Microsoft::WRL::ComPtr<ID3D11VertexShader> m_vertexShader;
     Microsoft::WRL::ComPtr<ID3D11PixelShader> m_pixelShader;
+
+    Microsoft::WRL::ComPtr<ID3D11InputLayout> m_inputLayout;
+
+    std::unique_ptr<TestCube> m_cube;
 
     // Rendering loop timer.
     DX::StepTimer                           m_timer;

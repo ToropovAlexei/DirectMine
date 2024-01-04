@@ -22,6 +22,8 @@
       <Filter>Common</Filter>
     </ClInclude>
     <ClInclude Include="ShadersLoader.h" />
+    <ClInclude Include="TestCube.h" />
+    <ClInclude Include="TestTriangle.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp" />
@@ -31,6 +33,8 @@
       <Filter>Common</Filter>
     </ClCompile>
     <ClCompile Include="ShadersLoader.cpp" />
+    <ClCompile Include="TestCube.cpp" />
+    <ClCompile Include="TestTriangle.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="resource.rc" />

@@ -78,7 +78,15 @@ void Game::Render()
     auto context = m_deviceResources->GetD3DDeviceContext();
 
     // TODO: Add your rendering code here.
-    context;
+    UINT stride = sizeof(Vertex);
+    UINT offset = 0;
+    context->IASetInputLayout(m_inputLayout.Get());
+    context->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+    context->VSSetShader(m_vertexShader.Get(), nullptr, 0u);
+    context->PSSetShader(m_pixelShader.Get(), nullptr, 0u);
+    context->IASetVertexBuffers(0u, 1u, m_cube->VertexBuffer().GetAddressOf(), &stride, &offset);
+    context->IASetIndexBuffer(m_cube->IndexBuffer().Get(), DXGI_FORMAT_R32_UINT, 0u);
+    context->DrawIndexed(36u, 0u, 0);
 
     m_deviceResources->PIXEndEvent();
 
@@ -171,12 +179,34 @@ void Game::CreateDeviceDependentResources()
     // TODO: Initialize device dependent objects here (independent of window size).
     m_vertexShader = ShadersLoader::LoadVertexShader(device, L"VertexShader.cso");
     m_pixelShader = ShadersLoader::LoadPixelShader(device, L"PixelShader.cso");
+    CreateInputLayout();
+    m_cube = std::make_unique<TestCube>(device);
 }
 
 // Allocate all memory resources that change on a window SizeChanged event.
 void Game::CreateWindowSizeDependentResources()
 {
     // TODO: Initialize windows-size dependent objects here.
+}
+
+void Game::CreateInputLayout()
+{
+    auto device = m_deviceResources->GetD3DDevice();
+    // Описание элементов вершинного формата
+    D3D11_INPUT_ELEMENT_DESC inputLayoutDesc[] =
+    {
+        { "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+        { "COLOR", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 12, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+        { "NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 24, D3D11_INPUT_PER_VERTEX_DATA, 0}
+    };
+
+    // Создание input layout
+    auto vertexShaderBlob = ShadersLoader::LoadBlob(device, L"VertexShader.cso");
+    device->CreateInputLayout(inputLayoutDesc,
+        ARRAYSIZE(inputLayoutDesc),
+        vertexShaderBlob->GetBufferPointer(), 
+        vertexShaderBlob->GetBufferSize(),
+        &m_inputLayout);
 }
 
 void Game::OnDeviceLost()
