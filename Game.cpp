@@ -77,16 +77,85 @@ void Game::Render()
     m_deviceResources->PIXBeginEvent(L"Render");
     auto context = m_deviceResources->GetD3DDeviceContext();
 
-    // TODO: Add your rendering code here.
-    UINT stride = sizeof(Vertex);
-    UINT offset = 0;
-    context->IASetInputLayout(m_inputLayout.Get());
-    context->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-    context->VSSetShader(m_vertexShader.Get(), nullptr, 0u);
-    context->PSSetShader(m_pixelShader.Get(), nullptr, 0u);
-    context->IASetVertexBuffers(0u, 1u, m_cube->VertexBuffer().GetAddressOf(), &stride, &offset);
-    context->IASetIndexBuffer(m_cube->IndexBuffer().Get(), DXGI_FORMAT_R32_UINT, 0u);
-    context->DrawIndexed(36u, 0u, 0);
+	HRESULT hr;
+
+	const UINT stride = sizeof(Vertex);
+	const UINT offset = 0u;
+	context->IASetVertexBuffers(0u, 1u, m_cube->VertexBuffer().GetAddressOf(), &stride, &offset);
+	context->IASetIndexBuffer(m_cube->IndexBuffer().Get(), DXGI_FORMAT_R16_UINT, 0u);
+
+	// create constant buffer for transformation matrix
+	struct ConstantBuffer
+	{
+		DirectX::XMMATRIX transform;
+	};
+	const ConstantBuffer cb =
+	{
+		{
+			DirectX::XMMatrixTranspose(
+				DirectX::XMMatrixRotationZ(0.0f) *
+				DirectX::XMMatrixRotationX(0.0f) *
+				DirectX::XMMatrixTranslation(0.0f,0.0f,4.0f) *
+				DirectX::XMMatrixPerspectiveLH(1.0f,3.0f / 4.0f,0.5f,10.0f)
+			)
+		}
+	};
+	Microsoft::WRL::ComPtr<ID3D11Buffer> pConstantBuffer;
+	D3D11_BUFFER_DESC cbd;
+	cbd.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+	cbd.Usage = D3D11_USAGE_DYNAMIC;
+	cbd.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+	cbd.MiscFlags = 0u;
+	cbd.ByteWidth = sizeof(cb);
+	cbd.StructureByteStride = 0u;
+	D3D11_SUBRESOURCE_DATA csd = {};
+	csd.pSysMem = &cb;
+	m_deviceResources->GetD3DDevice()->CreateBuffer(&cbd, &csd, &pConstantBuffer);
+
+	// bind constant buffer to vertex shader
+	context->VSSetConstantBuffers(0u, 1u, pConstantBuffer.GetAddressOf());
+
+
+	// lookup table for cube face colors
+	struct ConstantBuffer2
+	{
+		struct
+		{
+			float r;
+			float g;
+			float b;
+			float a;
+		} face_colors[6];
+	};
+	const ConstantBuffer2 cb2 =
+	{
+		{
+			{1.0f,0.0f,1.0f},
+			{1.0f,0.0f,0.0f},
+			{0.0f,1.0f,0.0f},
+			{0.0f,0.0f,1.0f},
+			{1.0f,1.0f,0.0f},
+			{0.0f,1.0f,1.0f},
+		}
+	};
+	Microsoft::WRL::ComPtr<ID3D11Buffer> pConstantBuffer2;
+	D3D11_BUFFER_DESC cbd2;
+	cbd2.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+	cbd2.Usage = D3D11_USAGE_DEFAULT;
+	cbd2.CPUAccessFlags = 0u;
+	cbd2.MiscFlags = 0u;
+	cbd2.ByteWidth = sizeof(cb2);
+	cbd2.StructureByteStride = 0u;
+	D3D11_SUBRESOURCE_DATA csd2 = {};
+	csd2.pSysMem = &cb2;
+	m_deviceResources->GetD3DDevice()->CreateBuffer(&cbd2, &csd2, &pConstantBuffer2);
+
+	context->PSSetConstantBuffers(0u, 1u, pConstantBuffer2.GetAddressOf());
+	context->PSSetShader(m_pixelShader.Get(), nullptr, 0u);
+	context->VSSetShader(m_vertexShader.Get(), nullptr, 0u);
+	context->IASetInputLayout(m_inputLayout.Get());
+	context->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+	context->DrawIndexed(36u, 0u, 0u);
 
     m_deviceResources->PIXEndEvent();
 
@@ -196,8 +265,8 @@ void Game::CreateInputLayout()
     D3D11_INPUT_ELEMENT_DESC inputLayoutDesc[] =
     {
         { "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0 },
-        { "COLOR", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 12, D3D11_INPUT_PER_VERTEX_DATA, 0 },
-        { "NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 24, D3D11_INPUT_PER_VERTEX_DATA, 0}
+		{ "COLOR", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 12, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+		{ "NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 24, D3D11_INPUT_PER_VERTEX_DATA, 0 },
     };
 
     // Создание input layout

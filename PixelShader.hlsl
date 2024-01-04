@@ -1,11 +1,9 @@
-struct VertexOut
+cbuffer CBuf
 {
-    float4 PosH : SV_POSITION;
-    float3 Color : COLOR;
-    float3 Normal : NORMAL;
+    float4 face_colors[6];
 };
 
-float4 main(VertexOut pin) : SV_TARGET
+float4 main(uint tid : SV_PrimitiveID) : SV_Target
 {
-    return float4(pin.Color, 1.0f);
+    return face_colors[tid / 2];
 }

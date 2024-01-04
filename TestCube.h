@@ -2,9 +2,12 @@
 
 struct Vertex
 {
-    DirectX::XMFLOAT3 position;
-    DirectX::XMFLOAT3 color;
-    DirectX::XMFLOAT3 normal;
+	struct
+	{
+		float x;
+		float y;
+		float z;
+	} pos;
 };
 
 class TestCube
