@@ -1,9 +1,14 @@
-cbuffer CBuf
+Texture2D tex : register(t0);
+SamplerState splr : register(s0);
+
+struct VertexOut
 {
-    float4 face_colors[6];
+    float4 PosH : SV_POSITION;
+    float3 Normal : NORMAL;
+    float2 TexC : TEXCOORD;
 };
 
-float4 main(uint tid : SV_PrimitiveID) : SV_Target
+float4 main(VertexOut pin) : SV_Target
 {
-    return face_colors[tid / 2];
+    return tex.Sample(splr, pin.TexC);
 }

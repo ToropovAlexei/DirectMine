@@ -186,7 +186,6 @@
     <ClInclude Include="ShadersLoader.h" />
     <ClInclude Include="StepTimer.h" />
     <ClInclude Include="TestCube.h" />
-    <ClInclude Include="TestTriangle.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Camera.cpp" />
@@ -201,7 +200,6 @@
     </ClCompile>
     <ClCompile Include="ShadersLoader.cpp" />
     <ClCompile Include="TestCube.cpp" />
-    <ClCompile Include="TestTriangle.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="resource.rc" />

@@ -23,7 +23,6 @@
     </ClInclude>
     <ClInclude Include="ShadersLoader.h" />
     <ClInclude Include="TestCube.h" />
-    <ClInclude Include="TestTriangle.h" />
     <ClInclude Include="Camera.h" />
   </ItemGroup>
   <ItemGroup>
@@ -35,7 +34,6 @@
     </ClCompile>
     <ClCompile Include="ShadersLoader.cpp" />
     <ClCompile Include="TestCube.cpp" />
-    <ClCompile Include="TestTriangle.cpp" />
     <ClCompile Include="Camera.cpp" />
   </ItemGroup>
   <ItemGroup>

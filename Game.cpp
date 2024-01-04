@@ -37,6 +37,20 @@ void Game::Initialize(HWND window, int width, int height)
     m_deviceResources->CreateWindowSizeDependentResources();
     CreateWindowSizeDependentResources();
 
+#if (_WIN32_WINNT >= 0x0A00 /*_WIN32_WINNT_WIN10*/)
+    Microsoft::WRL::Wrappers::RoInitializeWrapper initialize(RO_INIT_MULTITHREADED);
+    if (FAILED(initialize))
+    {
+        throw std::runtime_error("Failed to initialize WIC");
+    }
+#else
+    HRESULT hr = CoInitializeEx(nullptr, COINIT_MULTITHREADED);
+    if (FAILED(hr))
+    {
+        throw std::runtime_error("Failed to initialize WIC");
+    }
+#endif
+
     // TODO: Change the timer settings if you want something other than the default variable timestep mode.
     // e.g. for 60 FPS fixed timestep update logic, call:
     /*
@@ -145,8 +159,8 @@ void Game::Render()
 	{
 		{
 			DirectX::XMMatrixTranspose(
-				DirectX::XMMatrixRotationZ(45.0f) *
-				DirectX::XMMatrixRotationX(45.0f) *
+				DirectX::XMMatrixRotationZ(0.0f) *
+				DirectX::XMMatrixRotationX(0.0f) *
 				DirectX::XMMatrixTranslation(0.0f,0.0f,4.0f)
 			)
 		}
@@ -166,42 +180,19 @@ void Game::Render()
 	context->VSSetConstantBuffers(0u, 1u, pConstantBuffer.GetAddressOf());
 	context->VSSetConstantBuffers(1u, 1u, m_mainCB.GetAddressOf());
 
+    Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> textureSRV = nullptr;
+    DirectX::CreateWICTextureFromFile(m_deviceResources->GetD3DDevice(), L"cube.png", nullptr, &textureSRV);
+    context->PSSetShaderResources(0u, 1u, textureSRV.GetAddressOf());
 
-	// lookup table for cube face colors
-	struct ConstantBuffer2
-	{
-		struct
-		{
-			float r;
-			float g;
-			float b;
-			float a;
-		} face_colors[6];
-	};
-	const ConstantBuffer2 cb2 =
-	{
-		{
-			{1.0f,0.0f,1.0f},
-			{1.0f,0.0f,0.0f},
-			{0.0f,1.0f,0.0f},
-			{0.0f,0.0f,1.0f},
-			{1.0f,1.0f,0.0f},
-			{0.0f,1.0f,1.0f},
-		}
-	};
-	Microsoft::WRL::ComPtr<ID3D11Buffer> pConstantBuffer2;
-	D3D11_BUFFER_DESC cbd2;
-	cbd2.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
-	cbd2.Usage = D3D11_USAGE_DEFAULT;
-	cbd2.CPUAccessFlags = 0u;
-	cbd2.MiscFlags = 0u;
-	cbd2.ByteWidth = sizeof(cb2);
-	cbd2.StructureByteStride = 0u;
-	D3D11_SUBRESOURCE_DATA csd2 = {};
-	csd2.pSysMem = &cb2;
-	m_deviceResources->GetD3DDevice()->CreateBuffer(&cbd2, &csd2, &pConstantBuffer2);
+    Microsoft::WRL::ComPtr<ID3D11SamplerState> pSampler;
+    D3D11_SAMPLER_DESC samplerDesc = {};
+    samplerDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR;
+    samplerDesc.AddressU = D3D11_TEXTURE_ADDRESS_WRAP;
+    samplerDesc.AddressV = D3D11_TEXTURE_ADDRESS_WRAP;
+    samplerDesc.AddressW = D3D11_TEXTURE_ADDRESS_WRAP;
+    m_deviceResources->GetD3DDevice()->CreateSamplerState(&samplerDesc, &pSampler);
+    context->PSSetSamplers(0u, 1u, pSampler.GetAddressOf());
 
-	context->PSSetConstantBuffers(0u, 1u, pConstantBuffer2.GetAddressOf());
 	context->PSSetShader(m_pixelShader.Get(), nullptr, 0u);
 	context->VSSetShader(m_vertexShader.Get(), nullptr, 0u);
 	context->IASetInputLayout(m_inputLayout.Get());
@@ -324,8 +315,8 @@ void Game::CreateInputLayout()
     D3D11_INPUT_ELEMENT_DESC inputLayoutDesc[] =
     {
         { "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0 },
-		{ "COLOR", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 12, D3D11_INPUT_PER_VERTEX_DATA, 0 },
-		{ "NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 24, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+		{ "NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 12, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+		{ "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, 24, D3D11_INPUT_PER_VERTEX_DATA, 0 },
     };
 
     // Создание input layout

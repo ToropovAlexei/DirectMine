@@ -87,3 +87,5 @@ namespace DX
 
 #include "Keyboard.h"
 #include "Mouse.h"
+#include "WICTextureLoader.h"
+#include "GeometricPrimitive.h"

@@ -1,6 +1,6 @@
 cbuffer CBuf : register(b0)
 {
-    matrix transform;
+    matrix world;
 };
 
 cbuffer CBuf2 : register(b1)
@@ -11,11 +11,22 @@ cbuffer CBuf2 : register(b1)
 struct VertexIn
 {
     float3 PosL : POSITION;
-    float3 Color : COLOR;
     float3 Normal : NORMAL;
+    float2 TexC : TEXCOORD;
 };
 
-float4 main(VertexIn vin) : SV_Position
+struct VertexOut
 {
-    return mul(float4(vin.PosL, 1.0f), mul(transform, viewProj));
+    float4 PosH : SV_POSITION;
+    float3 Normal : NORMAL;
+    float2 TexC : TEXCOORD;
+};
+
+VertexOut main(VertexIn vin)
+{
+    VertexOut vout;
+    vout.PosH = mul(float4(vin.PosL, 1.0f), mul(world, viewProj));
+    vout.Normal = vin.Normal;
+    vout.TexC = vin.TexC;
+    return vout;
 }

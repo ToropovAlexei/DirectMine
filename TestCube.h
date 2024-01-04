@@ -3,7 +3,8 @@
 struct Vertex
 {
     DirectX::XMFLOAT3 pos;
-    DirectX::XMFLOAT3 color;
+    DirectX::XMFLOAT3 normal;
+    DirectX::XMFLOAT2 texCoord;
 };
 
 class TestCube
@@ -20,8 +21,8 @@ private:
     void BuildIndexBuffer(ID3D11Device* device);
 
 private:
-    std::vector<Vertex> vertices;
-    std::vector<UINT> indices;
+    DirectX::GeometricPrimitive::VertexCollection vertices;
+    DirectX::GeometricPrimitive::IndexCollection indices;
 
     Microsoft::WRL::ComPtr<ID3D11Buffer> vertexBuffer;
     Microsoft::WRL::ComPtr<ID3D11Buffer> indexBuffer;
