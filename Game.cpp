@@ -91,10 +91,9 @@ void Game::Render()
 	{
 		{
 			DirectX::XMMatrixTranspose(
-				DirectX::XMMatrixRotationZ(0.0f) *
-				DirectX::XMMatrixRotationX(0.0f) *
-				DirectX::XMMatrixTranslation(0.0f,0.0f,4.0f) *
-				DirectX::XMMatrixPerspectiveLH(1.0f,3.0f / 4.0f,0.5f,10.0f)
+				DirectX::XMMatrixRotationZ(45.0f) *
+				DirectX::XMMatrixRotationX(45.0f) *
+				DirectX::XMMatrixTranslation(0.0f,0.0f,4.0f)
 			)
 		}
 	};
@@ -112,6 +111,27 @@ void Game::Render()
 
 	// bind constant buffer to vertex shader
 	context->VSSetConstantBuffers(0u, 1u, pConstantBuffer.GetAddressOf());
+
+	const ConstantBuffer vcb2 =
+	{
+		{
+			DirectX::XMMatrixTranspose(DirectX::XMMatrixPerspectiveLH(1.0f,3.0f / 4.0f,0.5f,1000.0f))
+		}
+	};
+	Microsoft::WRL::ComPtr<ID3D11Buffer> pvConstantBuffer2;
+	D3D11_BUFFER_DESC cbdv2;
+	cbdv2.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+	cbdv2.Usage = D3D11_USAGE_DYNAMIC;
+	cbdv2.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+	cbdv2.MiscFlags = 0u;
+	cbdv2.ByteWidth = sizeof(vcb2);
+	cbdv2.StructureByteStride = 0u;
+	D3D11_SUBRESOURCE_DATA csdv2 = {};
+	csdv2.pSysMem = &vcb2;
+	m_deviceResources->GetD3DDevice()->CreateBuffer(&cbdv2, &csdv2, &pvConstantBuffer2);
+
+	// bind constant buffer to vertex shader
+	context->VSSetConstantBuffers(1u, 1u, pvConstantBuffer2.GetAddressOf());
 
 
 	// lookup table for cube face colors

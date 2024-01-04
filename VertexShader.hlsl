@@ -1,6 +1,11 @@
-cbuffer CBuf
+cbuffer CBuf : register(b0)
 {
     matrix transform;
+};
+
+cbuffer CBuf2 : register(b1)
+{
+    matrix viewProj;
 };
 
 struct VertexIn
@@ -12,5 +17,5 @@ struct VertexIn
 
 float4 main(VertexIn vin) : SV_Position
 {
-    return mul(float4(vin.PosL, 1.0f), transform);
+    return mul(float4(vin.PosL, 1.0f), mul(transform, viewProj));
 }
