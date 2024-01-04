@@ -2,12 +2,8 @@
 
 struct Vertex
 {
-	struct
-	{
-		float x;
-		float y;
-		float z;
-	} pos;
+    DirectX::XMFLOAT3 pos;
+    DirectX::XMFLOAT3 color;
 };
 
 class TestCube

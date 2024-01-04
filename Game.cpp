@@ -77,8 +77,6 @@ void Game::Render()
     m_deviceResources->PIXBeginEvent(L"Render");
     auto context = m_deviceResources->GetD3DDeviceContext();
 
-	HRESULT hr;
-
 	const UINT stride = sizeof(Vertex);
 	const UINT offset = 0u;
 	context->IASetVertexBuffers(0u, 1u, m_cube->VertexBuffer().GetAddressOf(), &stride, &offset);

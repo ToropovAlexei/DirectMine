@@ -21,14 +21,14 @@ void TestCube::BuildVertexBuffer(ID3D11Device* device)
 {
     Vertex vertices[] =
     {
-        { -1.0f,-1.0f,-1.0f	 },
-        { 1.0f,-1.0f,-1.0f	 },
-        { -1.0f,1.0f,-1.0f	 },
-        { 1.0f,1.0f,-1.0f	  },
-        { -1.0f,-1.0f,1.0f	 },
-        { 1.0f,-1.0f,1.0f	  },
-        { -1.0f,1.0f,1.0f	 },
-        { 1.0f,1.0f,1.0f	 },
+        { {-1.0f,-1.0f,-1.0f} },
+        { {1.0f,-1.0f,-1.0f} },
+        { {-1.0f,1.0f,-1.0f} },
+        { {1.0f,1.0f,-1.0f}	  },
+        { {-1.0f,-1.0f,1.0f} },
+        { {1.0f,-1.0f,1.0f}	},
+        { {-1.0f,1.0f,1.0f} },
+        { {1.0f,1.0f,1.0f} },
     };
     D3D11_BUFFER_DESC bd = {};
     bd.BindFlags = D3D11_BIND_VERTEX_BUFFER;
