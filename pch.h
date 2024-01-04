@@ -84,3 +84,6 @@ namespace DX
         }
     }
 }
+
+#include "Keyboard.h"
+#include "Mouse.h"

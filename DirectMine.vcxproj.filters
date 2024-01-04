@@ -24,6 +24,7 @@
     <ClInclude Include="ShadersLoader.h" />
     <ClInclude Include="TestCube.h" />
     <ClInclude Include="TestTriangle.h" />
+    <ClInclude Include="Camera.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp" />
@@ -35,6 +36,7 @@
     <ClCompile Include="ShadersLoader.cpp" />
     <ClCompile Include="TestCube.cpp" />
     <ClCompile Include="TestTriangle.cpp" />
+    <ClCompile Include="Camera.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="resource.rc" />
@@ -56,5 +58,8 @@
     <FxCompile Include="VertexShader.hlsl">
       <Filter>Shaders</Filter>
     </FxCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="packages.config" />
   </ItemGroup>
 </Project>

@@ -7,7 +7,12 @@
 #include "DeviceResources.h"
 #include "StepTimer.h"
 #include "TestCube.h"
+#include "Camera.h"
 
+struct MainConstantBuffer
+{
+    DirectX::XMMATRIX viewProj;
+};
 
 // A basic game implementation that creates a D3D11 device and
 // provides a game loop.
@@ -57,6 +62,9 @@ private:
     void CreateWindowSizeDependentResources();
 
     void CreateInputLayout();
+    
+    void CreateMainConstantBuffer();
+    void UpdateMainConstantBuffer();
 
     // Device resources.
     std::unique_ptr<DX::DeviceResources>    m_deviceResources;
@@ -66,7 +74,15 @@ private:
 
     Microsoft::WRL::ComPtr<ID3D11InputLayout> m_inputLayout;
 
+    Microsoft::WRL::ComPtr<ID3D11Buffer> m_mainCB;
+    DirectX::XMMATRIX m_view;
+    DirectX::XMMATRIX m_proj;
+
+    std::unique_ptr<Camera> m_cam;
+    std::unique_ptr<DirectX::Keyboard> m_keyboard;
+    std::unique_ptr<DirectX::Mouse> m_mouse;
     std::unique_ptr<TestCube> m_cube;
+    DirectX::Mouse::ButtonStateTracker m_tracker;
 
     // Rendering loop timer.
     DX::StepTimer                           m_timer;

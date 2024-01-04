@@ -19,12 +19,17 @@ Game::Game() noexcept(false)
     //   Add DX::DeviceResources::c_AllowTearing to opt-in to variable rate displays.
     //   Add DX::DeviceResources::c_EnableHDR for HDR10 display.
     m_deviceResources->RegisterDeviceNotify(this);
+	m_cam = std::make_unique<Camera>();
+	m_keyboard = std::make_unique<Keyboard>();
+	m_mouse = std::make_unique<Mouse>();
+	m_cam->UpdateViewMatrix();
 }
 
 // Initialize the Direct3D resources required to run.
 void Game::Initialize(HWND window, int width, int height)
 {
     m_deviceResources->SetWindow(window, width, height);
+    m_mouse->SetWindow(window);
 
     m_deviceResources->CreateDeviceResources();
     CreateDeviceDependentResources();
@@ -59,6 +64,55 @@ void Game::Update(DX::StepTimer const& timer)
 
     // TODO: Add your game logic here.
     elapsedTime;
+	UpdateMainConstantBuffer();
+
+    auto kb = m_keyboard->GetState();
+    if (kb.Escape)
+    {
+        ExitGame();
+    }
+
+    const float speed = 5.0f;
+    if (kb.A)
+    {
+        m_cam->Strafe(-speed * elapsedTime);
+    }
+    if (kb.D)
+    {
+        m_cam->Strafe(speed * elapsedTime);
+    }
+    if (kb.W)
+    {
+        m_cam->Walk(speed * elapsedTime);
+    }
+    if (kb.S)
+    {
+        m_cam->Walk(-speed * elapsedTime);
+    }
+
+    auto mouse = m_mouse->GetState();
+    m_tracker.Update(mouse);
+
+    if (mouse.positionMode == Mouse::MODE_RELATIVE)
+    {
+        float dx = XMConvertToRadians(0.05f * static_cast<float>(mouse.x));
+        float dy = XMConvertToRadians(0.05f * static_cast<float>(mouse.y));
+        m_cam->Pitch(dy);
+        m_cam->RotateY(dx);
+    }
+
+    if (m_tracker.leftButton == Mouse::ButtonStateTracker::ButtonState::PRESSED)
+    {
+        m_mouse->SetMode(Mouse::MODE_RELATIVE);
+    }
+    else if (m_tracker.leftButton == Mouse::ButtonStateTracker::ButtonState::RELEASED)
+    {
+        m_mouse->SetMode(Mouse::MODE_ABSOLUTE);
+    }
+
+    m_cam->UpdateViewMatrix();
+    m_view = m_cam->GetView();
+    UpdateMainConstantBuffer();
 }
 #pragma endregion
 
@@ -109,29 +163,8 @@ void Game::Render()
 	csd.pSysMem = &cb;
 	m_deviceResources->GetD3DDevice()->CreateBuffer(&cbd, &csd, &pConstantBuffer);
 
-	// bind constant buffer to vertex shader
 	context->VSSetConstantBuffers(0u, 1u, pConstantBuffer.GetAddressOf());
-
-	const ConstantBuffer vcb2 =
-	{
-		{
-			DirectX::XMMatrixTranspose(DirectX::XMMatrixPerspectiveLH(1.0f,3.0f / 4.0f,0.5f,1000.0f))
-		}
-	};
-	Microsoft::WRL::ComPtr<ID3D11Buffer> pvConstantBuffer2;
-	D3D11_BUFFER_DESC cbdv2;
-	cbdv2.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
-	cbdv2.Usage = D3D11_USAGE_DYNAMIC;
-	cbdv2.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
-	cbdv2.MiscFlags = 0u;
-	cbdv2.ByteWidth = sizeof(vcb2);
-	cbdv2.StructureByteStride = 0u;
-	D3D11_SUBRESOURCE_DATA csdv2 = {};
-	csdv2.pSysMem = &vcb2;
-	m_deviceResources->GetD3DDevice()->CreateBuffer(&cbdv2, &csdv2, &pvConstantBuffer2);
-
-	// bind constant buffer to vertex shader
-	context->VSSetConstantBuffers(1u, 1u, pvConstantBuffer2.GetAddressOf());
+	context->VSSetConstantBuffers(1u, 1u, m_mainCB.GetAddressOf());
 
 
 	// lookup table for cube face colors
@@ -267,6 +300,7 @@ void Game::CreateDeviceDependentResources()
     m_vertexShader = ShadersLoader::LoadVertexShader(device, L"VertexShader.cso");
     m_pixelShader = ShadersLoader::LoadPixelShader(device, L"PixelShader.cso");
     CreateInputLayout();
+	CreateMainConstantBuffer();
     m_cube = std::make_unique<TestCube>(device);
 }
 
@@ -274,6 +308,13 @@ void Game::CreateDeviceDependentResources()
 void Game::CreateWindowSizeDependentResources()
 {
     // TODO: Initialize windows-size dependent objects here.
+	auto size = m_deviceResources->GetOutputSize();
+	const float aspectRatio = static_cast<float>(size.right) / static_cast<float>(size.bottom);
+
+	m_proj = DirectX::XMMatrixPerspectiveFovLH(
+		XM_PIDIV4,
+		aspectRatio,
+		0.1f, 25.0f);
 }
 
 void Game::CreateInputLayout()
@@ -294,6 +335,45 @@ void Game::CreateInputLayout()
         vertexShaderBlob->GetBufferPointer(), 
         vertexShaderBlob->GetBufferSize(),
         &m_inputLayout);
+}
+
+void Game::CreateMainConstantBuffer()
+{
+	const MainConstantBuffer cb =
+	{
+		{
+			DirectX::XMMatrixTranspose(m_view * m_proj)
+		}
+	};
+	D3D11_BUFFER_DESC cbd;
+	cbd.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+	cbd.Usage = D3D11_USAGE_DYNAMIC;
+	cbd.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+	cbd.MiscFlags = 0u;
+	cbd.ByteWidth = sizeof(cb);
+	cbd.StructureByteStride = 0u;
+	D3D11_SUBRESOURCE_DATA csd = {};
+	csd.pSysMem = &cb;
+	m_deviceResources->GetD3DDevice()->CreateBuffer(&cbd, &csd, &m_mainCB);
+}
+
+void Game::UpdateMainConstantBuffer()
+{
+	D3D11_MAPPED_SUBRESOURCE msr;
+	const MainConstantBuffer cb =
+	{
+		{
+			DirectX::XMMatrixTranspose(m_view * m_proj)
+		}
+	};
+	auto context = m_deviceResources->GetD3DDeviceContext();
+	context->Map(
+		m_mainCB.Get(), 0u,
+		D3D11_MAP_WRITE_DISCARD, 0u,
+		&msr
+	);
+	memcpy(msr.pData, &cb, sizeof(cb));
+	context->Unmap(m_mainCB.Get(), 0u);
 }
 
 void Game::OnDeviceLost()
