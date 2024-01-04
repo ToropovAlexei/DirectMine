@@ -4,6 +4,7 @@
 
 #include "pch.h"
 #include "Game.h"
+#include "ShadersLoader.h"
 
 extern void ExitGame() noexcept;
 
@@ -168,7 +169,8 @@ void Game::CreateDeviceDependentResources()
     auto device = m_deviceResources->GetD3DDevice();
 
     // TODO: Initialize device dependent objects here (independent of window size).
-    device;
+    m_vertexShader = ShadersLoader::LoadVertexShader(device, L"VertexShader.cso");
+    m_pixelShader = ShadersLoader::LoadPixelShader(device, L"PixelShader.cso");
 }
 
 // Allocate all memory resources that change on a window SizeChanged event.
