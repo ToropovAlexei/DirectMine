@@ -6,7 +6,6 @@
 
 #include "DeviceResources.h"
 #include "StepTimer.h"
-#include "TestCube.h"
 #include "Camera.h"
 #include "CubeRenderer.h"
 
@@ -61,19 +60,12 @@ private:
 
     void CreateDeviceDependentResources();
     void CreateWindowSizeDependentResources();
-
-    void CreateInputLayout();
     
     void CreateMainConstantBuffer();
     void UpdateMainConstantBuffer();
 
     // Device resources.
     std::unique_ptr<DX::DeviceResources>    m_deviceResources;
-
-    Microsoft::WRL::ComPtr<ID3D11VertexShader> m_vertexShader;
-    Microsoft::WRL::ComPtr<ID3D11PixelShader> m_pixelShader;
-
-    Microsoft::WRL::ComPtr<ID3D11InputLayout> m_inputLayout;
 
     Microsoft::WRL::ComPtr<ID3D11Buffer> m_mainCB;
     DirectX::XMMATRIX m_view;
@@ -82,7 +74,6 @@ private:
     std::unique_ptr<Camera> m_cam;
     std::unique_ptr<DirectX::Keyboard> m_keyboard;
     std::unique_ptr<DirectX::Mouse> m_mouse;
-    std::unique_ptr<TestCube> m_cube;
     std::unique_ptr<CubeRenderer> m_cubeRenderer;
     DirectX::Mouse::ButtonStateTracker m_tracker;
 

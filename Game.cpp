@@ -260,11 +260,7 @@ void Game::CreateDeviceDependentResources()
     auto device = m_deviceResources->GetD3DDevice();
 
     // TODO: Initialize device dependent objects here (independent of window size).
-    m_vertexShader = ShadersLoader::LoadVertexShader(device, L"VertexShader.cso");
-    m_pixelShader = ShadersLoader::LoadPixelShader(device, L"PixelShader.cso");
-    CreateInputLayout();
 	CreateMainConstantBuffer();
-    m_cube = std::make_unique<TestCube>(device);
     m_cubeRenderer = std::make_unique<CubeRenderer>(device);
 }
 
@@ -279,26 +275,6 @@ void Game::CreateWindowSizeDependentResources()
 		XM_PIDIV4,
 		aspectRatio,
 		0.1f, 25.0f);
-}
-
-void Game::CreateInputLayout()
-{
-    auto device = m_deviceResources->GetD3DDevice();
-    // Описание элементов вершинного формата
-    D3D11_INPUT_ELEMENT_DESC inputLayoutDesc[] =
-    {
-        { "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0 },
-		{ "NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 12, D3D11_INPUT_PER_VERTEX_DATA, 0 },
-		{ "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, 24, D3D11_INPUT_PER_VERTEX_DATA, 0 },
-    };
-
-    // Создание input layout
-    auto vertexShaderBlob = ShadersLoader::LoadBlob(L"VertexShader.cso");
-    device->CreateInputLayout(inputLayoutDesc,
-        ARRAYSIZE(inputLayoutDesc),
-        vertexShaderBlob->GetBufferPointer(), 
-        vertexShaderBlob->GetBufferSize(),
-        &m_inputLayout);
 }
 
 void Game::CreateMainConstantBuffer()

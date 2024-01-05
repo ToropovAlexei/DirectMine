@@ -30,8 +30,6 @@
     <ClInclude Include="DeviceResources.h">
       <Filter>Common</Filter>
     </ClInclude>
-    <ClInclude Include="ShadersLoader.h" />
-    <ClInclude Include="TestCube.h" />
     <ClInclude Include="Camera.h" />
     <ClInclude Include="Cube.h">
       <Filter>Blocks</Filter>
@@ -57,6 +55,9 @@
     <ClInclude Include="GrassBlock.h">
       <Filter>Blocks</Filter>
     </ClInclude>
+    <ClInclude Include="ShadersLoader.h">
+      <Filter>Shaders</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp" />
@@ -65,8 +66,6 @@
     <ClCompile Include="DeviceResources.cpp">
       <Filter>Common</Filter>
     </ClCompile>
-    <ClCompile Include="ShadersLoader.cpp" />
-    <ClCompile Include="TestCube.cpp" />
     <ClCompile Include="Camera.cpp" />
     <ClCompile Include="Cube.cpp">
       <Filter>Blocks</Filter>
@@ -91,6 +90,9 @@
     </ClCompile>
     <ClCompile Include="GrassBlock.cpp">
       <Filter>Blocks</Filter>
+    </ClCompile>
+    <ClCompile Include="ShadersLoader.cpp">
+      <Filter>Shaders</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

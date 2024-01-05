@@ -192,7 +192,6 @@
     <ClInclude Include="pch.h" />
     <ClInclude Include="ShadersLoader.h" />
     <ClInclude Include="StepTimer.h" />
-    <ClInclude Include="TestCube.h" />
     <ClInclude Include="TexturesManager.h" />
   </ItemGroup>
   <ItemGroup>
@@ -214,7 +213,6 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="ShadersLoader.cpp" />
-    <ClCompile Include="TestCube.cpp" />
     <ClCompile Include="TexturesManager.cpp" />
   </ItemGroup>
   <ItemGroup>
