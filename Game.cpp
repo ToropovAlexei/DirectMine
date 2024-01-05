@@ -8,6 +8,7 @@
 #include "DebugBlock.h"
 #include "DirtBlock.h"
 #include "LeavesBlock.h"
+#include "GrassBlock.h"
 
 extern void ExitGame() noexcept;
 
@@ -158,7 +159,7 @@ void Game::Render()
         DirectX::XMMatrixRotationX(0.0f) *
         DirectX::XMMatrixTranslation(-1.5f, 0.0f, 4.0f)
     ));
-    auto leavesBlock = std::make_unique<LeavesBlock>(DirectX::XMMatrixTranspose(
+    auto leavesBlock = std::make_unique<GrassBlock>(DirectX::XMMatrixTranspose(
         DirectX::XMMatrixRotationZ(0.0f) *
         DirectX::XMMatrixRotationX(0.0f) *
         DirectX::XMMatrixTranslation(1.5f, 0.0f, 4.0f)

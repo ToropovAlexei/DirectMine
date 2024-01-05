@@ -16,6 +16,10 @@ void TexturesManager::LoadBlockTextures(ID3D11Device* device)
 	LoadBlockTexture(device, CubeId::Debug, L"cube.png");
 	LoadBlockTexture(device, CubeId::Dirt, L"dirt.png");
 	LoadBlockTexture(device, CubeId::Leaves, L"leaves.png");
+	LoadBlockTexture(device, CubeId::Grass, L"grass.png");
+	LoadBlockTexture(device, CubeId::Badrock, L"badrock.png");
+	LoadBlockTexture(device, CubeId::Stone, L"stone.png");
+	LoadBlockTexture(device, CubeId::Cobblestone, L"cobblestone.png");
 }
 
 void TexturesManager::LoadBlockTexture(ID3D11Device* device, CubeId id, const wchar_t* filename)

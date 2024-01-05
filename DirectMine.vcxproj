@@ -187,6 +187,7 @@
     <ClInclude Include="DeviceResources.h" />
     <ClInclude Include="DirtBlock.h" />
     <ClInclude Include="Game.h" />
+    <ClInclude Include="GrassBlock.h" />
     <ClInclude Include="LeavesBlock.h" />
     <ClInclude Include="pch.h" />
     <ClInclude Include="ShadersLoader.h" />
@@ -203,6 +204,7 @@
     <ClCompile Include="DeviceResources.cpp" />
     <ClCompile Include="DirtBlock.cpp" />
     <ClCompile Include="Game.cpp" />
+    <ClCompile Include="GrassBlock.cpp" />
     <ClCompile Include="LeavesBlock.cpp" />
     <ClCompile Include="Main.cpp" />
     <ClCompile Include="pch.cpp">

@@ -54,6 +54,9 @@
     <ClInclude Include="LeavesBlock.h">
       <Filter>Blocks</Filter>
     </ClInclude>
+    <ClInclude Include="GrassBlock.h">
+      <Filter>Blocks</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp" />
@@ -84,6 +87,9 @@
       <Filter>Blocks</Filter>
     </ClCompile>
     <ClCompile Include="LeavesBlock.cpp">
+      <Filter>Blocks</Filter>
+    </ClCompile>
+    <ClCompile Include="GrassBlock.cpp">
       <Filter>Blocks</Filter>
     </ClCompile>
   </ItemGroup>
