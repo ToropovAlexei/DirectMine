@@ -5,6 +5,7 @@
 #include "pch.h"
 #include "Game.h"
 #include "ShadersLoader.h"
+#include "DebugBlock.h"
 
 extern void ExitGame() noexcept;
 
@@ -145,59 +146,15 @@ void Game::Render()
     m_deviceResources->PIXBeginEvent(L"Render");
     auto context = m_deviceResources->GetD3DDeviceContext();
 
-	const UINT stride = sizeof(Vertex);
-	const UINT offset = 0u;
-	context->IASetVertexBuffers(0u, 1u, m_cube->VertexBuffer().GetAddressOf(), &stride, &offset);
-	context->IASetIndexBuffer(m_cube->IndexBuffer().Get(), DXGI_FORMAT_R16_UINT, 0u);
-
-	// create constant buffer for transformation matrix
-	struct ConstantBuffer
-	{
-		DirectX::XMMATRIX transform;
-	};
-	const ConstantBuffer cb =
-	{
-		{
-			DirectX::XMMatrixTranspose(
-				DirectX::XMMatrixRotationZ(0.0f) *
-				DirectX::XMMatrixRotationX(0.0f) *
-				DirectX::XMMatrixTranslation(0.0f,0.0f,4.0f)
-			)
-		}
-	};
-	Microsoft::WRL::ComPtr<ID3D11Buffer> pConstantBuffer;
-	D3D11_BUFFER_DESC cbd;
-	cbd.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
-	cbd.Usage = D3D11_USAGE_DYNAMIC;
-	cbd.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
-	cbd.MiscFlags = 0u;
-	cbd.ByteWidth = sizeof(cb);
-	cbd.StructureByteStride = 0u;
-	D3D11_SUBRESOURCE_DATA csd = {};
-	csd.pSysMem = &cb;
-	m_deviceResources->GetD3DDevice()->CreateBuffer(&cbd, &csd, &pConstantBuffer);
-
-	context->VSSetConstantBuffers(0u, 1u, pConstantBuffer.GetAddressOf());
-	context->VSSetConstantBuffers(1u, 1u, m_mainCB.GetAddressOf());
-
-    Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> textureSRV = nullptr;
-    DirectX::CreateWICTextureFromFile(m_deviceResources->GetD3DDevice(), L"cube.png", nullptr, &textureSRV);
-    context->PSSetShaderResources(0u, 1u, textureSRV.GetAddressOf());
-
-    Microsoft::WRL::ComPtr<ID3D11SamplerState> pSampler;
-    D3D11_SAMPLER_DESC samplerDesc = {};
-    samplerDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR;
-    samplerDesc.AddressU = D3D11_TEXTURE_ADDRESS_WRAP;
-    samplerDesc.AddressV = D3D11_TEXTURE_ADDRESS_WRAP;
-    samplerDesc.AddressW = D3D11_TEXTURE_ADDRESS_WRAP;
-    m_deviceResources->GetD3DDevice()->CreateSamplerState(&samplerDesc, &pSampler);
-    context->PSSetSamplers(0u, 1u, pSampler.GetAddressOf());
-
-	context->PSSetShader(m_pixelShader.Get(), nullptr, 0u);
-	context->VSSetShader(m_vertexShader.Get(), nullptr, 0u);
-	context->IASetInputLayout(m_inputLayout.Get());
-	context->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-	context->DrawIndexed(36u, 0u, 0u);
+    auto block = std::make_unique<DebugBlock>(DirectX::XMMatrixTranspose(
+        DirectX::XMMatrixRotationZ(0.0f) *
+        DirectX::XMMatrixRotationX(0.0f) *
+        DirectX::XMMatrixTranslation(0.0f, 0.0f, 4.0f)
+    ));
+    auto cubes = std::vector<std::unique_ptr<Cube>>();
+    cubes.push_back(std::move(block));
+    context->VSSetConstantBuffers(1u, 1u, m_mainCB.GetAddressOf());
+    m_cubeRenderer->DrawCubes(context, cubes);
 
     m_deviceResources->PIXEndEvent();
 
@@ -293,6 +250,7 @@ void Game::CreateDeviceDependentResources()
     CreateInputLayout();
 	CreateMainConstantBuffer();
     m_cube = std::make_unique<TestCube>(device);
+    m_cubeRenderer = std::make_unique<CubeRenderer>(device);
 }
 
 // Allocate all memory resources that change on a window SizeChanged event.
@@ -320,7 +278,7 @@ void Game::CreateInputLayout()
     };
 
     // Создание input layout
-    auto vertexShaderBlob = ShadersLoader::LoadBlob(device, L"VertexShader.cso");
+    auto vertexShaderBlob = ShadersLoader::LoadBlob(L"VertexShader.cso");
     device->CreateInputLayout(inputLayoutDesc,
         ARRAYSIZE(inputLayoutDesc),
         vertexShaderBlob->GetBufferPointer(), 

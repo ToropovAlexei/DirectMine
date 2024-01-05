@@ -8,6 +8,7 @@
 #include "StepTimer.h"
 #include "TestCube.h"
 #include "Camera.h"
+#include "CubeRenderer.h"
 
 struct MainConstantBuffer
 {
@@ -82,6 +83,7 @@ private:
     std::unique_ptr<DirectX::Keyboard> m_keyboard;
     std::unique_ptr<DirectX::Mouse> m_mouse;
     std::unique_ptr<TestCube> m_cube;
+    std::unique_ptr<CubeRenderer> m_cubeRenderer;
     DirectX::Mouse::ButtonStateTracker m_tracker;
 
     // Rendering loop timer.

@@ -5,7 +5,7 @@
 class ShadersLoader
 {
 public:
-    static Microsoft::WRL::ComPtr<ID3DBlob> LoadBlob(ID3D11Device* device, const wchar_t* filename)
+    static Microsoft::WRL::ComPtr<ID3DBlob> LoadBlob(const wchar_t* filename)
     {
         Microsoft::WRL::ComPtr<ID3DBlob> shaderBlob;
         HRESULT result = D3DReadFileToBlob(filename, &shaderBlob);
