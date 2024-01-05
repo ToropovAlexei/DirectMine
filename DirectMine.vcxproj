@@ -185,6 +185,7 @@
     <ClInclude Include="CubeRenderer.h" />
     <ClInclude Include="DebugBlock.h" />
     <ClInclude Include="DeviceResources.h" />
+    <ClInclude Include="DirtBlock.h" />
     <ClInclude Include="Game.h" />
     <ClInclude Include="pch.h" />
     <ClInclude Include="ShadersLoader.h" />
@@ -199,6 +200,7 @@
     <ClCompile Include="CubeRenderer.cpp" />
     <ClCompile Include="DebugBlock.cpp" />
     <ClCompile Include="DeviceResources.cpp" />
+    <ClCompile Include="DirtBlock.cpp" />
     <ClCompile Include="Game.cpp" />
     <ClCompile Include="Main.cpp" />
     <ClCompile Include="pch.cpp">

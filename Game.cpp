@@ -6,6 +6,7 @@
 #include "Game.h"
 #include "ShadersLoader.h"
 #include "DebugBlock.h"
+#include "DirtBlock.h"
 
 extern void ExitGame() noexcept;
 
@@ -151,8 +152,14 @@ void Game::Render()
         DirectX::XMMatrixRotationX(0.0f) *
         DirectX::XMMatrixTranslation(0.0f, 0.0f, 4.0f)
     ));
+    auto dirtBlock = std::make_unique<DirtBlock>(DirectX::XMMatrixTranspose(
+        DirectX::XMMatrixRotationZ(0.0f) *
+        DirectX::XMMatrixRotationX(0.0f) *
+        DirectX::XMMatrixTranslation(-1.5f, 0.0f, 4.0f)
+    ));
     auto cubes = std::vector<std::unique_ptr<Cube>>();
     cubes.push_back(std::move(block));
+    cubes.push_back(std::move(dirtBlock));
     context->VSSetConstantBuffers(1u, 1u, m_mainCB.GetAddressOf());
     m_cubeRenderer->DrawCubes(context, cubes);
 

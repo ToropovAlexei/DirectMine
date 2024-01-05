@@ -48,6 +48,9 @@
     <ClInclude Include="DebugBlock.h">
       <Filter>Blocks</Filter>
     </ClInclude>
+    <ClInclude Include="DirtBlock.h">
+      <Filter>Blocks</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp" />
@@ -72,6 +75,9 @@
       <Filter>Render</Filter>
     </ClCompile>
     <ClCompile Include="DebugBlock.cpp">
+      <Filter>Blocks</Filter>
+    </ClCompile>
+    <ClCompile Include="DirtBlock.cpp">
       <Filter>Blocks</Filter>
     </ClCompile>
   </ItemGroup>
