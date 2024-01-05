@@ -10,6 +10,7 @@ CubeRenderer::CubeRenderer(ID3D11Device* device)
     BuildIndexBuffer(device);
     BuildSampler(device);
     BuildConstantBuffer(device);
+    BuildBlendState(device);
     m_texManager = std::make_unique<TexturesManager>(device);
     m_vertexShader = ShadersLoader::LoadVertexShader(device, L"VertexShader.cso");
     m_pixelShader = ShadersLoader::LoadPixelShader(device, L"PixelShader.cso");
@@ -24,6 +25,7 @@ void CubeRenderer::DrawCubes(ID3D11DeviceContext1* context, std::vector<std::uni
     context->IASetInputLayout(m_inputLayout.Get());
     context->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
     context->PSSetSamplers(0u, 1u, m_sampler.GetAddressOf());
+    context->OMSetBlendState(m_blendState.Get(), nullptr, 0xFFFFFFFF);
 
     for (auto& cube : cubes)
     {
@@ -138,6 +140,22 @@ void CubeRenderer::BuildConstantBuffer(ID3D11Device* device)
     D3D11_SUBRESOURCE_DATA csd = {};
     csd.pSysMem = &m_activeCB;
     device->CreateBuffer(&cbd, &csd, &m_constantBuffer);
+}
+
+void CubeRenderer::BuildBlendState(ID3D11Device* device)
+{
+    D3D11_BLEND_DESC blendDesc = {};
+    blendDesc.AlphaToCoverageEnable = FALSE;
+    blendDesc.RenderTarget[0].BlendEnable = TRUE;
+    blendDesc.RenderTarget[0].SrcBlend = D3D11_BLEND_SRC_ALPHA;
+    blendDesc.RenderTarget[0].DestBlend = D3D11_BLEND_INV_SRC_ALPHA;
+    blendDesc.RenderTarget[0].BlendOp = D3D11_BLEND_OP_ADD;
+    blendDesc.RenderTarget[0].SrcBlendAlpha = D3D11_BLEND_ONE;
+    blendDesc.RenderTarget[0].DestBlendAlpha = D3D11_BLEND_ZERO;
+    blendDesc.RenderTarget[0].BlendOpAlpha = D3D11_BLEND_OP_ADD;
+    blendDesc.RenderTarget[0].RenderTargetWriteMask = D3D11_COLOR_WRITE_ENABLE_ALL;
+
+    device->CreateBlendState(&blendDesc, &m_blendState);
 }
 
 void CubeRenderer::UpdateWorldConstantBuffer(ID3D11DeviceContext1* context)

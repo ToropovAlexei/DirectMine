@@ -17,6 +17,7 @@ private:
     void BuildIndexBuffer(ID3D11Device* device);
     void BuildSampler(ID3D11Device* device);
     void BuildConstantBuffer(ID3D11Device* device);
+    void BuildBlendState(ID3D11Device* device);
 
     void UpdateWorldConstantBuffer(ID3D11DeviceContext1* context);
 
@@ -25,6 +26,7 @@ private:
     Microsoft::WRL::ComPtr<ID3D11PixelShader> m_pixelShader;
     Microsoft::WRL::ComPtr<ID3D11InputLayout> m_inputLayout;
     Microsoft::WRL::ComPtr<ID3D11SamplerState> m_sampler;
+    Microsoft::WRL::ComPtr<ID3D11BlendState> m_blendState;
 
     Microsoft::WRL::ComPtr<ID3D11Buffer> m_vertexBuffer;
     Microsoft::WRL::ComPtr<ID3D11Buffer> m_indexBuffer;

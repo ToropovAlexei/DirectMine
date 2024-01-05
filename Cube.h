@@ -5,6 +5,7 @@ enum class CubeId
 	Debug,
 	Air,
 	Dirt,
+	Leaves,
 };
 
 class Cube

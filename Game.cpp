@@ -7,6 +7,7 @@
 #include "ShadersLoader.h"
 #include "DebugBlock.h"
 #include "DirtBlock.h"
+#include "LeavesBlock.h"
 
 extern void ExitGame() noexcept;
 
@@ -157,9 +158,15 @@ void Game::Render()
         DirectX::XMMatrixRotationX(0.0f) *
         DirectX::XMMatrixTranslation(-1.5f, 0.0f, 4.0f)
     ));
+    auto leavesBlock = std::make_unique<LeavesBlock>(DirectX::XMMatrixTranspose(
+        DirectX::XMMatrixRotationZ(0.0f) *
+        DirectX::XMMatrixRotationX(0.0f) *
+        DirectX::XMMatrixTranslation(1.5f, 0.0f, 4.0f)
+    ));
     auto cubes = std::vector<std::unique_ptr<Cube>>();
     cubes.push_back(std::move(block));
     cubes.push_back(std::move(dirtBlock));
+    cubes.push_back(std::move(leavesBlock));
     context->VSSetConstantBuffers(1u, 1u, m_mainCB.GetAddressOf());
     m_cubeRenderer->DrawCubes(context, cubes);
 
