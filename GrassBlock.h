@@ -5,7 +5,7 @@ class GrassBlock :
     public Cube
 {
 public:
-    GrassBlock(DirectX::XMMATRIX world);
+    GrassBlock(DirectX::XMFLOAT3 pos);
 
     CubeId Id() const noexcept;
 };

@@ -1,8 +1,8 @@
 #include "pch.h"
 #include "DebugBlock.h"
 
-DebugBlock::DebugBlock(DirectX::XMMATRIX world) :
-	Cube(world)
+DebugBlock::DebugBlock(DirectX::XMFLOAT3 pos) :
+	Cube(pos)
 {
 }
 

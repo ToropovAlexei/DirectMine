@@ -1,8 +1,8 @@
 #include "pch.h"
 #include "LeavesBlock.h"
 
-LeavesBlock::LeavesBlock(DirectX::XMMATRIX world) :
-	Cube(world)
+LeavesBlock::LeavesBlock(DirectX::XMFLOAT3 pos) :
+	Cube(pos)
 {
 }
 

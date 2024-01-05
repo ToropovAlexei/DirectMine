@@ -29,7 +29,7 @@ void CubeRenderer::DrawCubes(ID3D11DeviceContext1* context, std::vector<std::uni
 
     for (auto& cube : cubes)
     {
-        m_activeCB = cube->World();
+        m_activeCB = cube->Pos();
         UpdateWorldConstantBuffer(context);
         context->VSSetConstantBuffers(0u, 1u, m_constantBuffer.GetAddressOf());
         context->PSSetShaderResources(0u, 1u, m_texManager->GetBlockTexture(cube->Id()).GetAddressOf());

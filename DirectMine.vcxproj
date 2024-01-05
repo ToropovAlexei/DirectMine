@@ -95,6 +95,7 @@
       <EnableEnhancedInstructionSet>StreamingSIMDExtensions2</EnableEnhancedInstructionSet>
       <ConformanceMode>true</ConformanceMode>
       <AdditionalOptions>/Zc:__cplusplus %(AdditionalOptions)</AdditionalOptions>
+      <LanguageStandard>stdcpplatest</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -116,6 +117,7 @@
       <FloatingPointModel>Fast</FloatingPointModel>
       <ConformanceMode>true</ConformanceMode>
       <AdditionalOptions>/Zc:__cplusplus %(AdditionalOptions)</AdditionalOptions>
+      <LanguageStandard>stdcpplatest</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -140,6 +142,7 @@
       <EnableEnhancedInstructionSet>StreamingSIMDExtensions2</EnableEnhancedInstructionSet>
       <ConformanceMode>true</ConformanceMode>
       <AdditionalOptions>/Zc:__cplusplus %(AdditionalOptions)</AdditionalOptions>
+      <LanguageStandard>stdcpplatest</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -166,6 +169,7 @@
       <ConformanceMode>true</ConformanceMode>
       <AdditionalOptions>/Zc:__cplusplus %(AdditionalOptions)</AdditionalOptions>
       <GuardEHContMetadata>true</GuardEHContMetadata>
+      <LanguageStandard>stdcpplatest</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -181,6 +185,7 @@
   <ItemGroup>
     <ClInclude Include="AirBlock.h" />
     <ClInclude Include="Camera.h" />
+    <ClInclude Include="Chunk.h" />
     <ClInclude Include="Cube.h" />
     <ClInclude Include="CubeRenderer.h" />
     <ClInclude Include="DebugBlock.h" />
@@ -193,10 +198,12 @@
     <ClInclude Include="ShadersLoader.h" />
     <ClInclude Include="StepTimer.h" />
     <ClInclude Include="TexturesManager.h" />
+    <ClInclude Include="World.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="AirBlock.cpp" />
     <ClCompile Include="Camera.cpp" />
+    <ClCompile Include="Chunk.cpp" />
     <ClCompile Include="Cube.cpp" />
     <ClCompile Include="CubeRenderer.cpp" />
     <ClCompile Include="DebugBlock.cpp" />
@@ -214,6 +221,7 @@
     </ClCompile>
     <ClCompile Include="ShadersLoader.cpp" />
     <ClCompile Include="TexturesManager.cpp" />
+    <ClCompile Include="World.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="resource.rc" />

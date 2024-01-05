@@ -5,7 +5,7 @@ class DirtBlock :
     public Cube
 {
 public:
-    DirtBlock(DirectX::XMMATRIX world);
+    DirtBlock(DirectX::XMFLOAT3 pos);
 
     CubeId Id() const noexcept;
 };

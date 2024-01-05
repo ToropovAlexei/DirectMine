@@ -1,17 +1,17 @@
 #include "pch.h"
 #include "Cube.h"
 
-Cube::Cube(DirectX::XMMATRIX world) :
-	m_world(world)
+Cube::Cube(DirectX::XMFLOAT3 pos) :
+	m_pos(pos)
 {
 }
 
-DirectX::XMMATRIX Cube::World() const noexcept
+DirectX::XMFLOAT3 Cube::Pos() const noexcept
 {
-	return m_world;
+	return m_pos;
 }
 
 CubeId Cube::Id() const noexcept
 {
-	throw std::runtime_error("Not implemented");
+	return CubeId::Air;
 }

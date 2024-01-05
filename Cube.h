@@ -15,13 +15,13 @@ enum class CubeId
 class Cube
 {
 public:
-	Cube(DirectX::XMMATRIX world);
+	Cube(DirectX::XMFLOAT3 pos);
 
-	DirectX::XMMATRIX World() const noexcept;
+	DirectX::XMFLOAT3 Pos() const noexcept;
 
 	virtual CubeId Id() const noexcept;
 
 protected:
-	DirectX::XMMATRIX m_world;
+	DirectX::XMFLOAT3 m_pos;
 };
 

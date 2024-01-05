@@ -27,6 +27,7 @@ Game::Game() noexcept(false)
 	m_keyboard = std::make_unique<Keyboard>();
 	m_mouse = std::make_unique<Mouse>();
 	m_cam->UpdateViewMatrix();
+    m_world = std::make_unique<World>(m_cam.get());
 }
 
 // Initialize the Direct3D resources required to run.
@@ -149,21 +150,9 @@ void Game::Render()
     m_deviceResources->PIXBeginEvent(L"Render");
     auto context = m_deviceResources->GetD3DDeviceContext();
 
-    auto block = std::make_unique<DebugBlock>(DirectX::XMMatrixTranspose(
-        DirectX::XMMatrixRotationZ(0.0f) *
-        DirectX::XMMatrixRotationX(0.0f) *
-        DirectX::XMMatrixTranslation(0.0f, 0.0f, 4.0f)
-    ));
-    auto dirtBlock = std::make_unique<DirtBlock>(DirectX::XMMatrixTranspose(
-        DirectX::XMMatrixRotationZ(0.0f) *
-        DirectX::XMMatrixRotationX(0.0f) *
-        DirectX::XMMatrixTranslation(-1.5f, 0.0f, 4.0f)
-    ));
-    auto leavesBlock = std::make_unique<GrassBlock>(DirectX::XMMatrixTranspose(
-        DirectX::XMMatrixRotationZ(0.0f) *
-        DirectX::XMMatrixRotationX(0.0f) *
-        DirectX::XMMatrixTranslation(1.5f, 0.0f, 4.0f)
-    ));
+    auto block = std::make_unique<DebugBlock>(DirectX::XMFLOAT3(0.0f, 0.0f, 4.0f));
+    auto dirtBlock = std::make_unique<DirtBlock>(DirectX::XMFLOAT3(-1.5f, 0.0f, 4.0f));
+    auto leavesBlock = std::make_unique<GrassBlock>(DirectX::XMFLOAT3(1.5f, 0.0f, 4.0f));
     auto cubes = std::vector<std::unique_ptr<Cube>>();
     cubes.push_back(std::move(block));
     cubes.push_back(std::move(dirtBlock));

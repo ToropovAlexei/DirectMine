@@ -39,8 +39,8 @@ private:
 
     UINT m_stride = sizeof(DirectX::GeometricPrimitive::VertexType);
     UINT m_offset = 0u;
-    UINT m_cbSize = sizeof(DirectX::XMMATRIX);
+    UINT m_cbSize = sizeof(DirectX::XMFLOAT4);
 
-    DirectX::XMMATRIX m_activeCB = DirectX::XMMATRIX();
+    DirectX::XMFLOAT3 m_activeCB = DirectX::XMFLOAT3();
 };
 

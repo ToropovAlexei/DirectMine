@@ -5,7 +5,7 @@ class DebugBlock :
     public Cube
 {
 public:
-    DebugBlock(DirectX::XMMATRIX world);
+    DebugBlock(DirectX::XMFLOAT3 pos);
     
     CubeId Id() const noexcept;
 };

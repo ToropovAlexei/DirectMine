@@ -20,6 +20,12 @@
     <Filter Include="Render">
       <UniqueIdentifier>{1b534f0b-6519-48cb-9bc5-c6c815cdf7fe}</UniqueIdentifier>
     </Filter>
+    <Filter Include="World">
+      <UniqueIdentifier>{2e3dfaaf-0bc9-4919-b624-9d1a34f485e1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="World\Cunk">
+      <UniqueIdentifier>{cc8c6174-e410-483a-b6ef-62c937b29cc7}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="pch.h" />
@@ -58,6 +64,12 @@
     <ClInclude Include="ShadersLoader.h">
       <Filter>Shaders</Filter>
     </ClInclude>
+    <ClInclude Include="World.h">
+      <Filter>World</Filter>
+    </ClInclude>
+    <ClInclude Include="Chunk.h">
+      <Filter>World\Cunk</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp" />
@@ -93,6 +105,12 @@
     </ClCompile>
     <ClCompile Include="ShadersLoader.cpp">
       <Filter>Shaders</Filter>
+    </ClCompile>
+    <ClCompile Include="World.cpp">
+      <Filter>World</Filter>
+    </ClCompile>
+    <ClCompile Include="Chunk.cpp">
+      <Filter>World\Cunk</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

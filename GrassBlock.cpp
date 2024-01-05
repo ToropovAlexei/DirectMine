@@ -1,8 +1,8 @@
 #include "pch.h"
 #include "GrassBlock.h"
 
-GrassBlock::GrassBlock(DirectX::XMMATRIX world) :
-	Cube(world)
+GrassBlock::GrassBlock(DirectX::XMFLOAT3 pos) :
+	Cube(pos)
 {
 }
 

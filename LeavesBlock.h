@@ -5,7 +5,7 @@ class LeavesBlock :
     public Cube
 {
 public:
-    LeavesBlock(DirectX::XMMATRIX world);
+    LeavesBlock(DirectX::XMFLOAT3 pos);
 
     CubeId Id() const noexcept;
 };

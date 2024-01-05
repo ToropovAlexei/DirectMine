@@ -53,6 +53,7 @@
 #include <vector>
 #include <map>
 #include <unordered_map>
+#include <array>
 
 #ifdef _DEBUG
 #include <dxgidebug.h>
