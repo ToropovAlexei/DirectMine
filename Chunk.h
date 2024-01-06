@@ -8,7 +8,7 @@ public:
 	Chunk();
 
 	static const int WIDTH = 16;
-	static const int HEIGHT = 256;
+	static const int HEIGHT = 16;
 	static const int DEPTH = 16;
 	static constexpr int VOLUME = WIDTH * HEIGHT * HEIGHT;
 

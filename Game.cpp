@@ -159,6 +159,11 @@ void Game::Render()
     cubes.push_back(std::move(leavesBlock));
     context->VSSetConstantBuffers(1u, 1u, m_mainCB.GetAddressOf());
     m_cubeRenderer->DrawCubes(context, cubes);
+    auto& chunks = m_world->Chunks();
+    for (auto& chunk : chunks)
+    {
+        m_cubeRenderer->DrawChunk(context, chunk.get());
+    }
 
     m_deviceResources->PIXEndEvent();
 
