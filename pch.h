@@ -92,3 +92,5 @@ namespace DX
 #include "Mouse.h"
 #include "WICTextureLoader.h"
 #include "GeometricPrimitive.h"
+#include <ScreenGrab.h>
+#include <wincodec.h>

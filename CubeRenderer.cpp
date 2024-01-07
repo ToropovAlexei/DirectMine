@@ -37,7 +37,7 @@ void CubeRenderer::DrawCubes(ID3D11DeviceContext1* context, std::vector<std::uni
     }
 }
 
-void CubeRenderer::DrawChunk(ID3D11DeviceContext1* context, Chunk* chunk)
+void CubeRenderer::DrawChunk(ID3D11DeviceContext1* context, Chunk* chunk, TextureAtlas textureAtlas)
 {
     context->IASetVertexBuffers(0u, 1u, m_vertexBuffer.GetAddressOf(), &m_stride, &m_offset);
     context->IASetIndexBuffer(m_indexBuffer.Get(), DXGI_FORMAT_R16_UINT, 0u);
@@ -55,7 +55,7 @@ void CubeRenderer::DrawChunk(ID3D11DeviceContext1* context, Chunk* chunk)
         m_activeCB = block->Pos();
         UpdateWorldConstantBuffer(context);
         context->VSSetConstantBuffers(0u, 1u, m_constantBuffer.GetAddressOf());
-        context->PSSetShaderResources(0u, 1u, m_texManager->GetBlockTexture(block->Id()).GetAddressOf());
+        context->PSSetShaderResources(0u, 1u, textureAtlas.GetAtlasSRV().GetAddressOf());
         context->DrawIndexed(36u, 0u, 0u);
     }
 }

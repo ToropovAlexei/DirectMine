@@ -26,6 +26,9 @@
     <Filter Include="World\Cunk">
       <UniqueIdentifier>{cc8c6174-e410-483a-b6ef-62c937b29cc7}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Utils">
+      <UniqueIdentifier>{3cfb8a72-3aa2-4492-a546-22acd2f91d5a}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="pch.h" />
@@ -70,6 +73,15 @@
     <ClInclude Include="Chunk.h">
       <Filter>World\Cunk</Filter>
     </ClInclude>
+    <ClInclude Include="TextureLoader.h">
+      <Filter>Textures</Filter>
+    </ClInclude>
+    <ClInclude Include="TextureAtlas.h">
+      <Filter>Textures</Filter>
+    </ClInclude>
+    <ClInclude Include="MathUtils.h">
+      <Filter>Utils</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp" />
@@ -111,6 +123,15 @@
     </ClCompile>
     <ClCompile Include="Chunk.cpp">
       <Filter>World\Cunk</Filter>
+    </ClCompile>
+    <ClCompile Include="TextureLoader.cpp">
+      <Filter>Textures</Filter>
+    </ClCompile>
+    <ClCompile Include="TextureAtlas.cpp">
+      <Filter>Textures</Filter>
+    </ClCompile>
+    <ClCompile Include="MathUtils.cpp">
+      <Filter>Utils</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
