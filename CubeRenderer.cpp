@@ -16,7 +16,7 @@ CubeRenderer::CubeRenderer(ID3D11Device* device)
     m_pixelShader = ShadersLoader::LoadPixelShader(device, L"PixelShader.cso");
 }
 
-void CubeRenderer::DrawChunk(ID3D11DeviceContext1* context, Chunk* chunk, TextureAtlas textureAtlas)
+void CubeRenderer::DrawChunk(ID3D11DeviceContext1* context, Chunk* chunk)
 {
     context->IASetVertexBuffers(0u, 1u, m_vertexBuffer.GetAddressOf(), &m_stride, &m_offset);
     context->IASetIndexBuffer(m_indexBuffer.Get(), DXGI_FORMAT_R16_UINT, 0u);
@@ -26,7 +26,7 @@ void CubeRenderer::DrawChunk(ID3D11DeviceContext1* context, Chunk* chunk, Textur
     context->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
     context->PSSetSamplers(0u, 1u, m_sampler.GetAddressOf());
     context->OMSetBlendState(m_blendState.Get(), nullptr, 0xFFFFFFFF);
-    context->PSSetShaderResources(0u, 1u, textureAtlas.GetAtlasSRV().GetAddressOf());
+    context->PSSetShaderResources(0u, 1u, TextureAtlas::GetAtlasSRV().GetAddressOf());
 
     auto& blocks = chunk->GetBlocks();
 

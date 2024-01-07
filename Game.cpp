@@ -12,8 +12,7 @@ using namespace DirectX;
 
 using Microsoft::WRL::ComPtr;
 
-Game::Game() noexcept(false) :
-    m_textureAtlas()
+Game::Game() noexcept(false)
 {
     m_deviceResources = std::make_unique<DX::DeviceResources>();
     // TODO: Provide parameters for swapchain format, depth/stencil format, and backbuffer count.
@@ -164,7 +163,7 @@ void Game::Render()
     auto& chunks = m_world->Chunks();
     for (auto& chunk : chunks)
     {
-        m_cubeRenderer->DrawChunk(context, chunk.get(), m_textureAtlas);
+        m_cubeRenderer->DrawChunk(context, chunk.get());
     }
 
     m_deviceResources->PIXEndEvent();
@@ -258,7 +257,7 @@ void Game::CreateDeviceDependentResources()
     // TODO: Initialize device dependent objects here (independent of window size).
 	CreateMainConstantBuffer();
     m_cubeRenderer = std::make_unique<CubeRenderer>(device);
-    m_textureAtlas.BuildAtlas(device, m_deviceResources->GetD3DDeviceContext());
+    TextureAtlas::BuildAtlas(device, m_deviceResources->GetD3DDeviceContext());
 }
 
 // Allocate all memory resources that change on a window SizeChanged event.

@@ -197,6 +197,7 @@
     <ClInclude Include="TextureAtlas.h" />
     <ClInclude Include="TextureLoader.h" />
     <ClInclude Include="TexturesManager.h" />
+    <ClInclude Include="UVCoords.h" />
     <ClInclude Include="World.h" />
   </ItemGroup>
   <ItemGroup>
@@ -219,6 +220,7 @@
     <ClCompile Include="TextureAtlas.cpp" />
     <ClCompile Include="TextureLoader.cpp" />
     <ClCompile Include="TexturesManager.cpp" />
+    <ClCompile Include="UVCoords.cpp" />
     <ClCompile Include="World.cpp" />
   </ItemGroup>
   <ItemGroup>

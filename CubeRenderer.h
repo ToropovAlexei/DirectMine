@@ -10,7 +10,7 @@ class CubeRenderer
 public:
 	CubeRenderer(ID3D11Device* device);
 
-    void DrawChunk(ID3D11DeviceContext1* context, Chunk* chunk, TextureAtlas textureAtlas);
+    void DrawChunk(ID3D11DeviceContext1* context, Chunk* chunk);
 
 private:
 	void BuildInputLayout(ID3D11Device* device);

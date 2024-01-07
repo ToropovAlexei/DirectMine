@@ -70,7 +70,12 @@
     <ClInclude Include="MathUtils.h">
       <Filter>Utils</Filter>
     </ClInclude>
-    <ClInclude Include="Mesh.h" />
+    <ClInclude Include="Mesh.h">
+      <Filter>Graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="UVCoords.h">
+      <Filter>Graphics</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp" />
@@ -107,7 +112,12 @@
     <ClCompile Include="MathUtils.cpp">
       <Filter>Utils</Filter>
     </ClCompile>
-    <ClCompile Include="Mesh.cpp" />
+    <ClCompile Include="Mesh.cpp">
+      <Filter>Graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="UVCoords.cpp">
+      <Filter>Graphics</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="resource.rc" />
