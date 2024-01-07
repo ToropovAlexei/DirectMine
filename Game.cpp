@@ -151,13 +151,6 @@ void Game::Render()
     m_deviceResources->PIXBeginEvent(L"Render");
     auto context = m_deviceResources->GetD3DDeviceContext();
 
-    //auto block = std::make_unique<DebugBlock>(DirectX::XMFLOAT3(0.0f, 0.0f, 4.0f));
-    //auto dirtBlock = std::make_unique<DirtBlock>(DirectX::XMFLOAT3(-1.5f, 0.0f, 4.0f));
-    //auto leavesBlock = std::make_unique<GrassBlock>(DirectX::XMFLOAT3(1.5f, 0.0f, 4.0f));
-    //auto cubes = std::vector<std::unique_ptr<Cube>>();
-    //cubes.push_back(std::move(block));
-    //cubes.push_back(std::move(dirtBlock));
-    //cubes.push_back(std::move(leavesBlock));
     context->VSSetConstantBuffers(1u, 1u, m_mainCB.GetAddressOf());
     //m_cubeRenderer->DrawCubes(context, cubes);
     auto& chunks = m_world->Chunks();
@@ -258,6 +251,10 @@ void Game::CreateDeviceDependentResources()
 	CreateMainConstantBuffer();
     m_cubeRenderer = std::make_unique<CubeRenderer>(device);
     TextureAtlas::BuildAtlas(device, m_deviceResources->GetD3DDeviceContext());
+    for (auto& chunk : m_world->Chunks())
+    {
+        chunk->UpdateMesh(device);
+    }
 }
 
 // Allocate all memory resources that change on a window SizeChanged event.
@@ -270,7 +267,7 @@ void Game::CreateWindowSizeDependentResources()
 	m_proj = DirectX::XMMatrixPerspectiveFovLH(
 		XM_PIDIV4,
 		aspectRatio,
-		0.1f, 25.0f);
+		0.1f, 250.0f);
 }
 
 void Game::CreateMainConstantBuffer()

@@ -44,8 +44,12 @@ public:
 
 	void FillWith();
 
+	void UpdateMesh(ID3D11Device* device);
+
 	DirectX::GeometricPrimitive::VertexCollection& GetVertices();
 	DirectX::GeometricPrimitive::IndexCollection& GetIndices();
+	Microsoft::WRL::ComPtr<ID3D11Buffer> GetVertexBuffer();
+	Microsoft::WRL::ComPtr<ID3D11Buffer> GetIndexBuffer();
 
 private:
 	std::unordered_map<BlockPos, Cube, BlockPosHash> m_blocks;
@@ -53,6 +57,10 @@ private:
 	DirectX::GeometricPrimitive::VertexCollection m_vertices;
 	DirectX::GeometricPrimitive::IndexCollection m_indices;
 
-	void UpdateMesh();
+	Microsoft::WRL::ComPtr<ID3D11Buffer> m_vertexBuffer;
+	Microsoft::WRL::ComPtr<ID3D11Buffer> m_indexBuffer;
+
+	void BuildVertexBuffer(ID3D11Device* device);
+	void BuildIndexBuffer(ID3D11Device* device);
 };
 

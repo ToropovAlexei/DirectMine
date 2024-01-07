@@ -18,8 +18,8 @@ CubeRenderer::CubeRenderer(ID3D11Device* device)
 
 void CubeRenderer::DrawChunk(ID3D11DeviceContext1* context, Chunk* chunk)
 {
-    context->IASetVertexBuffers(0u, 1u, m_vertexBuffer.GetAddressOf(), &m_stride, &m_offset);
-    context->IASetIndexBuffer(m_indexBuffer.Get(), DXGI_FORMAT_R16_UINT, 0u);
+    context->IASetVertexBuffers(0u, 1u, chunk->GetVertexBuffer().GetAddressOf(), &m_stride, &m_offset);
+    context->IASetIndexBuffer(chunk->GetIndexBuffer().Get(), DXGI_FORMAT_R16_UINT, 0u);
     context->PSSetShader(m_pixelShader.Get(), nullptr, 0u);
     context->VSSetShader(m_vertexShader.Get(), nullptr, 0u);
     context->IASetInputLayout(m_inputLayout.Get());
@@ -27,16 +27,7 @@ void CubeRenderer::DrawChunk(ID3D11DeviceContext1* context, Chunk* chunk)
     context->PSSetSamplers(0u, 1u, m_sampler.GetAddressOf());
     context->OMSetBlendState(m_blendState.Get(), nullptr, 0xFFFFFFFF);
     context->PSSetShaderResources(0u, 1u, TextureAtlas::GetAtlasSRV().GetAddressOf());
-
-    auto& blocks = chunk->GetBlocks();
-
-    for (auto& block : blocks)
-    {
-        m_activeCB = DirectX::XMFLOAT3(block.first.x, block.first.y, block.first.z);
-        UpdateWorldConstantBuffer(context);
-        context->VSSetConstantBuffers(0u, 1u, m_constantBuffer.GetAddressOf());
-        context->DrawIndexed(36u, 0u, 0u);
-    }
+    context->DrawIndexed(chunk->GetIndices().size(), 0u, 0u);
 }
 
 void CubeRenderer::BuildInputLayout(ID3D11Device* device)

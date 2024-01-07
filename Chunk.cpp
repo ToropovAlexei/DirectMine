@@ -24,7 +24,6 @@ void Chunk::FillWith()
 			}
 		}
 	}
-    UpdateMesh();
 }
 
 DirectX::GeometricPrimitive::VertexCollection& Chunk::GetVertices()
@@ -37,46 +36,64 @@ DirectX::GeometricPrimitive::IndexCollection& Chunk::GetIndices()
     return m_indices;
 }
 
-void Chunk::UpdateMesh()
+Microsoft::WRL::ComPtr<ID3D11Buffer> Chunk::GetVertexBuffer()
+{
+    return m_vertexBuffer;
+}
+
+Microsoft::WRL::ComPtr<ID3D11Buffer> Chunk::GetIndexBuffer()
+{
+    return m_indexBuffer;
+}
+
+void Chunk::UpdateMesh(ID3D11Device* device)
 {
 	for (auto& blockPair : m_blocks)
 	{
-        DirectX::GeometricPrimitive::VertexCollection vertices;
-        DirectX::GeometricPrimitive::IndexCollection indices;
-
-        DirectX::GeometricPrimitive::CreateCube(vertices, indices, 1.0f, false);
-
-        // Back
-        vertices[0].textureCoordinate = { 0.75f, 1.0f / 3.0f };
-        vertices[1].textureCoordinate = { 0.75f, 2.0f / 3.0f };
-        vertices[2].textureCoordinate = { 1.0f, 2.0f / 3.0f };
-        vertices[3].textureCoordinate = { 1.0f, 1.0f / 3.0f };
-        // Front
-        vertices[4].textureCoordinate = { 0.25f, 1.0f / 3.0f };
-        vertices[5].textureCoordinate = { 0.25f, 2.0f / 3.0f };
-        vertices[6].textureCoordinate = { 0.5f, 2.0f / 3.0f };
-        vertices[7].textureCoordinate = { 0.5f, 1.0f / 3.0f };
-        // Right
-        vertices[8].textureCoordinate = { 0.5f, 1.0f / 3.0f };
-        vertices[9].textureCoordinate = { 0.5f, 2.0f / 3.0f };
-        vertices[10].textureCoordinate = { 0.75f, 2.0f / 3.0f };
-        vertices[11].textureCoordinate = { 0.75f, 1.0f / 3.0f };
-        // Left
-        vertices[12].textureCoordinate = { 0.0f, 1.0f / 3.0f };
-        vertices[13].textureCoordinate = { 0.0f, 2.0f / 3.0f };
-        vertices[14].textureCoordinate = { 0.25f, 2.0f / 3.0f };
-        vertices[15].textureCoordinate = { 0.25f, 1.0f / 3.0f };
-        // Top
-        vertices[16].textureCoordinate = { 0.25f, 0.0f };
-        vertices[17].textureCoordinate = { 0.25f, 1.0f / 3.0f };
-        vertices[18].textureCoordinate = { 0.5f, 1.0f / 3.0f };
-        vertices[19].textureCoordinate = { 0.5f, 0.0f };
-        // Bottom
-        vertices[20].textureCoordinate = { 0.25f, 2.0f / 3.0f };
-        vertices[21].textureCoordinate = { 0.25f, 1.0f };
-        vertices[22].textureCoordinate = { 0.5f, 1.0f };
-        vertices[23].textureCoordinate = { 0.5f, 2.0f / 3.0f };
-        m_vertices = vertices;
-        m_indices = indices;
+        DirectX::GeometricPrimitive::VertexType vertex1 = DirectX::GeometricPrimitive::VertexType(DirectX::XMFLOAT3(-0.5f + blockPair.first.x, -0.5f + blockPair.first.y, 0.5f + blockPair.first.z), DirectX::XMFLOAT3(), DirectX::XMFLOAT2(0.0f, 0.0f));
+        DirectX::GeometricPrimitive::VertexType vertex2 = DirectX::GeometricPrimitive::VertexType(DirectX::XMFLOAT3(0.5f + blockPair.first.x, -0.5f + blockPair.first.y, 0.5f + blockPair.first.z), DirectX::XMFLOAT3(), DirectX::XMFLOAT2(1.0f, 0.0f));
+        DirectX::GeometricPrimitive::VertexType vertex3 = DirectX::GeometricPrimitive::VertexType(DirectX::XMFLOAT3(0.5f + blockPair.first.x, 0.5f + blockPair.first.y, 0.5f + blockPair.first.z), DirectX::XMFLOAT3(), DirectX::XMFLOAT2(1.0f, 1.0f));
+        DirectX::GeometricPrimitive::VertexType vertex4 = DirectX::GeometricPrimitive::VertexType(DirectX::XMFLOAT3(-0.5f + blockPair.first.x, 0.5f + blockPair.first.y, 0.5f + blockPair.first.z), DirectX::XMFLOAT3(), DirectX::XMFLOAT2(0.0f, 1.0f));
+        m_vertices.push_back(vertex1);
+        m_vertices.push_back(vertex2);
+        m_vertices.push_back(vertex3);
+        m_vertices.push_back(vertex4);
+        int offset = m_vertices.size();
+        m_indices.push_back(2 + offset);
+        m_indices.push_back(1 + offset);
+        m_indices.push_back(0 + offset);
+        m_indices.push_back(3 + offset);
+        m_indices.push_back(2 + offset);
+        m_indices.push_back(0 + offset);
 	}
+    BuildVertexBuffer(device);
+    BuildIndexBuffer(device);
+}
+
+void Chunk::BuildVertexBuffer(ID3D11Device* device)
+{
+    D3D11_BUFFER_DESC bd = {};
+    bd.BindFlags = D3D11_BIND_VERTEX_BUFFER;
+    bd.Usage = D3D11_USAGE_DEFAULT;
+    bd.CPUAccessFlags = 0u;
+    bd.MiscFlags = 0u;
+    bd.ByteWidth = static_cast<UINT>(sizeof(DirectX::GeometricPrimitive::VertexType) * m_vertices.size());
+    bd.StructureByteStride = sizeof(DirectX::GeometricPrimitive::VertexType);
+    D3D11_SUBRESOURCE_DATA sd = {};
+    sd.pSysMem = m_vertices.data();
+    device->CreateBuffer(&bd, &sd, &m_vertexBuffer);
+}
+
+void Chunk::BuildIndexBuffer(ID3D11Device* device)
+{
+    D3D11_BUFFER_DESC ibd = {};
+    ibd.BindFlags = D3D11_BIND_INDEX_BUFFER;
+    ibd.Usage = D3D11_USAGE_DEFAULT;
+    ibd.CPUAccessFlags = 0u;
+    ibd.MiscFlags = 0u;
+    ibd.ByteWidth = static_cast<UINT>(sizeof(uint16_t) * m_indices.size());
+    ibd.StructureByteStride = sizeof(uint16_t);
+    D3D11_SUBRESOURCE_DATA isd = {};
+    isd.pSysMem = m_indices.data();
+    device->CreateBuffer(&ibd, &isd, &m_indexBuffer);
 }
