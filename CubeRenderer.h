@@ -10,7 +10,6 @@ class CubeRenderer
 public:
 	CubeRenderer(ID3D11Device* device);
 
-    void DrawCubes(ID3D11DeviceContext1* context, std::vector<std::unique_ptr<Cube>>& cubes);
     void DrawChunk(ID3D11DeviceContext1* context, Chunk* chunk, TextureAtlas textureAtlas);
 
 private:

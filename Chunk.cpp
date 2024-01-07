@@ -1,8 +1,17 @@
 #include "pch.h"
 #include "Chunk.h"
-#include "GrassBlock.h"
 
 Chunk::Chunk()
+{
+
+}
+
+const std::unordered_map<Chunk::BlockPos, Cube, Chunk::BlockPosHash>& Chunk::GetBlocks() const noexcept
+{
+	return m_blocks;
+}
+
+void Chunk::FillWith()
 {
 	for (size_t x = 0; x < Chunk::WIDTH; x++)
 	{
@@ -10,13 +19,9 @@ Chunk::Chunk()
 		{
 			for (size_t z = 0; z < Chunk::DEPTH; z++)
 			{
-				m_blocks[x * Chunk::WIDTH + y + z * (Chunk::WIDTH * Chunk::HEIGHT)] = std::make_unique<GrassBlock>(DirectX::XMFLOAT3(x, y, z));
+				BlockPos pos = BlockPos(x, y, z);
+				m_blocks.insert({ pos, Cube() });
 			}
 		}
 	}
-}
-
-const std::array<std::unique_ptr<Cube>, Chunk::VOLUME>& Chunk::GetBlocks() const noexcept
-{
-	return m_blocks;
 }

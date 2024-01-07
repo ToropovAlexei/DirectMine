@@ -43,26 +43,11 @@
     <ClInclude Include="Cube.h">
       <Filter>Blocks</Filter>
     </ClInclude>
-    <ClInclude Include="AirBlock.h">
-      <Filter>Blocks</Filter>
-    </ClInclude>
     <ClInclude Include="TexturesManager.h">
       <Filter>Textures</Filter>
     </ClInclude>
     <ClInclude Include="CubeRenderer.h">
       <Filter>Render</Filter>
-    </ClInclude>
-    <ClInclude Include="DebugBlock.h">
-      <Filter>Blocks</Filter>
-    </ClInclude>
-    <ClInclude Include="DirtBlock.h">
-      <Filter>Blocks</Filter>
-    </ClInclude>
-    <ClInclude Include="LeavesBlock.h">
-      <Filter>Blocks</Filter>
-    </ClInclude>
-    <ClInclude Include="GrassBlock.h">
-      <Filter>Blocks</Filter>
     </ClInclude>
     <ClInclude Include="ShadersLoader.h">
       <Filter>Shaders</Filter>
@@ -94,26 +79,11 @@
     <ClCompile Include="Cube.cpp">
       <Filter>Blocks</Filter>
     </ClCompile>
-    <ClCompile Include="AirBlock.cpp">
-      <Filter>Blocks</Filter>
-    </ClCompile>
     <ClCompile Include="TexturesManager.cpp">
       <Filter>Textures</Filter>
     </ClCompile>
     <ClCompile Include="CubeRenderer.cpp">
       <Filter>Render</Filter>
-    </ClCompile>
-    <ClCompile Include="DebugBlock.cpp">
-      <Filter>Blocks</Filter>
-    </ClCompile>
-    <ClCompile Include="DirtBlock.cpp">
-      <Filter>Blocks</Filter>
-    </ClCompile>
-    <ClCompile Include="LeavesBlock.cpp">
-      <Filter>Blocks</Filter>
-    </ClCompile>
-    <ClCompile Include="GrassBlock.cpp">
-      <Filter>Blocks</Filter>
     </ClCompile>
     <ClCompile Include="ShadersLoader.cpp">
       <Filter>Shaders</Filter>

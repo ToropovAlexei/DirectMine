@@ -5,10 +5,6 @@
 #include "pch.h"
 #include "Game.h"
 #include "ShadersLoader.h"
-#include "DebugBlock.h"
-#include "DirtBlock.h"
-#include "LeavesBlock.h"
-#include "GrassBlock.h"
 
 extern void ExitGame() noexcept;
 
@@ -29,6 +25,11 @@ Game::Game() noexcept(false) :
 	m_mouse = std::make_unique<Mouse>();
 	m_cam->UpdateViewMatrix();
     m_world = std::make_unique<World>(m_cam.get());
+    auto& chunks = m_world->Chunks();
+    for (auto& chunk : chunks)
+    {
+        chunk->FillWith();
+    }
 }
 
 // Initialize the Direct3D resources required to run.
@@ -151,15 +152,15 @@ void Game::Render()
     m_deviceResources->PIXBeginEvent(L"Render");
     auto context = m_deviceResources->GetD3DDeviceContext();
 
-    auto block = std::make_unique<DebugBlock>(DirectX::XMFLOAT3(0.0f, 0.0f, 4.0f));
-    auto dirtBlock = std::make_unique<DirtBlock>(DirectX::XMFLOAT3(-1.5f, 0.0f, 4.0f));
-    auto leavesBlock = std::make_unique<GrassBlock>(DirectX::XMFLOAT3(1.5f, 0.0f, 4.0f));
-    auto cubes = std::vector<std::unique_ptr<Cube>>();
-    cubes.push_back(std::move(block));
-    cubes.push_back(std::move(dirtBlock));
-    cubes.push_back(std::move(leavesBlock));
+    //auto block = std::make_unique<DebugBlock>(DirectX::XMFLOAT3(0.0f, 0.0f, 4.0f));
+    //auto dirtBlock = std::make_unique<DirtBlock>(DirectX::XMFLOAT3(-1.5f, 0.0f, 4.0f));
+    //auto leavesBlock = std::make_unique<GrassBlock>(DirectX::XMFLOAT3(1.5f, 0.0f, 4.0f));
+    //auto cubes = std::vector<std::unique_ptr<Cube>>();
+    //cubes.push_back(std::move(block));
+    //cubes.push_back(std::move(dirtBlock));
+    //cubes.push_back(std::move(leavesBlock));
     context->VSSetConstantBuffers(1u, 1u, m_mainCB.GetAddressOf());
-    m_cubeRenderer->DrawCubes(context, cubes);
+    //m_cubeRenderer->DrawCubes(context, cubes);
     auto& chunks = m_world->Chunks();
     for (auto& chunk : chunks)
     {
