@@ -44,7 +44,15 @@ public:
 
 	void FillWith();
 
+	DirectX::GeometricPrimitive::VertexCollection& GetVertices();
+	DirectX::GeometricPrimitive::IndexCollection& GetIndices();
+
 private:
 	std::unordered_map<BlockPos, Cube, BlockPosHash> m_blocks;
+
+	DirectX::GeometricPrimitive::VertexCollection m_vertices;
+	DirectX::GeometricPrimitive::IndexCollection m_indices;
+
+	void UpdateMesh();
 };
 

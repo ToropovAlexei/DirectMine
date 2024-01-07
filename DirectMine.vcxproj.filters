@@ -29,6 +29,9 @@
     <Filter Include="Utils">
       <UniqueIdentifier>{3cfb8a72-3aa2-4492-a546-22acd2f91d5a}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Graphics">
+      <UniqueIdentifier>{b446c0aa-4264-4d45-9667-29ba931a7194}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="pch.h" />
@@ -67,6 +70,7 @@
     <ClInclude Include="MathUtils.h">
       <Filter>Utils</Filter>
     </ClInclude>
+    <ClInclude Include="Mesh.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp" />
@@ -103,6 +107,7 @@
     <ClCompile Include="MathUtils.cpp">
       <Filter>Utils</Filter>
     </ClCompile>
+    <ClCompile Include="Mesh.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="resource.rc" />

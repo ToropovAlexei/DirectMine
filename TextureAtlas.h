@@ -29,7 +29,8 @@ private:
 	std::unordered_map<std::string, UVCoords> m_texturesCoords;
 
 	int m_textureSize = 16;
-	int m_atlasSize;
-	int m_texturesPerRow;
+	float m_atlasGridStep = 0.0f;
+	int m_atlasSize = 0;
+	int m_texturesPerRow = 0;
 };
 

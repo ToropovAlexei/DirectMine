@@ -8,7 +8,7 @@ std::unordered_map<std::string, Microsoft::WRL::ComPtr<ID3D11Resource>> TextureL
 	for (const auto& texturePath : std::filesystem::directory_iterator(path))
 	{
 		std::filesystem::path filePath = texturePath.path();
-		textures.insert({ filePath.filename().string(), TextureLoader::LoadTexture(device, filePath)});
+		textures.insert({ filePath.stem().string(), TextureLoader::LoadTexture(device, filePath)});
 	}
 	if (textures.empty())
 	{
