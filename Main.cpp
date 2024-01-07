@@ -31,6 +31,16 @@ extern "C"
     __declspec(dllexport) int AmdPowerXpressRequestHighPerformance = 1;
 }
 
+LPCWSTR ConvertToLPCWSTR(const char* str)
+{
+    int length = MultiByteToWideChar(CP_ACP, 0, str, -1, NULL, 0); // Получаем длину строки в кодировке Unicode
+
+    wchar_t* buffer = new wchar_t[length]; // Выделяем память для строки в кодировке Unicode
+    MultiByteToWideChar(CP_ACP, 0, str, -1, buffer, length); // Преобразуем строку в кодировке ANSI в строку в кодировке Unicode
+
+    return buffer; // Возвращаем преобразованную строку
+}
+
 // Entry point
 int WINAPI wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _In_ LPWSTR lpCmdLine, _In_ int nCmdShow)
 {
@@ -90,17 +100,23 @@ int WINAPI wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, 
 
     // Main message loop
     MSG msg = {};
-    while (WM_QUIT != msg.message)
+    try {
+        while (WM_QUIT != msg.message)
+        {
+            if (PeekMessage(&msg, nullptr, 0, 0, PM_REMOVE))
+            {
+                TranslateMessage(&msg);
+                DispatchMessage(&msg);
+            }
+            else
+            {
+                g_game->Tick();
+            }
+        }
+    }
+    catch (const std::runtime_error& e)
     {
-        if (PeekMessage(&msg, nullptr, 0, 0, PM_REMOVE))
-        {
-            TranslateMessage(&msg);
-            DispatchMessage(&msg);
-        }
-        else
-        {
-            g_game->Tick();
-        }
+        MessageBox(nullptr, ConvertToLPCWSTR(e.what()), L"Standard Exception", MB_OK | MB_ICONEXCLAMATION);
     }
 
     g_game.reset();
