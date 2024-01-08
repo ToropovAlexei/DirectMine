@@ -83,7 +83,12 @@ void Game::Update(DX::StepTimer const& timer)
     float elapsedTime = float(timer.GetElapsedSeconds());
 
     // TODO: Add your game logic here.
-    elapsedTime;
+    std::wstring title = L"DirectX 11 FPS: "
+        + std::to_wstring(timer.GetFramesPerSecond())
+        + L" x:" + std::to_wstring(static_cast<int>(m_cam->GetPosition3f().x))
+        + L" y:" + std::to_wstring(static_cast<int>(m_cam->GetPosition3f().y))
+        + L" z:" + std::to_wstring(static_cast<int>(m_cam->GetPosition3f().z));
+    SetWindowText(GetActiveWindow(), title.c_str());
 	UpdateMainConstantBuffer();
 
     auto kb = m_keyboard->GetState();

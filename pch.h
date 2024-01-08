@@ -94,3 +94,5 @@ namespace DX
 #include "GeometricPrimitive.h"
 #include <ScreenGrab.h>
 #include <wincodec.h>
+#include <locale>
+#include <codecvt>
