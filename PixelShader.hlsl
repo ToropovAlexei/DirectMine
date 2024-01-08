@@ -4,7 +4,6 @@ SamplerState splr : register(s0);
 struct VertexOut
 {
     float4 PosH : SV_POSITION;
-    float3 Normal : NORMAL;
     float2 TexC : TEXCOORD;
 };
 

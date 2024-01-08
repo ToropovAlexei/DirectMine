@@ -76,6 +76,9 @@
     <ClInclude Include="UVCoords.h">
       <Filter>Graphics</Filter>
     </ClInclude>
+    <ClInclude Include="Vertex.h">
+      <Filter>Graphics</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp" />

@@ -151,8 +151,7 @@ void Game::Render()
     m_deviceResources->PIXBeginEvent(L"Render");
     auto context = m_deviceResources->GetD3DDeviceContext();
 
-    context->VSSetConstantBuffers(1u, 1u, m_mainCB.GetAddressOf());
-    //m_cubeRenderer->DrawCubes(context, cubes);
+    context->VSSetConstantBuffers(0u, 1u, m_mainCB.GetAddressOf());
     auto& chunks = m_world->Chunks();
     for (auto& chunk : chunks)
     {

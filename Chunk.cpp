@@ -26,7 +26,7 @@ void Chunk::FillWith()
 	}
 }
 
-DirectX::GeometricPrimitive::VertexCollection& Chunk::GetVertices()
+std::vector<Vertex>& Chunk::GetVertices()
 {
     return m_vertices;
 }
@@ -74,7 +74,10 @@ void Chunk::UpdateMesh(ID3D11Device* device)
             m_indices.push_back(static_cast<UINT>(indices[i]) + indicesOffset);
         }
 
-        m_vertices.insert(m_vertices.end(), vertices.begin(), vertices.end());
+        for (size_t i = 0; i < vertices.size(); i++)
+        {
+            m_vertices.push_back(Vertex(vertices[i].position, vertices[i].textureCoordinate));
+        }
 	}
 
     BuildVertexBuffer(device);
@@ -88,8 +91,8 @@ void Chunk::BuildVertexBuffer(ID3D11Device* device)
     bd.Usage = D3D11_USAGE_DEFAULT;
     bd.CPUAccessFlags = 0u;
     bd.MiscFlags = 0u;
-    bd.ByteWidth = static_cast<UINT>(sizeof(DirectX::GeometricPrimitive::VertexType) * m_vertices.size());
-    bd.StructureByteStride = sizeof(DirectX::GeometricPrimitive::VertexType);
+    bd.ByteWidth = static_cast<UINT>(sizeof(Vertex) * m_vertices.size());
+    bd.StructureByteStride = sizeof(Vertex);
     D3D11_SUBRESOURCE_DATA sd = {};
     sd.pSysMem = m_vertices.data();
     device->CreateBuffer(&bd, &sd, &m_vertexBuffer);

@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Cube.h"
+#include "Vertex.h"
 
 class Chunk
 {
@@ -46,15 +47,17 @@ public:
 
 	void UpdateMesh(ID3D11Device* device);
 
-	DirectX::GeometricPrimitive::VertexCollection& GetVertices();
+	std::vector<Vertex>& GetVertices();
 	std::vector<UINT>& GetIndices();
 	Microsoft::WRL::ComPtr<ID3D11Buffer> GetVertexBuffer();
 	Microsoft::WRL::ComPtr<ID3D11Buffer> GetIndexBuffer();
 
+	void ComputeBox(std::vector<Vertex> vertices, std::vector<UINT>& indices);
+
 private:
 	std::unordered_map<BlockPos, Cube, BlockPosHash> m_blocks;
 
-	DirectX::GeometricPrimitive::VertexCollection m_vertices;
+	std::vector<Vertex> m_vertices;
 	std::vector<UINT> m_indices;
 
 	Microsoft::WRL::ComPtr<ID3D11Buffer> m_vertexBuffer;
