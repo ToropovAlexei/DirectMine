@@ -19,7 +19,7 @@ void Chunk::FillWith()
 		{
 			for (size_t z = 0; z < Chunk::DEPTH; z++)
 			{
-				BlockPos pos = BlockPos(x, y, z);
+                Chunk::BlockPos pos = Chunk::BlockPos(static_cast<float>(x), static_cast<float>(y), static_cast<float>(z));
 				m_blocks.insert({ pos, Cube() });
 			}
 		}
@@ -46,39 +46,126 @@ Microsoft::WRL::ComPtr<ID3D11Buffer> Chunk::GetIndexBuffer()
     return m_indexBuffer;
 }
 
+void Chunk::addFrontFace(DirectX::XMFLOAT3 pos)
+{
+    UINT offset = static_cast<UINT>(m_vertices.size());
+    std::vector<Vertex> vertices = {
+        {{0.0f + pos.x, 0.0f + pos.y, 0.0f + pos.z}, {0.0f, 0.0f}},   // Вершина 0
+        {{1.0f + pos.x, 0.0f + pos.y, 0.0f + pos.z}, {1.0f, 0.0f}},   // Вершина 1
+        {{1.0f + pos.x, 1.0f + pos.y, 0.0f + pos.z}, {1.0f, 1.0f}},   // Вершина 2
+        {{0.0f + pos.x, 1.0f + pos.y, 0.0f + pos.z}, {0.0f, 1.0f}}    // Вершина 3
+    };
+
+    std::vector<UINT> indices = {
+        0 + offset, 2 + offset, 1 + offset,    // Первый треугольник (передняя грань)
+        0 + offset, 3 + offset, 2 + offset,    // Второй треугольник (передняя грань)
+    };
+    m_vertices.insert(m_vertices.end(), vertices.begin(), vertices.end());
+    m_indices.insert(m_indices.end(), indices.begin(), indices.end());
+}
+
+void Chunk::addBackFace(DirectX::XMFLOAT3 pos)
+{
+    UINT offset = static_cast<UINT>(m_vertices.size());
+    std::vector<Vertex> vertices = {
+        {{0.0f + pos.x, 0.0f + pos.y, 1.0f + pos.z}, {0.0f, 0.0f}},   // Вершина 0
+        {{1.0f + pos.x, 0.0f + pos.y, 1.0f + pos.z}, {1.0f, 0.0f}},   // Вершина 1
+        {{1.0f + pos.x, 1.0f + pos.y, 1.0f + pos.z}, {1.0f, 1.0f}},   // Вершина 2
+        {{0.0f + pos.x, 1.0f + pos.y, 1.0f + pos.z}, {0.0f, 1.0f}}    // Вершина 3
+    };
+
+    std::vector<UINT> indices = {
+        0 + offset, 1 + offset, 2 + offset,    // Первый треугольник (передняя грань)
+        0 + offset, 2 + offset, 3 + offset,    // Второй треугольник (передняя грань)
+    };
+    m_vertices.insert(m_vertices.end(), vertices.begin(), vertices.end());
+    m_indices.insert(m_indices.end(), indices.begin(), indices.end());
+}
+
+void Chunk::addTopFace(DirectX::XMFLOAT3 pos)
+{
+    UINT offset = static_cast<UINT>(m_vertices.size());
+    std::vector<Vertex> vertices = {
+        {{0.0f + pos.x, 1.0f + pos.y, 0.0f + pos.z}, {0.0f, 0.0f}},   // Вершина 0
+        {{1.0f + pos.x, 1.0f + pos.y, 0.0f + pos.z}, {1.0f, 0.0f}},   // Вершина 1
+        {{1.0f + pos.x, 1.0f + pos.y, 1.0f + pos.z}, {1.0f, 1.0f}},   // Вершина 2
+        {{0.0f + pos.x, 1.0f + pos.y, 1.0f + pos.z}, {0.0f, 1.0f}}    // Вершина 3
+    };
+
+    std::vector<UINT> indices = {
+        0 + offset, 2 + offset, 1 + offset,    // Первый треугольник (передняя грань)
+        0 + offset, 3 + offset, 2 + offset,    // Второй треугольник (передняя грань)
+    };
+    m_vertices.insert(m_vertices.end(), vertices.begin(), vertices.end());
+    m_indices.insert(m_indices.end(), indices.begin(), indices.end());
+}
+
+void Chunk::addBottomFace(DirectX::XMFLOAT3 pos)
+{
+    UINT offset = static_cast<UINT>(m_vertices.size());
+    std::vector<Vertex> vertices = {
+        {{0.0f + pos.x, 0.0f + pos.y, 0.0f + pos.z}, {0.0f, 0.0f}},   // Вершина 0
+        {{1.0f + pos.x, 0.0f + pos.y, 0.0f + pos.z}, {1.0f, 0.0f}},   // Вершина 1
+        {{1.0f + pos.x, 0.0f + pos.y, 1.0f + pos.z}, {1.0f, 1.0f}},   // Вершина 2
+        {{0.0f + pos.x, 0.0f + pos.y, 1.0f + pos.z}, {0.0f, 1.0f}}    // Вершина 3
+    };
+
+    std::vector<UINT> indices = {
+        0 + offset, 1 + offset, 2 + offset,    // Первый треугольник (передняя грань)
+        0 + offset, 2 + offset, 3 + offset,    // Второй треугольник (передняя грань)
+    };
+    m_vertices.insert(m_vertices.end(), vertices.begin(), vertices.end());
+    m_indices.insert(m_indices.end(), indices.begin(), indices.end());
+}
+
+void Chunk::addLeftFace(DirectX::XMFLOAT3 pos)
+{
+    UINT offset = static_cast<UINT>(m_vertices.size());
+    std::vector<Vertex> vertices = {
+        {{0.0f + pos.x, 0.0f + pos.y, 0.0f + pos.z}, {0.0f, 0.0f}},   // Вершина 0
+        {{0.0f + pos.x, 1.0f + pos.y, 0.0f + pos.z}, {1.0f, 0.0f}},   // Вершина 1
+        {{0.0f + pos.x, 1.0f + pos.y, 1.0f + pos.z}, {1.0f, 1.0f}},   // Вершина 2
+        {{0.0f + pos.x, 0.0f + pos.y, 1.0f + pos.z}, {0.0f, 1.0f}}    // Вершина 3
+    };
+
+    std::vector<UINT> indices = {
+        0 + offset, 2 + offset, 1 + offset,    // Первый треугольник (передняя грань)
+        0 + offset, 3 + offset, 2 + offset,    // Второй треугольник (передняя грань)
+    };
+    m_vertices.insert(m_vertices.end(), vertices.begin(), vertices.end());
+    m_indices.insert(m_indices.end(), indices.begin(), indices.end());
+}
+
+void Chunk::addRightFace(DirectX::XMFLOAT3 pos)
+{
+    UINT offset = static_cast<UINT>(m_vertices.size());
+    std::vector<Vertex> vertices = {
+        {{1.0f + pos.x, 0.0f + pos.y, 0.0f + pos.z}, {0.0f, 0.0f}},   // Вершина 0
+        {{1.0f + pos.x, 1.0f + pos.y, 0.0f + pos.z}, {1.0f, 0.0f}},   // Вершина 1
+        {{1.0f + pos.x, 1.0f + pos.y, 1.0f + pos.z}, {1.0f, 1.0f}},   // Вершина 2
+        {{1.0f + pos.x, 0.0f + pos.y, 1.0f + pos.z}, {0.0f, 1.0f}}    // Вершина 3
+    };
+
+    std::vector<UINT> indices = {
+        0 + offset, 1 + offset, 2 + offset,    // Первый треугольник (передняя грань)
+        0 + offset, 2 + offset, 3 + offset,    // Второй треугольник (передняя грань)
+    };
+    m_vertices.insert(m_vertices.end(), vertices.begin(), vertices.end());
+    m_indices.insert(m_indices.end(), indices.begin(), indices.end());
+}
+
 void Chunk::UpdateMesh(ID3D11Device* device)
 {
-	for (auto& blockPair : m_blocks)
-	{
+    for (auto& blockPair : m_blocks)
+    {
         Chunk::BlockPos pos = blockPair.first;
-        if (pos.x != 0 && pos.y != 0 && pos.z != 0 && pos.x != WIDTH - 1 && pos.y != HEIGHT - 1 && pos.z != DEPTH - 1)
-        {
-            continue;
-        }
-        DirectX::GeometricPrimitive::VertexCollection vertices;
-        DirectX::GeometricPrimitive::IndexCollection indices;
-
-        DirectX::GeometricPrimitive::CreateCube(vertices, indices, 1.0f, false);
-
-        int indicesOffset = m_vertices.size();
-
-        for (auto& vertex : vertices)
-        {
-            vertex.position.x += blockPair.first.x;
-            vertex.position.y += blockPair.first.y;
-            vertex.position.z += blockPair.first.z;
-        }
-
-        for (size_t i = 0; i < indices.size(); i++)
-        {
-            m_indices.push_back(static_cast<UINT>(indices[i]) + indicesOffset);
-        }
-
-        for (size_t i = 0; i < vertices.size(); i++)
-        {
-            m_vertices.push_back(Vertex(vertices[i].position, vertices[i].textureCoordinate));
-        }
-	}
+        addFrontFace(DirectX::XMFLOAT3(pos.x, pos.y, pos.z));
+        addBackFace(DirectX::XMFLOAT3(pos.x, pos.y, pos.z));
+        addTopFace(DirectX::XMFLOAT3(pos.x, pos.y, pos.z));
+        addBottomFace(DirectX::XMFLOAT3(pos.x, pos.y, pos.z));
+        addLeftFace(DirectX::XMFLOAT3(pos.x, pos.y, pos.z));
+        addRightFace(DirectX::XMFLOAT3(pos.x, pos.y, pos.z));
+    }
 
     BuildVertexBuffer(device);
     BuildIndexBuffer(device);

@@ -22,7 +22,7 @@ void CubeRenderer::DrawChunk(ID3D11DeviceContext1* context, Chunk* chunk)
     context->PSSetSamplers(0u, 1u, m_sampler.GetAddressOf());
     context->OMSetBlendState(m_blendState.Get(), nullptr, 0xFFFFFFFF);
     context->PSSetShaderResources(0u, 1u, TextureAtlas::GetAtlasSRV().GetAddressOf());
-    context->DrawIndexed(chunk->GetIndices().size(), 0u, 0u);
+    context->DrawIndexed(static_cast<UINT>(chunk->GetIndices().size()), 0u, 0u);
 }
 
 void CubeRenderer::BuildInputLayout(ID3D11Device* device)

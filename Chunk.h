@@ -52,9 +52,13 @@ public:
 	Microsoft::WRL::ComPtr<ID3D11Buffer> GetVertexBuffer();
 	Microsoft::WRL::ComPtr<ID3D11Buffer> GetIndexBuffer();
 
-	void ComputeBox(std::vector<Vertex> vertices, std::vector<UINT>& indices);
-
 private:
+	void addFrontFace(DirectX::XMFLOAT3 pos);
+	void addBackFace(DirectX::XMFLOAT3 pos);
+	void addTopFace(DirectX::XMFLOAT3 pos);
+	void addBottomFace(DirectX::XMFLOAT3 pos);
+	void addLeftFace(DirectX::XMFLOAT3 pos);
+	void addRightFace(DirectX::XMFLOAT3 pos);
 	std::unordered_map<BlockPos, Cube, BlockPosHash> m_blocks;
 
 	std::vector<Vertex> m_vertices;
