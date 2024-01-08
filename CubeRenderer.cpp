@@ -19,7 +19,7 @@ CubeRenderer::CubeRenderer(ID3D11Device* device)
 void CubeRenderer::DrawChunk(ID3D11DeviceContext1* context, Chunk* chunk)
 {
     context->IASetVertexBuffers(0u, 1u, chunk->GetVertexBuffer().GetAddressOf(), &m_stride, &m_offset);
-    context->IASetIndexBuffer(chunk->GetIndexBuffer().Get(), DXGI_FORMAT_R16_UINT, 0u);
+    context->IASetIndexBuffer(chunk->GetIndexBuffer().Get(), DXGI_FORMAT_R32_UINT, 0u);
     context->PSSetShader(m_pixelShader.Get(), nullptr, 0u);
     context->VSSetShader(m_vertexShader.Get(), nullptr, 0u);
     context->IASetInputLayout(m_inputLayout.Get());

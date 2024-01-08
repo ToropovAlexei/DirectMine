@@ -31,7 +31,7 @@ DirectX::GeometricPrimitive::VertexCollection& Chunk::GetVertices()
     return m_vertices;
 }
 
-DirectX::GeometricPrimitive::IndexCollection& Chunk::GetIndices()
+std::vector<UINT>& Chunk::GetIndices()
 {
     return m_indices;
 }
@@ -50,22 +50,33 @@ void Chunk::UpdateMesh(ID3D11Device* device)
 {
 	for (auto& blockPair : m_blocks)
 	{
-        DirectX::GeometricPrimitive::VertexType vertex1 = DirectX::GeometricPrimitive::VertexType(DirectX::XMFLOAT3(-0.5f + blockPair.first.x, -0.5f + blockPair.first.y, 0.5f + blockPair.first.z), DirectX::XMFLOAT3(), DirectX::XMFLOAT2(0.0f, 0.0f));
-        DirectX::GeometricPrimitive::VertexType vertex2 = DirectX::GeometricPrimitive::VertexType(DirectX::XMFLOAT3(0.5f + blockPair.first.x, -0.5f + blockPair.first.y, 0.5f + blockPair.first.z), DirectX::XMFLOAT3(), DirectX::XMFLOAT2(1.0f, 0.0f));
-        DirectX::GeometricPrimitive::VertexType vertex3 = DirectX::GeometricPrimitive::VertexType(DirectX::XMFLOAT3(0.5f + blockPair.first.x, 0.5f + blockPair.first.y, 0.5f + blockPair.first.z), DirectX::XMFLOAT3(), DirectX::XMFLOAT2(1.0f, 1.0f));
-        DirectX::GeometricPrimitive::VertexType vertex4 = DirectX::GeometricPrimitive::VertexType(DirectX::XMFLOAT3(-0.5f + blockPair.first.x, 0.5f + blockPair.first.y, 0.5f + blockPair.first.z), DirectX::XMFLOAT3(), DirectX::XMFLOAT2(0.0f, 1.0f));
-        m_vertices.push_back(vertex1);
-        m_vertices.push_back(vertex2);
-        m_vertices.push_back(vertex3);
-        m_vertices.push_back(vertex4);
-        int offset = m_vertices.size();
-        m_indices.push_back(2 + offset);
-        m_indices.push_back(1 + offset);
-        m_indices.push_back(0 + offset);
-        m_indices.push_back(3 + offset);
-        m_indices.push_back(2 + offset);
-        m_indices.push_back(0 + offset);
+        Chunk::BlockPos pos = blockPair.first;
+        if (pos.x != 0 && pos.y != 0 && pos.z != 0 && pos.x != WIDTH - 1 && pos.y != HEIGHT - 1 && pos.z != DEPTH - 1)
+        {
+            continue;
+        }
+        DirectX::GeometricPrimitive::VertexCollection vertices;
+        DirectX::GeometricPrimitive::IndexCollection indices;
+
+        DirectX::GeometricPrimitive::CreateCube(vertices, indices, 1.0f, false);
+
+        int indicesOffset = m_vertices.size();
+
+        for (auto& vertex : vertices)
+        {
+            vertex.position.x += blockPair.first.x;
+            vertex.position.y += blockPair.first.y;
+            vertex.position.z += blockPair.first.z;
+        }
+
+        for (size_t i = 0; i < indices.size(); i++)
+        {
+            m_indices.push_back(static_cast<UINT>(indices[i]) + indicesOffset);
+        }
+
+        m_vertices.insert(m_vertices.end(), vertices.begin(), vertices.end());
 	}
+
     BuildVertexBuffer(device);
     BuildIndexBuffer(device);
 }
@@ -91,8 +102,8 @@ void Chunk::BuildIndexBuffer(ID3D11Device* device)
     ibd.Usage = D3D11_USAGE_DEFAULT;
     ibd.CPUAccessFlags = 0u;
     ibd.MiscFlags = 0u;
-    ibd.ByteWidth = static_cast<UINT>(sizeof(uint16_t) * m_indices.size());
-    ibd.StructureByteStride = sizeof(uint16_t);
+    ibd.ByteWidth = static_cast<UINT>(sizeof(UINT) * m_indices.size());
+    ibd.StructureByteStride = sizeof(UINT);
     D3D11_SUBRESOURCE_DATA isd = {};
     isd.pSysMem = m_indices.data();
     device->CreateBuffer(&ibd, &isd, &m_indexBuffer);
