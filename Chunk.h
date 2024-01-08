@@ -16,6 +16,23 @@ public:
 		{
 			return x == other.x && y == other.y && z == other.z;
 		}
+
+		BlockPos operator+(const BlockPos& other) const
+		{
+			BlockPos result;
+			result.x = x + other.x;
+			result.y = y + other.y;
+			result.z = z + other.z;
+			return result;
+		}
+		BlockPos operator-(const BlockPos& other) const
+		{
+			BlockPos result;
+			result.x = x - other.x;
+			result.y = y - other.y;
+			result.z = z - other.z;
+			return result;
+		}
 	};
 
 	struct BlockPosHash
@@ -47,18 +64,20 @@ public:
 
 	void UpdateMesh(ID3D11Device* device);
 
+	bool HasBlockAt(BlockPos& pos);
+
 	std::vector<Vertex>& GetVertices();
 	std::vector<UINT>& GetIndices();
 	Microsoft::WRL::ComPtr<ID3D11Buffer> GetVertexBuffer();
 	Microsoft::WRL::ComPtr<ID3D11Buffer> GetIndexBuffer();
 
 private:
-	void addFrontFace(DirectX::XMFLOAT3 pos);
-	void addBackFace(DirectX::XMFLOAT3 pos);
-	void addTopFace(DirectX::XMFLOAT3 pos);
-	void addBottomFace(DirectX::XMFLOAT3 pos);
-	void addLeftFace(DirectX::XMFLOAT3 pos);
-	void addRightFace(DirectX::XMFLOAT3 pos);
+	void AddFrontFace(DirectX::XMFLOAT3 pos, std::string texture);
+	void AddBackFace(DirectX::XMFLOAT3 pos, std::string texture);
+	void AddTopFace(DirectX::XMFLOAT3 pos, std::string texture);
+	void AddBottomFace(DirectX::XMFLOAT3 pos, std::string texture);
+	void AddLeftFace(DirectX::XMFLOAT3 pos, std::string texture);
+	void AddRightFace(DirectX::XMFLOAT3 pos, std::string texture);
 	std::unordered_map<BlockPos, Cube, BlockPosHash> m_blocks;
 
 	std::vector<Vertex> m_vertices;

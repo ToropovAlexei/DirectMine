@@ -32,6 +32,9 @@
     <Filter Include="Graphics">
       <UniqueIdentifier>{b446c0aa-4264-4d45-9667-29ba931a7194}</UniqueIdentifier>
     </Filter>
+    <Filter Include="World\Cunk\Block">
+      <UniqueIdentifier>{24829d84-69c6-451c-9539-f54c5a3563d7}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="pch.h" />
@@ -79,6 +82,9 @@
     <ClInclude Include="Vertex.h">
       <Filter>Graphics</Filter>
     </ClInclude>
+    <ClInclude Include="Block.h">
+      <Filter>World\Cunk\Block</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp" />
@@ -120,6 +126,9 @@
     </ClCompile>
     <ClCompile Include="UVCoords.cpp">
       <Filter>Graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="Block.cpp">
+      <Filter>World\Cunk\Block</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
