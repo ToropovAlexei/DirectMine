@@ -85,6 +85,15 @@
     <ClInclude Include="Block.h">
       <Filter>World\Cunk\Block</Filter>
     </ClInclude>
+    <ClInclude Include="ChunkBlock.h">
+      <Filter>World\Cunk\Block</Filter>
+    </ClInclude>
+    <ClInclude Include="BlockLoader.h">
+      <Filter>World\Cunk\Block</Filter>
+    </ClInclude>
+    <ClInclude Include="BlockManager.h">
+      <Filter>World\Cunk\Block</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp" />
@@ -128,6 +137,15 @@
       <Filter>Graphics</Filter>
     </ClCompile>
     <ClCompile Include="Block.cpp">
+      <Filter>World\Cunk\Block</Filter>
+    </ClCompile>
+    <ClCompile Include="ChunkBlock.cpp">
+      <Filter>World\Cunk\Block</Filter>
+    </ClCompile>
+    <ClCompile Include="BlockLoader.cpp">
+      <Filter>World\Cunk\Block</Filter>
+    </ClCompile>
+    <ClCompile Include="BlockManager.cpp">
       <Filter>World\Cunk\Block</Filter>
     </ClCompile>
   </ItemGroup>

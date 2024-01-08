@@ -255,10 +255,7 @@ void Game::CreateDeviceDependentResources()
 	CreateMainConstantBuffer();
     m_cubeRenderer = std::make_unique<CubeRenderer>(device);
     TextureAtlas::BuildAtlas(device, m_deviceResources->GetD3DDeviceContext());
-    for (auto& chunk : m_world->Chunks())
-    {
-        chunk->UpdateMesh(device);
-    }
+    m_world->UpdateMesh(device);
 }
 
 // Allocate all memory resources that change on a window SizeChanged event.

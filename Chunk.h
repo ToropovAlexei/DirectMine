@@ -1,7 +1,8 @@
 #pragma once
 
-#include "Cube.h"
 #include "Vertex.h"
+#include "ChunkBlock.h"
+#include "BlockManager.h"
 
 class Chunk
 {
@@ -58,11 +59,11 @@ public:
 	static const int DEPTH = 32;
 	static constexpr int VOLUME = WIDTH * HEIGHT * HEIGHT;
 
-	const std::unordered_map<BlockPos, Cube, BlockPosHash>& GetBlocks() const noexcept;
+	const std::unordered_map<BlockPos, ChunkBlock, BlockPosHash>& GetBlocks() const noexcept;
 
 	void FillWith();
 
-	void UpdateMesh(ID3D11Device* device);
+	void UpdateMesh(ID3D11Device* device, BlockManager& blockManager);
 
 	bool HasBlockAt(BlockPos& pos);
 
@@ -78,7 +79,7 @@ private:
 	void AddBottomFace(DirectX::XMFLOAT3 pos, std::string texture);
 	void AddLeftFace(DirectX::XMFLOAT3 pos, std::string texture);
 	void AddRightFace(DirectX::XMFLOAT3 pos, std::string texture);
-	std::unordered_map<BlockPos, Cube, BlockPosHash> m_blocks;
+	std::unordered_map<BlockPos, ChunkBlock, BlockPosHash> m_blocks;
 
 	std::vector<Vertex> m_vertices;
 	std::vector<UINT> m_indices;

@@ -1,0 +1,4 @@
+{
+  "name": "grass",
+  "textures": ["grass_top", "grass_side", "dirt"]
+}

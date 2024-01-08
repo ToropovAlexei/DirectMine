@@ -8,7 +8,7 @@ Chunk::Chunk()
 
 }
 
-const std::unordered_map<Chunk::BlockPos, Cube, Chunk::BlockPosHash>& Chunk::GetBlocks() const noexcept
+const std::unordered_map<Chunk::BlockPos, ChunkBlock, Chunk::BlockPosHash>& Chunk::GetBlocks() const noexcept
 {
 	return m_blocks;
 }
@@ -24,7 +24,7 @@ void Chunk::FillWith()
                 if (rand() % 10 > 1)
                 {
                     Chunk::BlockPos pos = Chunk::BlockPos(static_cast<float>(x), static_cast<float>(y), static_cast<float>(z));
-                    m_blocks.insert({ pos, Cube() });
+                    m_blocks.insert({ pos, ChunkBlock(1)});
                 }
 			}
 		}
@@ -165,7 +165,7 @@ void Chunk::AddRightFace(DirectX::XMFLOAT3 pos, std::string texture)
     m_indices.insert(m_indices.end(), indices.begin(), indices.end());
 }
 
-void Chunk::UpdateMesh(ID3D11Device* device)
+void Chunk::UpdateMesh(ID3D11Device* device, BlockManager& blockManager)
 {
     for (auto& blockPair : m_blocks)
     {
@@ -176,29 +176,33 @@ void Chunk::UpdateMesh(ID3D11Device* device)
         Chunk::BlockPos rightPos = blockPair.first + Chunk::BlockPos(1.0f, 0.0f, 0.0f);
         Chunk::BlockPos frontPos = blockPair.first - Chunk::BlockPos(0.0f, 0.0f, 1.0f);
         Chunk::BlockPos backPos = blockPair.first + Chunk::BlockPos(0.0f, 0.0f, 1.0f);
+
+        uint32_t blockId = blockPair.second.GetId();
+        Block block = blockManager.GetBlockById(blockId);
+
         if (pos.z == 0 || !HasBlockAt(frontPos))
         {
-            AddFrontFace(DirectX::XMFLOAT3(pos.x, pos.y, pos.z), "grass_side");
+            AddFrontFace(DirectX::XMFLOAT3(pos.x, pos.y, pos.z), block.GetFaceTexture(Block::BlockFaces::Front));
         }
         if (pos.z == DEPTH - 1 || !HasBlockAt(backPos))
         {
-            AddBackFace(DirectX::XMFLOAT3(pos.x, pos.y, pos.z), "grass_side");
+            AddBackFace(DirectX::XMFLOAT3(pos.x, pos.y, pos.z), block.GetFaceTexture(Block::BlockFaces::Back));
         }
         if (pos.y == HEIGHT - 1 || !HasBlockAt(topPos))
         {
-            AddTopFace(DirectX::XMFLOAT3(pos.x, pos.y, pos.z), "grass_top");
+            AddTopFace(DirectX::XMFLOAT3(pos.x, pos.y, pos.z), block.GetFaceTexture(Block::BlockFaces::Top));
         }
         if (pos.y == 0 || !HasBlockAt(bottomPos))
         {
-            AddBottomFace(DirectX::XMFLOAT3(pos.x, pos.y, pos.z), "dirt");
+            AddBottomFace(DirectX::XMFLOAT3(pos.x, pos.y, pos.z), block.GetFaceTexture(Block::BlockFaces::Bottom));
         }
         if (pos.x == 0 || !HasBlockAt(leftPos))
         {
-            AddLeftFace(DirectX::XMFLOAT3(pos.x, pos.y, pos.z), "grass_side");
+            AddLeftFace(DirectX::XMFLOAT3(pos.x, pos.y, pos.z), block.GetFaceTexture(Block::BlockFaces::Left));
         }
         if (pos.x == WIDTH - 1 || !HasBlockAt(rightPos))
         {
-            AddRightFace(DirectX::XMFLOAT3(pos.x, pos.y, pos.z), "grass_side");
+            AddRightFace(DirectX::XMFLOAT3(pos.x, pos.y, pos.z), block.GetFaceTexture(Block::BlockFaces::Right));
         }
     }
 
