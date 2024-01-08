@@ -21,10 +21,10 @@ void Chunk::FillWith()
 		{
 			for (size_t z = 0; z < Chunk::DEPTH; z++)
 			{
-                if (rand() % 10 > 1)
+                if (rand() % 100 > 75)
                 {
                     Chunk::BlockPos pos = Chunk::BlockPos(static_cast<float>(x), static_cast<float>(y), static_cast<float>(z));
-                    m_blocks.insert({ pos, ChunkBlock(1)});
+                    m_blocks.insert({ pos, ChunkBlock(rand() % 10)});
                 }
 			}
 		}
