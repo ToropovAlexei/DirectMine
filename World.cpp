@@ -27,7 +27,7 @@ World::World(std::unique_ptr<DX::DeviceResources>& deviceResources,
 	for (int i = 0; i < numThreads; i++)
 	{
 		threads.emplace_back([this, i]() {
-			TEST_ADD_CHUNK(0, 0, i * 4, 8, 1, i * 4 + 4);
+			TEST_ADD_CHUNK(0, 0, i * 4, 16, 1, i * 4 + 4);
 			});
 	}
 	if (threads.size() >= numThreads) {
@@ -45,20 +45,6 @@ World::World(std::unique_ptr<DX::DeviceResources>& deviceResources,
 	{
 		chunk.second->UpdateBuffers(m_deviceResources->GetD3DDevice());
 	}
-
-	//for (int x = 0; x < 16; x++)
-	//{
-	//	for (int y = 0; y < 1; y++)
-	//	{
-	//		for (int z = 0; z < 16; z++)
-	//		{
-	//			WorldPos chunkPos = { 32.0f * x, 32.0f * y, 32.0f * z };
-	//			m_chunks.insert({ chunkPos, std::make_unique<Chunk>(chunkPos) });
-	//			m_chunks[chunkPos]->FillWith(); // TODO remove this
-	//			m_chunks[chunkPos]->UpdateMesh(m_deviceResources->GetD3DDevice(), m_blockManager);
-	//		}
-	//	}
-	//}
 }
 
 void World::Update(DX::StepTimer const& timer)
