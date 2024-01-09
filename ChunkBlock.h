@@ -12,14 +12,14 @@ public:
 		Down,
 	};
 public:
-	ChunkBlock(uint32_t id) noexcept;
-	ChunkBlock(uint32_t id, BlockDirection dir) noexcept;
+	ChunkBlock(uint16_t id) noexcept;
+	ChunkBlock(uint16_t id, BlockDirection dir) noexcept;
 
-	uint32_t GetId() const noexcept;
+	uint16_t GetId() const noexcept;
 	BlockDirection GetDirection() const noexcept;
 
 private:
-	uint32_t m_id;
+	uint16_t m_id;
 	BlockDirection m_dir;
 };
 

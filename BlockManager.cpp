@@ -10,7 +10,7 @@ void BlockManager::LoadBlocks()
 	BuildBlocksMap(blocks);
 }
 
-Block& BlockManager::GetBlockById(uint32_t id)
+Block& BlockManager::GetBlockById(uint16_t id)
 {
 	if (!m_blocksById.contains(id))
 	{
@@ -32,7 +32,7 @@ void BlockManager::BuildBlocksMap(std::vector<Block>& blocks)
 {
 	for (size_t i = 0; i < blocks.size(); i++)
 	{
-		m_blocksById.insert({ static_cast<uint32_t>(i), blocks[i] });
+		m_blocksById.insert({ static_cast<uint16_t>(i), blocks[i] });
 		m_blocksByName.insert({ blocks[i].GetName(), blocks[i]});
 	}
 }
