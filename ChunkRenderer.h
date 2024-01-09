@@ -4,6 +4,7 @@
 #include "Chunk.h"
 #include "TextureAtlas.h"
 #include "DeviceResources.h"
+#include "WorldPos.hpp"
 
 class ChunkRenderer
 {
@@ -11,7 +12,7 @@ public:
 	ChunkRenderer(std::unique_ptr<DX::DeviceResources>& deviceResources);
 
     void DrawChunk(Chunk* chunk);
-    void RenderChunks(std::vector<std::unique_ptr<Chunk>>& chunks);
+    void RenderChunks(std::unordered_map<WorldPos, std::unique_ptr<Chunk>, WorldPosHash>& chunks);
 
 private:
 	void BuildInputLayout();

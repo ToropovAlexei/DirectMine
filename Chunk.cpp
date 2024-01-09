@@ -8,7 +8,7 @@ Chunk::Chunk()
 
 }
 
-const std::unordered_map<Chunk::BlockPos, ChunkBlock, Chunk::BlockPosHash>& Chunk::GetBlocks() const noexcept
+const std::unordered_map<WorldPos, ChunkBlock, WorldPosHash>& Chunk::GetBlocks() const noexcept
 {
 	return m_blocks;
 }
@@ -23,7 +23,7 @@ void Chunk::FillWith()
 			{
                 if (rand() % 100 > 75)
                 {
-                    Chunk::BlockPos pos = Chunk::BlockPos(static_cast<float>(x), static_cast<float>(y), static_cast<float>(z));
+                    WorldPos pos = WorldPos(static_cast<float>(x), static_cast<float>(y), static_cast<float>(z));
                     m_blocks.insert({ pos, ChunkBlock(rand() % 10)});
                 }
 			}
@@ -169,13 +169,13 @@ void Chunk::UpdateMesh(ID3D11Device* device, BlockManager& blockManager)
 {
     for (auto& blockPair : m_blocks)
     {
-        Chunk::BlockPos pos = blockPair.first;
-        Chunk::BlockPos topPos = blockPair.first + Chunk::BlockPos(0.0f, 1.0f, 0.0f);
-        Chunk::BlockPos bottomPos = blockPair.first - Chunk::BlockPos(0.0f, 1.0f, 0.0f);
-        Chunk::BlockPos leftPos = blockPair.first - Chunk::BlockPos(1.0f, 0.0f, 0.0f);
-        Chunk::BlockPos rightPos = blockPair.first + Chunk::BlockPos(1.0f, 0.0f, 0.0f);
-        Chunk::BlockPos frontPos = blockPair.first - Chunk::BlockPos(0.0f, 0.0f, 1.0f);
-        Chunk::BlockPos backPos = blockPair.first + Chunk::BlockPos(0.0f, 0.0f, 1.0f);
+        WorldPos pos = blockPair.first;
+        WorldPos topPos = blockPair.first + WorldPos(0.0f, 1.0f, 0.0f);
+        WorldPos bottomPos = blockPair.first - WorldPos(0.0f, 1.0f, 0.0f);
+        WorldPos leftPos = blockPair.first - WorldPos(1.0f, 0.0f, 0.0f);
+        WorldPos rightPos = blockPair.first + WorldPos(1.0f, 0.0f, 0.0f);
+        WorldPos frontPos = blockPair.first - WorldPos(0.0f, 0.0f, 1.0f);
+        WorldPos backPos = blockPair.first + WorldPos(0.0f, 0.0f, 1.0f);
 
         uint32_t blockId = blockPair.second.GetId();
         Block block = blockManager.GetBlockById(blockId);
@@ -210,7 +210,7 @@ void Chunk::UpdateMesh(ID3D11Device* device, BlockManager& blockManager)
     BuildIndexBuffer(device);
 }
 
-bool Chunk::HasBlockAt(BlockPos& pos)
+bool Chunk::HasBlockAt(WorldPos& pos)
 {
     return m_blocks.contains(pos);
 }

@@ -6,6 +6,7 @@
 #include "DeviceResources.h"
 #include "StepTimer.h"
 #include "ChunkRenderer.h"
+#include "WorldPos.hpp"
 
 struct MainConstantBuffer
 {
@@ -26,14 +27,12 @@ public:
 
 	void OnWindowSizeChanged(float aspectRatio);
 
-	const std::vector<std::unique_ptr<Chunk>>& Chunks() const noexcept;
-
 private:
 	void CreateMainCB();
 	void UpdateMainCB();
 
 private:
-	std::vector<std::unique_ptr<Chunk>> m_chunks;
+	std::unordered_map<WorldPos, std::unique_ptr<Chunk>, WorldPosHash> m_chunks;
 	std::unique_ptr<DX::DeviceResources>& m_deviceResources;
 	std::unique_ptr<Camera> m_cam;
 	std::unique_ptr<DirectX::Keyboard>& m_keyboard;

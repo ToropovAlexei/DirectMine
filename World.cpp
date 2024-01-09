@@ -20,9 +20,10 @@ World::World(std::unique_ptr<DX::DeviceResources>& deviceResources,
 	m_proj = DirectX::XMMATRIX();
 	m_chunkRenderer = std::make_unique<ChunkRenderer>(m_deviceResources);
 	CreateMainCB();
-	m_chunks.push_back(std::make_unique<Chunk>());
-	m_chunks[0]->FillWith(); // TODO remove this
-	m_chunks[0]->UpdateMesh(m_deviceResources->GetD3DDevice(), m_blockManager);
+	WorldPos chunkPos = { 0.0f, 0.0f, 0.0f };
+	m_chunks.insert({ chunkPos, std::make_unique<Chunk>() });
+	m_chunks[chunkPos]->FillWith(); // TODO remove this
+	m_chunks[chunkPos]->UpdateMesh(m_deviceResources->GetD3DDevice(), m_blockManager);
 }
 
 void World::Update(DX::StepTimer const& timer)
@@ -92,11 +93,6 @@ void World::OnWindowSizeChanged(float aspectRatio)
 		DirectX::XM_PIDIV4,
 		aspectRatio,
 		0.1f, 250.0f);
-}
-
-const std::vector<std::unique_ptr<Chunk>>& World::Chunks() const noexcept
-{
-	return m_chunks;
 }
 
 void World::CreateMainCB()

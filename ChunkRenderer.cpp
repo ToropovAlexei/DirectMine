@@ -27,7 +27,7 @@ void ChunkRenderer::DrawChunk(Chunk* chunk)
     context->DrawIndexed(static_cast<UINT>(chunk->GetIndices().size()), 0u, 0u);
 }
 
-void ChunkRenderer::RenderChunks(std::vector<std::unique_ptr<Chunk>>& chunks)
+void ChunkRenderer::RenderChunks(std::unordered_map<WorldPos, std::unique_ptr<Chunk>, WorldPosHash>& chunks)
 {
     auto context = m_deviceResources->GetD3DDeviceContext();
 
@@ -41,9 +41,9 @@ void ChunkRenderer::RenderChunks(std::vector<std::unique_ptr<Chunk>>& chunks)
 
     for (auto& chunk : chunks)
     {
-        context->IASetVertexBuffers(0u, 1u, chunk->GetVertexBuffer().GetAddressOf(), &m_stride, &m_offset);
-        context->IASetIndexBuffer(chunk->GetIndexBuffer().Get(), DXGI_FORMAT_R32_UINT, 0u);
-        context->DrawIndexed(static_cast<UINT>(chunk->GetIndices().size()), 0u, 0u);
+        context->IASetVertexBuffers(0u, 1u, chunk.second->GetVertexBuffer().GetAddressOf(), &m_stride, &m_offset);
+        context->IASetIndexBuffer(chunk.second->GetIndexBuffer().Get(), DXGI_FORMAT_R32_UINT, 0u);
+        context->DrawIndexed(static_cast<UINT>(chunk.second->GetIndices().size()), 0u, 0u);
     }
 }
 

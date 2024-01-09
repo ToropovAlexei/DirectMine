@@ -204,6 +204,7 @@
     <ClInclude Include="UVCoords.h" />
     <ClInclude Include="Vertex.h" />
     <ClInclude Include="World.h" />
+    <ClInclude Include="WorldPos.hpp" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Block.cpp" />

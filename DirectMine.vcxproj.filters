@@ -94,6 +94,9 @@
     <ClInclude Include="BlockManager.h">
       <Filter>World\Cunk\Block</Filter>
     </ClInclude>
+    <ClInclude Include="WorldPos.hpp">
+      <Filter>World</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp" />
