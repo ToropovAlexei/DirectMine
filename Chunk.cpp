@@ -3,9 +3,9 @@
 #include "UVCoords.h"
 #include "TextureAtlas.h"
 
-Chunk::Chunk()
+Chunk::Chunk(WorldPos& worldPos) :
+    m_worldPos(worldPos)
 {
-
 }
 
 const std::unordered_map<WorldPos, ChunkBlock, WorldPosHash>& Chunk::GetBlocks() const noexcept
@@ -21,11 +21,8 @@ void Chunk::FillWith()
 		{
 			for (size_t z = 0; z < Chunk::DEPTH; z++)
 			{
-                if (rand() % 100 > 75)
-                {
-                    WorldPos pos = WorldPos(static_cast<float>(x), static_cast<float>(y), static_cast<float>(z));
-                    m_blocks.insert({ pos, ChunkBlock(rand() % 10)});
-                }
+                WorldPos pos = WorldPos(static_cast<float>(x), static_cast<float>(y), static_cast<float>(z));
+                m_blocks.insert({ pos, ChunkBlock(rand() % 12) });
 			}
 		}
 	}
@@ -169,7 +166,7 @@ void Chunk::UpdateMesh(ID3D11Device* device, BlockManager& blockManager)
 {
     for (auto& blockPair : m_blocks)
     {
-        WorldPos pos = blockPair.first;
+        WorldPos pos = m_worldPos + blockPair.first;
         WorldPos topPos = blockPair.first + WorldPos(0.0f, 1.0f, 0.0f);
         WorldPos bottomPos = blockPair.first - WorldPos(0.0f, 1.0f, 0.0f);
         WorldPos leftPos = blockPair.first - WorldPos(1.0f, 0.0f, 0.0f);
@@ -210,9 +207,62 @@ void Chunk::UpdateMesh(ID3D11Device* device, BlockManager& blockManager)
     BuildIndexBuffer(device);
 }
 
+void Chunk::UpdateMeshWithoutBuffers(BlockManager blockManager)
+{
+    for (auto& blockPair : m_blocks)
+    {
+        WorldPos pos = m_worldPos + blockPair.first;
+        WorldPos topPos = blockPair.first + WorldPos(0.0f, 1.0f, 0.0f);
+        WorldPos bottomPos = blockPair.first - WorldPos(0.0f, 1.0f, 0.0f);
+        WorldPos leftPos = blockPair.first - WorldPos(1.0f, 0.0f, 0.0f);
+        WorldPos rightPos = blockPair.first + WorldPos(1.0f, 0.0f, 0.0f);
+        WorldPos frontPos = blockPair.first - WorldPos(0.0f, 0.0f, 1.0f);
+        WorldPos backPos = blockPair.first + WorldPos(0.0f, 0.0f, 1.0f);
+
+        uint32_t blockId = blockPair.second.GetId();
+        Block block = blockManager.GetBlockById(blockId);
+
+        if (pos.z == 0 || !HasBlockAt(frontPos))
+        {
+            AddFrontFace(DirectX::XMFLOAT3(pos.x, pos.y, pos.z), block.GetFaceTexture(Block::BlockFaces::Front));
+        }
+        if (pos.z == DEPTH - 1 || !HasBlockAt(backPos))
+        {
+            AddBackFace(DirectX::XMFLOAT3(pos.x, pos.y, pos.z), block.GetFaceTexture(Block::BlockFaces::Back));
+        }
+        if (pos.y == HEIGHT - 1 || !HasBlockAt(topPos))
+        {
+            AddTopFace(DirectX::XMFLOAT3(pos.x, pos.y, pos.z), block.GetFaceTexture(Block::BlockFaces::Top));
+        }
+        if (pos.y == 0 || !HasBlockAt(bottomPos))
+        {
+            AddBottomFace(DirectX::XMFLOAT3(pos.x, pos.y, pos.z), block.GetFaceTexture(Block::BlockFaces::Bottom));
+        }
+        if (pos.x == 0 || !HasBlockAt(leftPos))
+        {
+            AddLeftFace(DirectX::XMFLOAT3(pos.x, pos.y, pos.z), block.GetFaceTexture(Block::BlockFaces::Left));
+        }
+        if (pos.x == WIDTH - 1 || !HasBlockAt(rightPos))
+        {
+            AddRightFace(DirectX::XMFLOAT3(pos.x, pos.y, pos.z), block.GetFaceTexture(Block::BlockFaces::Right));
+        }
+    }
+}
+
 bool Chunk::HasBlockAt(WorldPos& pos)
 {
     return m_blocks.contains(pos);
+}
+
+WorldPos& Chunk::GetPos() noexcept
+{
+    return m_worldPos;
+}
+
+void Chunk::UpdateBuffers(ID3D11Device* device)
+{
+    BuildVertexBuffer(device);
+    BuildIndexBuffer(device);
 }
 
 void Chunk::BuildVertexBuffer(ID3D11Device* device)

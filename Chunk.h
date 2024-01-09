@@ -8,7 +8,7 @@
 class Chunk
 {
 public:
-	Chunk();
+	Chunk(WorldPos& worldPos);
 
 	static const int WIDTH = 32;
 	static const int HEIGHT = 32;
@@ -20,8 +20,13 @@ public:
 	void FillWith();
 
 	void UpdateMesh(ID3D11Device* device, BlockManager& blockManager);
+	void UpdateMeshWithoutBuffers(BlockManager blockManager);
+
+	void UpdateBuffers(ID3D11Device* device);
 
 	bool HasBlockAt(WorldPos& pos);
+
+	WorldPos& GetPos() noexcept;
 
 	std::vector<Vertex>& GetVertices();
 	std::vector<UINT>& GetIndices();
@@ -35,10 +40,14 @@ private:
 	void AddBottomFace(DirectX::XMFLOAT3 pos, std::string texture);
 	void AddLeftFace(DirectX::XMFLOAT3 pos, std::string texture);
 	void AddRightFace(DirectX::XMFLOAT3 pos, std::string texture);
+
+private:
 	std::unordered_map<WorldPos, ChunkBlock, WorldPosHash> m_blocks;
 
 	std::vector<Vertex> m_vertices;
 	std::vector<UINT> m_indices;
+
+	WorldPos m_worldPos;
 
 	Microsoft::WRL::ComPtr<ID3D11Buffer> m_vertexBuffer;
 	Microsoft::WRL::ComPtr<ID3D11Buffer> m_indexBuffer;

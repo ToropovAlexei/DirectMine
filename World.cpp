@@ -20,17 +20,52 @@ World::World(std::unique_ptr<DX::DeviceResources>& deviceResources,
 	m_proj = DirectX::XMMATRIX();
 	m_chunkRenderer = std::make_unique<ChunkRenderer>(m_deviceResources);
 	CreateMainCB();
-	WorldPos chunkPos = { 0.0f, 0.0f, 0.0f };
-	m_chunks.insert({ chunkPos, std::make_unique<Chunk>() });
-	m_chunks[chunkPos]->FillWith(); // TODO remove this
-	m_chunks[chunkPos]->UpdateMesh(m_deviceResources->GetD3DDevice(), m_blockManager);
+
+	int numThreads = 4;
+	std::vector<std::thread> threads;
+
+	for (int i = 0; i < numThreads; i++)
+	{
+		threads.emplace_back([this, i]() {
+			TEST_ADD_CHUNK(0, 0, i * 4, 16, 1, i * 4 + 4);
+			});
+	}
+	if (threads.size() >= numThreads) {
+		for (std::thread& thread : threads) {
+			thread.join();
+		}
+		threads.clear();
+	}
+
+	for (std::thread& thread : threads) {
+		thread.join();
+	}
+
+	for (auto& chunk : m_chunks)
+	{
+		chunk.second->UpdateBuffers(m_deviceResources->GetD3DDevice());
+	}
+
+	//for (int x = 0; x < 16; x++)
+	//{
+	//	for (int y = 0; y < 1; y++)
+	//	{
+	//		for (int z = 0; z < 16; z++)
+	//		{
+	//			WorldPos chunkPos = { 32.0f * x, 32.0f * y, 32.0f * z };
+	//			m_chunks.insert({ chunkPos, std::make_unique<Chunk>(chunkPos) });
+	//			m_chunks[chunkPos]->FillWith(); // TODO remove this
+	//			m_chunks[chunkPos]->UpdateMesh(m_deviceResources->GetD3DDevice(), m_blockManager);
+	//		}
+	//	}
+	//}
 }
 
 void World::Update(DX::StepTimer const& timer)
 {
 	float elapsedTime = float(timer.GetElapsedSeconds());
 	auto kb = m_keyboard->GetState();
-	const float speed = 5.0f;
+	const float speed = 25.0f;
 	if (kb.A)
 	{
 		m_cam->Strafe(-speed * elapsedTime);
@@ -93,6 +128,26 @@ void World::OnWindowSizeChanged(float aspectRatio)
 		DirectX::XM_PIDIV4,
 		aspectRatio,
 		0.1f, 250.0f);
+}
+
+void World::TEST_ADD_CHUNK(int x1, int y1, int z1, int x2, int y2, int z2)
+{
+	std::unordered_map<WorldPos, std::unique_ptr<Chunk>, WorldPosHash> generatedChunks;
+	for (int x = x1; x < x2; x++)
+	{
+		for (int y = y1; y < y2; y++)
+		{
+			for (int z = z1; z < z2; z++)
+			{
+				WorldPos chunkPos = { 32.0f * x, 32.0f * y, 32.0f * z };
+				generatedChunks.insert({ chunkPos, std::make_unique<Chunk>(chunkPos) });
+				generatedChunks[chunkPos]->FillWith(); // TODO remove this
+				generatedChunks[chunkPos]->UpdateMeshWithoutBuffers(m_blockManager);
+			}
+		}
+	}
+	std::lock_guard<std::mutex> lock(mutex);
+	m_chunks.insert(std::make_move_iterator(generatedChunks.begin()), std::make_move_iterator(generatedChunks.end()));
 }
 
 void World::CreateMainCB()

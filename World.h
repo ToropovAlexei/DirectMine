@@ -26,6 +26,7 @@ public:
 	void Render();
 
 	void OnWindowSizeChanged(float aspectRatio);
+	void TEST_ADD_CHUNK(int x1, int y1, int z1, int x2, int y2, int z2);
 
 private:
 	void CreateMainCB();
@@ -45,5 +46,7 @@ private:
 
 	DirectX::XMMATRIX m_view;
 	DirectX::XMMATRIX m_proj;
+
+	std::mutex mutex;
 };
 

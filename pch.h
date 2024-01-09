@@ -54,6 +54,8 @@
 #include <map>
 #include <unordered_map>
 #include <array>
+#include <thread>
+#include <mutex>
 
 #ifdef _DEBUG
 #include <dxgidebug.h>
