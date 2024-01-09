@@ -7,14 +7,8 @@
 #include "DeviceResources.h"
 #include "StepTimer.h"
 #include "Camera.h"
-#include "CubeRenderer.h"
 #include "World.h"
 #include "TextureAtlas.h"
-
-struct MainConstantBuffer
-{
-    DirectX::XMMATRIX viewProj;
-};
 
 // A basic game implementation that creates a D3D11 device and
 // provides a game loop.
@@ -62,26 +56,16 @@ private:
 
     void CreateDeviceDependentResources();
     void CreateWindowSizeDependentResources();
-    
-    void CreateMainConstantBuffer();
-    void UpdateMainConstantBuffer();
 
     // Device resources.
-    std::unique_ptr<DX::DeviceResources>    m_deviceResources;
+    std::unique_ptr<DX::DeviceResources> m_deviceResources;
 
-    Microsoft::WRL::ComPtr<ID3D11Buffer> m_mainCB;
-    DirectX::XMMATRIX m_view;
-    DirectX::XMMATRIX m_proj;
-
-    std::unique_ptr<Camera> m_cam;
     std::unique_ptr<DirectX::Keyboard> m_keyboard;
     std::unique_ptr<DirectX::Mouse> m_mouse;
-    std::unique_ptr<CubeRenderer> m_cubeRenderer;
+    std::unique_ptr<DirectX::Mouse::ButtonStateTracker> m_tracker;
 
     std::unique_ptr<World> m_world;
 
-    DirectX::Mouse::ButtonStateTracker m_tracker;
-
     // Rendering loop timer.
-    DX::StepTimer                           m_timer;
+    DX::StepTimer m_timer;
 };

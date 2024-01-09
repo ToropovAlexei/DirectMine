@@ -52,7 +52,7 @@
     <ClInclude Include="TexturesManager.h">
       <Filter>Textures</Filter>
     </ClInclude>
-    <ClInclude Include="CubeRenderer.h">
+    <ClInclude Include="ChunkRenderer.h">
       <Filter>Render</Filter>
     </ClInclude>
     <ClInclude Include="ShadersLoader.h">
@@ -109,7 +109,7 @@
     <ClCompile Include="TexturesManager.cpp">
       <Filter>Textures</Filter>
     </ClCompile>
-    <ClCompile Include="CubeRenderer.cpp">
+    <ClCompile Include="ChunkRenderer.cpp">
       <Filter>Render</Filter>
     </ClCompile>
     <ClCompile Include="ShadersLoader.cpp">

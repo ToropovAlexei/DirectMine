@@ -3,20 +3,23 @@
 #include "Cube.h"
 #include "Chunk.h"
 #include "TextureAtlas.h"
+#include "DeviceResources.h"
 
-class CubeRenderer
+class ChunkRenderer
 {
 public:
-	CubeRenderer(ID3D11Device* device);
+	ChunkRenderer(std::unique_ptr<DX::DeviceResources>& deviceResources);
 
-    void DrawChunk(ID3D11DeviceContext1* context, Chunk* chunk);
-
-private:
-	void BuildInputLayout(ID3D11Device* device);
-    void BuildSampler(ID3D11Device* device);
-    void BuildBlendState(ID3D11Device* device);
+    void DrawChunk(Chunk* chunk);
+    void RenderChunks(std::vector<std::unique_ptr<Chunk>>& chunks);
 
 private:
+	void BuildInputLayout();
+    void BuildSampler();
+    void BuildBlendState();
+
+private:
+    std::unique_ptr<DX::DeviceResources>& m_deviceResources;
     Microsoft::WRL::ComPtr<ID3D11VertexShader> m_vertexShader;
     Microsoft::WRL::ComPtr<ID3D11PixelShader> m_pixelShader;
     Microsoft::WRL::ComPtr<ID3D11InputLayout> m_inputLayout;
