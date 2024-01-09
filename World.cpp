@@ -27,7 +27,7 @@ World::World(std::unique_ptr<DX::DeviceResources>& deviceResources,
 	for (int i = 0; i < numThreads; i++)
 	{
 		threads.emplace_back([this, i]() {
-			TEST_ADD_CHUNK(0, 0, i * 4, 16, 1, i * 4 + 4);
+			TEST_ADD_CHUNK(0, 0, i * 4, 8, 1, i * 4 + 4);
 			});
 	}
 	if (threads.size() >= numThreads) {
@@ -127,7 +127,7 @@ void World::OnWindowSizeChanged(float aspectRatio)
 	m_proj = DirectX::XMMatrixPerspectiveFovLH(
 		DirectX::XM_PIDIV4,
 		aspectRatio,
-		0.1f, 250.0f);
+		0.1f, 1000.0f);
 }
 
 void World::TEST_ADD_CHUNK(int x1, int y1, int z1, int x2, int y2, int z2)

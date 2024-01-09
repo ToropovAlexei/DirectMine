@@ -24,7 +24,7 @@ public:
 
 	void UpdateBuffers(ID3D11Device* device);
 
-	bool HasBlockAt(WorldPos& pos);
+	inline bool HasBlockAt(WorldPos& pos);
 
 	WorldPos& GetPos() noexcept;
 
@@ -34,12 +34,12 @@ public:
 	Microsoft::WRL::ComPtr<ID3D11Buffer> GetIndexBuffer();
 
 private:
-	void AddFrontFace(DirectX::XMFLOAT3 pos, std::string texture);
-	void AddBackFace(DirectX::XMFLOAT3 pos, std::string texture);
-	void AddTopFace(DirectX::XMFLOAT3 pos, std::string texture);
-	void AddBottomFace(DirectX::XMFLOAT3 pos, std::string texture);
-	void AddLeftFace(DirectX::XMFLOAT3 pos, std::string texture);
-	void AddRightFace(DirectX::XMFLOAT3 pos, std::string texture);
+	inline void AddFrontFace(DirectX::XMFLOAT3& pos, std::string& texture);
+	inline void AddBackFace(DirectX::XMFLOAT3& pos, std::string& texture);
+	inline void AddTopFace(DirectX::XMFLOAT3& pos, std::string& texture);
+	inline void AddBottomFace(DirectX::XMFLOAT3& pos, std::string& texture);
+	inline void AddLeftFace(DirectX::XMFLOAT3& pos, std::string& texture);
+	inline void AddRightFace(DirectX::XMFLOAT3& pos, std::string& texture);
 
 private:
 	std::unordered_map<WorldPos, ChunkBlock, WorldPosHash> m_blocks;

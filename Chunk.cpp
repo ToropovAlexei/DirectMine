@@ -48,118 +48,112 @@ Microsoft::WRL::ComPtr<ID3D11Buffer> Chunk::GetIndexBuffer()
     return m_indexBuffer;
 }
 
-void Chunk::AddFrontFace(DirectX::XMFLOAT3 pos, std::string texture)
+inline void Chunk::AddFrontFace(DirectX::XMFLOAT3& pos, std::string& texture)
 {
     UVCoords uvCoords = TextureAtlas::GetTextureCoords(texture);
     UINT offset = static_cast<UINT>(m_vertices.size());
-    std::vector<Vertex> vertices = {
-        {{0.0f + pos.x, 0.0f + pos.y, 0.0f + pos.z}, {uvCoords.u1, uvCoords.v2}},   // Вершина 0
-        {{1.0f + pos.x, 0.0f + pos.y, 0.0f + pos.z}, {uvCoords.u2, uvCoords.v2}},   // Вершина 1
-        {{1.0f + pos.x, 1.0f + pos.y, 0.0f + pos.z}, {uvCoords.u2, uvCoords.v1}},   // Вершина 2
-        {{0.0f + pos.x, 1.0f + pos.y, 0.0f + pos.z}, {uvCoords.u1, uvCoords.v1}}    // Вершина 3
-    };
 
-    std::vector<UINT> indices = {
-        0 + offset, 2 + offset, 1 + offset,    // Первый треугольник (передняя грань)
-        0 + offset, 3 + offset, 2 + offset,    // Второй треугольник (передняя грань)
-    };
-    m_vertices.insert(m_vertices.end(), vertices.begin(), vertices.end());
-    m_indices.insert(m_indices.end(), indices.begin(), indices.end());
+    m_vertices.emplace_back(Vertex({ 0.0f + pos.x, 0.0f + pos.y, 0.0f + pos.z }, {uvCoords.u1, uvCoords.v2}));
+    m_vertices.emplace_back(Vertex({ 1.0f + pos.x, 0.0f + pos.y, 0.0f + pos.z }, { uvCoords.u2, uvCoords.v2 }));
+    m_vertices.emplace_back(Vertex({ 1.0f + pos.x, 1.0f + pos.y, 0.0f + pos.z }, { uvCoords.u2, uvCoords.v1 }));
+    m_vertices.emplace_back(Vertex({ 0.0f + pos.x, 1.0f + pos.y, 0.0f + pos.z }, { uvCoords.u1, uvCoords.v1 }));
+
+    m_indices.emplace_back(0 + offset);
+    m_indices.emplace_back(2 + offset);
+    m_indices.emplace_back(1 + offset);
+    m_indices.emplace_back(0 + offset);
+    m_indices.emplace_back(3 + offset);
+    m_indices.emplace_back(2 + offset);
 }
 
-void Chunk::AddBackFace(DirectX::XMFLOAT3 pos, std::string texture)
+inline void Chunk::AddBackFace(DirectX::XMFLOAT3& pos, std::string& texture)
 {
     UVCoords uvCoords = TextureAtlas::GetTextureCoords(texture);
     UINT offset = static_cast<UINT>(m_vertices.size());
-    std::vector<Vertex> vertices = {
-        {{0.0f + pos.x, 0.0f + pos.y, 1.0f + pos.z}, {uvCoords.u2, uvCoords.v2}},   // Вершина 0
-        {{1.0f + pos.x, 0.0f + pos.y, 1.0f + pos.z}, {uvCoords.u1, uvCoords.v2}},   // Вершина 1
-        {{1.0f + pos.x, 1.0f + pos.y, 1.0f + pos.z}, {uvCoords.u1, uvCoords.v1}},   // Вершина 2
-        {{0.0f + pos.x, 1.0f + pos.y, 1.0f + pos.z}, {uvCoords.u2, uvCoords.v1}}    // Вершина 3
-    };
 
-    std::vector<UINT> indices = {
-        0 + offset, 1 + offset, 2 + offset,    // Первый треугольник (передняя грань)
-        0 + offset, 2 + offset, 3 + offset,    // Второй треугольник (передняя грань)
-    };
-    m_vertices.insert(m_vertices.end(), vertices.begin(), vertices.end());
-    m_indices.insert(m_indices.end(), indices.begin(), indices.end());
+    m_vertices.emplace_back(Vertex({ 0.0f + pos.x, 0.0f + pos.y, 1.0f + pos.z }, { uvCoords.u2, uvCoords.v2 }));
+    m_vertices.emplace_back(Vertex({ 1.0f + pos.x, 0.0f + pos.y, 1.0f + pos.z }, { uvCoords.u1, uvCoords.v2 }));
+    m_vertices.emplace_back(Vertex({ 1.0f + pos.x, 1.0f + pos.y, 1.0f + pos.z }, { uvCoords.u1, uvCoords.v1 }));
+    m_vertices.emplace_back(Vertex({ 0.0f + pos.x, 1.0f + pos.y, 1.0f + pos.z }, { uvCoords.u2, uvCoords.v1 }));
+
+    m_indices.emplace_back(0 + offset);
+    m_indices.emplace_back(1 + offset);
+    m_indices.emplace_back(2 + offset);
+    m_indices.emplace_back(0 + offset);
+    m_indices.emplace_back(2 + offset);
+    m_indices.emplace_back(3 + offset);
 }
 
-void Chunk::AddTopFace(DirectX::XMFLOAT3 pos, std::string texture)
+inline void Chunk::AddTopFace(DirectX::XMFLOAT3& pos, std::string& texture)
 {
     UVCoords uvCoords = TextureAtlas::GetTextureCoords(texture);
     UINT offset = static_cast<UINT>(m_vertices.size());
-    std::vector<Vertex> vertices = {
-        {{0.0f + pos.x, 1.0f + pos.y, 0.0f + pos.z}, {uvCoords.u1, uvCoords.v2}},   // Вершина 0
-        {{1.0f + pos.x, 1.0f + pos.y, 0.0f + pos.z}, {uvCoords.u2, uvCoords.v2}},   // Вершина 1
-        {{1.0f + pos.x, 1.0f + pos.y, 1.0f + pos.z}, {uvCoords.u2, uvCoords.v1}},   // Вершина 2
-        {{0.0f + pos.x, 1.0f + pos.y, 1.0f + pos.z}, {uvCoords.u1, uvCoords.v1}}    // Вершина 3
-    };
 
-    std::vector<UINT> indices = {
-        0 + offset, 2 + offset, 1 + offset,    // Первый треугольник (передняя грань)
-        0 + offset, 3 + offset, 2 + offset,    // Второй треугольник (передняя грань)
-    };
-    m_vertices.insert(m_vertices.end(), vertices.begin(), vertices.end());
-    m_indices.insert(m_indices.end(), indices.begin(), indices.end());
+    m_vertices.emplace_back(Vertex({ 0.0f + pos.x, 1.0f + pos.y, 0.0f + pos.z }, { uvCoords.u1, uvCoords.v2 }));
+    m_vertices.emplace_back(Vertex({ 1.0f + pos.x, 1.0f + pos.y, 0.0f + pos.z }, { uvCoords.u2, uvCoords.v2 }));
+    m_vertices.emplace_back(Vertex({ 1.0f + pos.x, 1.0f + pos.y, 1.0f + pos.z }, { uvCoords.u2, uvCoords.v1 }));
+    m_vertices.emplace_back(Vertex({ 0.0f + pos.x, 1.0f + pos.y, 1.0f + pos.z }, { uvCoords.u1, uvCoords.v1 }));
+
+    m_indices.emplace_back(0 + offset);
+    m_indices.emplace_back(2 + offset);
+    m_indices.emplace_back(1 + offset);
+    m_indices.emplace_back(0 + offset);
+    m_indices.emplace_back(3 + offset);
+    m_indices.emplace_back(2 + offset);
 }
 
-void Chunk::AddBottomFace(DirectX::XMFLOAT3 pos, std::string texture)
+inline void Chunk::AddBottomFace(DirectX::XMFLOAT3& pos, std::string& texture)
 {
     UVCoords uvCoords = TextureAtlas::GetTextureCoords(texture);
     UINT offset = static_cast<UINT>(m_vertices.size());
-    std::vector<Vertex> vertices = {
-        {{0.0f + pos.x, 0.0f + pos.y, 0.0f + pos.z}, {uvCoords.u2, uvCoords.v2}},   // Вершина 0
-        {{1.0f + pos.x, 0.0f + pos.y, 0.0f + pos.z}, {uvCoords.u1, uvCoords.v2}},   // Вершина 1
-        {{1.0f + pos.x, 0.0f + pos.y, 1.0f + pos.z}, {uvCoords.u1, uvCoords.v1}},   // Вершина 2
-        {{0.0f + pos.x, 0.0f + pos.y, 1.0f + pos.z}, {uvCoords.u2, uvCoords.v1}}    // Вершина 3
-    };
 
-    std::vector<UINT> indices = {
-        0 + offset, 1 + offset, 2 + offset,    // Первый треугольник (передняя грань)
-        0 + offset, 2 + offset, 3 + offset,    // Второй треугольник (передняя грань)
-    };
-    m_vertices.insert(m_vertices.end(), vertices.begin(), vertices.end());
-    m_indices.insert(m_indices.end(), indices.begin(), indices.end());
+    m_vertices.emplace_back(Vertex({ 0.0f + pos.x, 0.0f + pos.y, 0.0f + pos.z }, { uvCoords.u2, uvCoords.v2 }));
+    m_vertices.emplace_back(Vertex({ 1.0f + pos.x, 0.0f + pos.y, 0.0f + pos.z }, { uvCoords.u1, uvCoords.v2 }));
+    m_vertices.emplace_back(Vertex({ 1.0f + pos.x, 0.0f + pos.y, 1.0f + pos.z }, { uvCoords.u1, uvCoords.v1 }));
+    m_vertices.emplace_back(Vertex({ 0.0f + pos.x, 0.0f + pos.y, 1.0f + pos.z }, { uvCoords.u2, uvCoords.v1 }));
+
+    m_indices.emplace_back(0 + offset);
+    m_indices.emplace_back(1 + offset);
+    m_indices.emplace_back(2 + offset);
+    m_indices.emplace_back(0 + offset);
+    m_indices.emplace_back(2 + offset);
+    m_indices.emplace_back(3 + offset);
 }
 
-void Chunk::AddLeftFace(DirectX::XMFLOAT3 pos, std::string texture)
+inline void Chunk::AddLeftFace(DirectX::XMFLOAT3& pos, std::string& texture)
 {
     UVCoords uvCoords = TextureAtlas::GetTextureCoords(texture);
     UINT offset = static_cast<UINT>(m_vertices.size());
-    std::vector<Vertex> vertices = {
-        {{0.0f + pos.x, 0.0f + pos.y, 0.0f + pos.z}, {uvCoords.u2, uvCoords.v2}},   // Вершина 0
-        {{0.0f + pos.x, 1.0f + pos.y, 0.0f + pos.z}, {uvCoords.u2, uvCoords.v1}},   // Вершина 1
-        {{0.0f + pos.x, 1.0f + pos.y, 1.0f + pos.z}, {uvCoords.u1, uvCoords.v1}},   // Вершина 2
-        {{0.0f + pos.x, 0.0f + pos.y, 1.0f + pos.z}, {uvCoords.u1, uvCoords.v2}}    // Вершина 3
-    };
 
-    std::vector<UINT> indices = {
-        0 + offset, 2 + offset, 1 + offset,    // Первый треугольник (передняя грань)
-        0 + offset, 3 + offset, 2 + offset,    // Второй треугольник (передняя грань)
-    };
-    m_vertices.insert(m_vertices.end(), vertices.begin(), vertices.end());
-    m_indices.insert(m_indices.end(), indices.begin(), indices.end());
+    m_vertices.emplace_back(Vertex({ 0.0f + pos.x, 0.0f + pos.y, 0.0f + pos.z }, { uvCoords.u2, uvCoords.v2 }));
+    m_vertices.emplace_back(Vertex({ 0.0f + pos.x, 1.0f + pos.y, 0.0f + pos.z }, { uvCoords.u2, uvCoords.v1 }));
+    m_vertices.emplace_back(Vertex({ 0.0f + pos.x, 1.0f + pos.y, 1.0f + pos.z }, { uvCoords.u1, uvCoords.v1 }));
+    m_vertices.emplace_back(Vertex({ 0.0f + pos.x, 0.0f + pos.y, 1.0f + pos.z }, { uvCoords.u1, uvCoords.v2 }));
+
+    m_indices.emplace_back(0 + offset);
+    m_indices.emplace_back(2 + offset);
+    m_indices.emplace_back(1 + offset);
+    m_indices.emplace_back(0 + offset);
+    m_indices.emplace_back(3 + offset);
+    m_indices.emplace_back(2 + offset);
 }
 
-void Chunk::AddRightFace(DirectX::XMFLOAT3 pos, std::string texture)
+inline void Chunk::AddRightFace(DirectX::XMFLOAT3& pos, std::string& texture)
 {
     UVCoords uvCoords = TextureAtlas::GetTextureCoords(texture);
     UINT offset = static_cast<UINT>(m_vertices.size());
-    std::vector<Vertex> vertices = {
-        {{1.0f + pos.x, 0.0f + pos.y, 0.0f + pos.z}, {uvCoords.u1, uvCoords.v2}},   // Вершина 0
-        {{1.0f + pos.x, 1.0f + pos.y, 0.0f + pos.z}, {uvCoords.u1, uvCoords.v1}},   // Вершина 1
-        {{1.0f + pos.x, 1.0f + pos.y, 1.0f + pos.z}, {uvCoords.u2, uvCoords.v1}},   // Вершина 2
-        {{1.0f + pos.x, 0.0f + pos.y, 1.0f + pos.z}, {uvCoords.u2, uvCoords.v2}}    // Вершина 3
-    };
 
-    std::vector<UINT> indices = {
-        0 + offset, 1 + offset, 2 + offset,    // Первый треугольник (передняя грань)
-        0 + offset, 2 + offset, 3 + offset,    // Второй треугольник (передняя грань)
-    };
-    m_vertices.insert(m_vertices.end(), vertices.begin(), vertices.end());
-    m_indices.insert(m_indices.end(), indices.begin(), indices.end());
+    m_vertices.emplace_back(Vertex({ 1.0f + pos.x, 0.0f + pos.y, 0.0f + pos.z }, { uvCoords.u1, uvCoords.v2 }));
+    m_vertices.emplace_back(Vertex({ 1.0f + pos.x, 1.0f + pos.y, 0.0f + pos.z }, { uvCoords.u1, uvCoords.v1 }));
+    m_vertices.emplace_back(Vertex({ 1.0f + pos.x, 1.0f + pos.y, 1.0f + pos.z }, { uvCoords.u2, uvCoords.v1 }));
+    m_vertices.emplace_back(Vertex({ 1.0f + pos.x, 0.0f + pos.y, 1.0f + pos.z }, { uvCoords.u2, uvCoords.v2 }));
+
+    m_indices.emplace_back(0 + offset);
+    m_indices.emplace_back(1 + offset);
+    m_indices.emplace_back(2 + offset);
+    m_indices.emplace_back(0 + offset);
+    m_indices.emplace_back(2 + offset);
+    m_indices.emplace_back(3 + offset);
 }
 
 void Chunk::UpdateMesh(ID3D11Device* device, BlockManager& blockManager)
@@ -174,32 +168,33 @@ void Chunk::UpdateMesh(ID3D11Device* device, BlockManager& blockManager)
         WorldPos frontPos = blockPair.first - WorldPos(0.0f, 0.0f, 1.0f);
         WorldPos backPos = blockPair.first + WorldPos(0.0f, 0.0f, 1.0f);
 
-        uint32_t blockId = blockPair.second.GetId();
+        uint16_t blockId = blockPair.second.GetId();
         Block block = blockManager.GetBlockById(blockId);
+        DirectX::XMFLOAT3 blockPos = DirectX::XMFLOAT3(pos.x, pos.y, pos.z);
 
         if (pos.z == 0 || !HasBlockAt(frontPos))
         {
-            AddFrontFace(DirectX::XMFLOAT3(pos.x, pos.y, pos.z), block.GetFaceTexture(Block::BlockFaces::Front));
+            AddFrontFace(blockPos, block.GetFaceTexture(Block::BlockFaces::Front));
         }
         if (pos.z == DEPTH - 1 || !HasBlockAt(backPos))
         {
-            AddBackFace(DirectX::XMFLOAT3(pos.x, pos.y, pos.z), block.GetFaceTexture(Block::BlockFaces::Back));
+            AddBackFace(blockPos, block.GetFaceTexture(Block::BlockFaces::Back));
         }
         if (pos.y == HEIGHT - 1 || !HasBlockAt(topPos))
         {
-            AddTopFace(DirectX::XMFLOAT3(pos.x, pos.y, pos.z), block.GetFaceTexture(Block::BlockFaces::Top));
+            AddTopFace(blockPos, block.GetFaceTexture(Block::BlockFaces::Top));
         }
         if (pos.y == 0 || !HasBlockAt(bottomPos))
         {
-            AddBottomFace(DirectX::XMFLOAT3(pos.x, pos.y, pos.z), block.GetFaceTexture(Block::BlockFaces::Bottom));
+            AddBottomFace(blockPos, block.GetFaceTexture(Block::BlockFaces::Bottom));
         }
         if (pos.x == 0 || !HasBlockAt(leftPos))
         {
-            AddLeftFace(DirectX::XMFLOAT3(pos.x, pos.y, pos.z), block.GetFaceTexture(Block::BlockFaces::Left));
+            AddLeftFace(blockPos, block.GetFaceTexture(Block::BlockFaces::Left));
         }
         if (pos.x == WIDTH - 1 || !HasBlockAt(rightPos))
         {
-            AddRightFace(DirectX::XMFLOAT3(pos.x, pos.y, pos.z), block.GetFaceTexture(Block::BlockFaces::Right));
+            AddRightFace(blockPos, block.GetFaceTexture(Block::BlockFaces::Right));
         }
     }
 
@@ -219,37 +214,38 @@ void Chunk::UpdateMeshWithoutBuffers(BlockManager blockManager)
         WorldPos frontPos = blockPair.first - WorldPos(0.0f, 0.0f, 1.0f);
         WorldPos backPos = blockPair.first + WorldPos(0.0f, 0.0f, 1.0f);
 
-        uint32_t blockId = blockPair.second.GetId();
+        uint16_t blockId = blockPair.second.GetId();
         Block block = blockManager.GetBlockById(blockId);
+        DirectX::XMFLOAT3 blockPos = DirectX::XMFLOAT3(pos.x, pos.y, pos.z);
 
         if (pos.z == 0 || !HasBlockAt(frontPos))
         {
-            AddFrontFace(DirectX::XMFLOAT3(pos.x, pos.y, pos.z), block.GetFaceTexture(Block::BlockFaces::Front));
+            AddFrontFace(blockPos, block.GetFaceTexture(Block::BlockFaces::Front));
         }
         if (pos.z == DEPTH - 1 || !HasBlockAt(backPos))
         {
-            AddBackFace(DirectX::XMFLOAT3(pos.x, pos.y, pos.z), block.GetFaceTexture(Block::BlockFaces::Back));
+            AddBackFace(blockPos, block.GetFaceTexture(Block::BlockFaces::Back));
         }
         if (pos.y == HEIGHT - 1 || !HasBlockAt(topPos))
         {
-            AddTopFace(DirectX::XMFLOAT3(pos.x, pos.y, pos.z), block.GetFaceTexture(Block::BlockFaces::Top));
+            AddTopFace(blockPos, block.GetFaceTexture(Block::BlockFaces::Top));
         }
         if (pos.y == 0 || !HasBlockAt(bottomPos))
         {
-            AddBottomFace(DirectX::XMFLOAT3(pos.x, pos.y, pos.z), block.GetFaceTexture(Block::BlockFaces::Bottom));
+            AddBottomFace(blockPos, block.GetFaceTexture(Block::BlockFaces::Bottom));
         }
         if (pos.x == 0 || !HasBlockAt(leftPos))
         {
-            AddLeftFace(DirectX::XMFLOAT3(pos.x, pos.y, pos.z), block.GetFaceTexture(Block::BlockFaces::Left));
+            AddLeftFace(blockPos, block.GetFaceTexture(Block::BlockFaces::Left));
         }
         if (pos.x == WIDTH - 1 || !HasBlockAt(rightPos))
         {
-            AddRightFace(DirectX::XMFLOAT3(pos.x, pos.y, pos.z), block.GetFaceTexture(Block::BlockFaces::Right));
+            AddRightFace(blockPos, block.GetFaceTexture(Block::BlockFaces::Right));
         }
     }
 }
 
-bool Chunk::HasBlockAt(WorldPos& pos)
+inline bool Chunk::HasBlockAt(WorldPos& pos)
 {
     return m_blocks.contains(pos);
 }
