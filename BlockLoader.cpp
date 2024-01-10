@@ -27,5 +27,6 @@ void BlockLoader::LoadBlock(std::filesystem::path filePath)
 	nlohmann::json blockData = nlohmann::json::parse(f);
 	std::vector<std::string> textures = blockData["textures"];
 	std::string name = blockData["name"];
-	m_blocks.push_back(Block(name, textures));
+	BlockId id = blockData["id"];
+	m_blocks.push_back(Block(id, name, textures));
 }

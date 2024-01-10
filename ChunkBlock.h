@@ -1,4 +1,7 @@
 #pragma once
+
+#include "BlockId.h"
+
 class ChunkBlock
 {
 public:
@@ -12,14 +15,14 @@ public:
 		Down,
 	};
 public:
-	ChunkBlock(uint16_t id) noexcept;
-	ChunkBlock(uint16_t id, BlockDirection dir) noexcept;
+	ChunkBlock(BlockId id) noexcept;
+	ChunkBlock(BlockId id, BlockDirection dir) noexcept;
 
-	uint16_t GetId() const noexcept;
+	BlockId GetId() const noexcept;
 	BlockDirection GetDirection() const noexcept;
 
 private:
-	uint16_t m_id;
+	BlockId m_id;
 	BlockDirection m_dir;
 };
 

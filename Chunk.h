@@ -4,6 +4,7 @@
 #include "ChunkBlock.h"
 #include "BlockManager.h"
 #include "WorldPos.hpp"
+#include "BlockId.h"
 
 class Chunk
 {
@@ -18,6 +19,8 @@ public:
 	const std::unordered_map<WorldPos, ChunkBlock, WorldPosHash>& GetBlocks() const noexcept;
 
 	void FillWith();
+
+	void AddBlock(WorldPos& worldPos, BlockId blockId);
 
 	void UpdateMesh(ID3D11Device* device, BlockManager& blockManager);
 	void UpdateMeshWithoutBuffers(BlockManager blockManager);

@@ -1,8 +1,9 @@
 #include "pch.h"
 #include "Block.h"
 
-Block::Block(std::string name, std::vector<std::string> textures) noexcept :
-	m_name(name)
+Block::Block(BlockId id, std::string name, std::vector<std::string> textures) :
+	m_name(name),
+	m_id(id)
 {
 	BuildTextures(textures);
 }
@@ -17,7 +18,12 @@ std::string& Block::GetFaceTexture(BlockFaces face)
 	return m_textures[static_cast<size_t>(face)];
 }
 
-void Block::BuildTextures(std::vector<std::string> textures) noexcept
+BlockId Block::GetId() const noexcept
+{
+	return m_id;
+}
+
+void Block::BuildTextures(std::vector<std::string> textures)
 {
 	if (textures.size() == 1)
 	{

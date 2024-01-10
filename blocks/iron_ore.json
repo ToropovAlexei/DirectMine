@@ -1,4 +1,5 @@
 {
+  "id": 10,
   "name": "iron_ore",
   "textures": ["iron_ore"]
 }

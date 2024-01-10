@@ -192,6 +192,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="Block.h" />
+    <ClInclude Include="BlockId.h" />
     <ClInclude Include="BlockLoader.h" />
     <ClInclude Include="BlockManager.h" />
     <ClInclude Include="Camera.h" />
@@ -213,6 +214,7 @@
     <ClInclude Include="UVCoords.h" />
     <ClInclude Include="Vertex.h" />
     <ClInclude Include="World.h" />
+    <ClInclude Include="WorldGenerator.h" />
     <ClInclude Include="WorldPos.hpp" />
   </ItemGroup>
   <ItemGroup>
@@ -241,6 +243,7 @@
     <ClCompile Include="TexturesManager.cpp" />
     <ClCompile Include="UVCoords.cpp" />
     <ClCompile Include="World.cpp" />
+    <ClCompile Include="WorldGenerator.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="resource.rc" />

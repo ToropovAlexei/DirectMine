@@ -13,6 +13,7 @@ World::World(std::unique_ptr<DX::DeviceResources>& deviceResources,
 {
 	m_blockManager = BlockManager();
 	m_blockManager.LoadBlocks();
+	m_worldGenerator = std::make_unique<WorldGenerator>(m_blockManager);
 	TextureAtlas::BuildAtlas(m_deviceResources->GetD3DDevice(), m_deviceResources->GetD3DDeviceContext());
 	m_cam = std::make_unique<Camera>();
 	m_cam->UpdateViewMatrix();
@@ -21,28 +22,45 @@ World::World(std::unique_ptr<DX::DeviceResources>& deviceResources,
 	m_chunkRenderer = std::make_unique<ChunkRenderer>(m_deviceResources);
 	CreateMainCB();
 
-	int numThreads = 4;
-	std::vector<std::thread> threads;
+	WorldPos pos = WorldPos(0.0f, 0.0f, 0.0f);
+	m_chunks.insert({ pos, m_worldGenerator->GenerateChunk(pos) });
 
-	for (int i = 0; i < numThreads; i++)
+	for (int x = 0; x < 16; x++)
 	{
-		threads.emplace_back([this, i]() {
-			TEST_ADD_CHUNK(0, 0, i * 4, 16, 1, i * 4 + 4);
-			});
-	}
-	if (threads.size() >= numThreads) {
-		for (std::thread& thread : threads) {
-			thread.join();
+		for (int y = 0; y < 1; y++)
+		{
+			for (int z = 0; z < 16; z++)
+			{
+				WorldPos pos = WorldPos(32.0f * x, 32.0f * y, 32.0f * z);
+				m_chunks.insert({ pos, m_worldGenerator->GenerateChunk(pos) });
+			}
 		}
-		threads.clear();
 	}
+	
 
-	for (std::thread& thread : threads) {
-		thread.join();
-	}
+	//int numThreads = 4;
+	//std::vector<std::thread> threads;
+
+	//for (int i = 0; i < numThreads; i++)
+	//{
+	//	threads.emplace_back([this, i]() {
+	//		TEST_ADD_CHUNK(0, 0, i * 4, 2, 1, i * 4 + 4);
+	//		});
+	//}
+	//if (threads.size() >= numThreads) {
+	//	for (std::thread& thread : threads) {
+	//		thread.join();
+	//	}
+	//	threads.clear();
+	//}
+
+	//for (std::thread& thread : threads) {
+	//	thread.join();
+	//}
 
 	for (auto& chunk : m_chunks)
 	{
+		chunk.second->UpdateMesh(m_deviceResources->GetD3DDevice(), m_blockManager);
 		chunk.second->UpdateBuffers(m_deviceResources->GetD3DDevice());
 	}
 }

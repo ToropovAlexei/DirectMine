@@ -10,16 +10,21 @@ void BlockManager::LoadBlocks()
 	BuildBlocksMap(blocks);
 }
 
-Block& BlockManager::GetBlockById(uint16_t id)
+Block& BlockManager::GetBlockById(BlockId id)
 {
 	if (!m_blocksById.contains(id))
 	{
-		throw std::runtime_error("Block with id " + std::to_string(id) + " not found");
+		throw std::runtime_error("Block with id " + std::to_string(static_cast<uint16_t>(id)) + " not found");
 	}
 	return m_blocksById[id];
 }
 
-Block& BlockManager::GetBlockByName(std::string name)
+BlockId BlockManager::GetBlockIdByName(std::string& name)
+{
+	return m_blocksByName[name].GetId();
+}
+
+Block& BlockManager::GetBlockByName(std::string& name)
 {
 	if (!m_blocksByName.contains(name))
 	{
@@ -32,7 +37,7 @@ void BlockManager::BuildBlocksMap(std::vector<Block>& blocks)
 {
 	for (size_t i = 0; i < blocks.size(); i++)
 	{
-		m_blocksById.insert({ static_cast<uint16_t>(i), blocks[i] });
+		m_blocksById.insert({ blocks[i].GetId(), blocks[i]});
 		m_blocksByName.insert({ blocks[i].GetName(), blocks[i]});
 	}
 }

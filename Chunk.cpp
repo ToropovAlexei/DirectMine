@@ -22,10 +22,15 @@ void Chunk::FillWith()
 			for (size_t z = 0; z < Chunk::DEPTH; z++)
 			{
                 WorldPos pos = WorldPos(static_cast<float>(x), static_cast<float>(y), static_cast<float>(z));
-                m_blocks.insert({ pos, ChunkBlock(rand() % 12) });
+                m_blocks.insert({ pos, ChunkBlock(static_cast<BlockId>(rand() % 12)) });
 			}
 		}
 	}
+}
+
+void Chunk::AddBlock(WorldPos& worldPos, BlockId blockId)
+{
+    m_blocks.insert({ worldPos, ChunkBlock(blockId) });
 }
 
 std::vector<Vertex>& Chunk::GetVertices()
@@ -168,7 +173,7 @@ void Chunk::UpdateMesh(ID3D11Device* device, BlockManager& blockManager)
         WorldPos frontPos = blockPair.first - WorldPos(0.0f, 0.0f, 1.0f);
         WorldPos backPos = blockPair.first + WorldPos(0.0f, 0.0f, 1.0f);
 
-        uint16_t blockId = blockPair.second.GetId();
+        BlockId blockId = blockPair.second.GetId();
         Block block = blockManager.GetBlockById(blockId);
         DirectX::XMFLOAT3 blockPos = DirectX::XMFLOAT3(pos.x, pos.y, pos.z);
 
@@ -214,7 +219,7 @@ void Chunk::UpdateMeshWithoutBuffers(BlockManager blockManager)
         WorldPos frontPos = blockPair.first - WorldPos(0.0f, 0.0f, 1.0f);
         WorldPos backPos = blockPair.first + WorldPos(0.0f, 0.0f, 1.0f);
 
-        uint16_t blockId = blockPair.second.GetId();
+        BlockId blockId = blockPair.second.GetId();
         Block block = blockManager.GetBlockById(blockId);
         DirectX::XMFLOAT3 blockPos = DirectX::XMFLOAT3(pos.x, pos.y, pos.z);
 

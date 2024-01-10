@@ -7,6 +7,7 @@
 #include "StepTimer.h"
 #include "ChunkRenderer.h"
 #include "WorldPos.hpp"
+#include "WorldGenerator.h"
 
 struct MainConstantBuffer
 {
@@ -41,6 +42,7 @@ private:
 	std::unique_ptr<DirectX::Mouse::ButtonStateTracker>& m_tracker;
 
 	BlockManager m_blockManager;
+	std::unique_ptr<WorldGenerator> m_worldGenerator;
 	std::unique_ptr<ChunkRenderer> m_chunkRenderer;
 	Microsoft::WRL::ComPtr<ID3D11Buffer> m_mainCB;
 
