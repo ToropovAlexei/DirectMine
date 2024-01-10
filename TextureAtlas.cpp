@@ -14,6 +14,9 @@ void TextureAtlas::BuildAtlas(ID3D11Device* device, ID3D11DeviceContext* context
 	int atlasSize = MathUtils::GetNextPowerOfTwo(squareSize * textureSize);
     int texturesPerRow = atlasSize / textureSize;
     float atlasGridStep = static_cast<float>(textureSize) / atlasSize;
+    // Обязательно вычитаем 0.5f чтобы текстура не смешивалась с соседней 
+    // https://learn.microsoft.com/en-us/windows/win32/direct3d9/directly-mapping-texels-to-pixels?redirectedfrom=MSDN
+    float atlasGridStepWithCorrection = static_cast<float>(textureSize - 0.5f) / atlasSize;
 
     D3D11_TEXTURE2D_DESC atlasDesc = {};
     atlasDesc.Width = atlasSize;
@@ -38,9 +41,9 @@ void TextureAtlas::BuildAtlas(ID3D11Device* device, ID3D11DeviceContext* context
         context->CopySubresourceRegion(atlasTexture.Get(), 0, x, y, 0, texturePair.second.Get(), 0, nullptr);
 
         float u1 = gridX * atlasGridStep;
-        float u2 = u1 + atlasGridStep;
+        float u2 = u1 + atlasGridStepWithCorrection;
         float v1 = gridY * atlasGridStep;
-        float v2 = v1 + atlasGridStep;
+        float v2 = v1 + atlasGridStepWithCorrection;
         texturesCoords.insert({ texturePair.first, UVCoords(u1, v1, u2, v2) });
         i++;
     }
