@@ -47,7 +47,11 @@ void TextureAtlas::BuildAtlas(ID3D11Device* device, ID3D11DeviceContext* context
         texturesCoords.insert({ texturePair.first, UVCoords(u1, v1, u2, v2) });
         i++;
     }
-    DirectX::SaveWICTextureToFile(context, atlasTexture.Get(), GUID_ContainerFormatPng, L"atlas.png"); // TODO FOR TESTS ONLY
+
+#ifdef DEBUG
+    // TODO FOR TESTS ONLY
+    DirectX::SaveWICTextureToFile(context, atlasTexture.Get(), GUID_ContainerFormatPng, L"atlas.png");
+#endif // DEBUG
 
     D3D11_SHADER_RESOURCE_VIEW_DESC srvDesc = {};
     srvDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM; // Формат текстуры

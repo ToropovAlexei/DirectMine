@@ -30,17 +30,17 @@ void Block::BuildTextures(std::vector<std::string> textures) noexcept
 	if (textures.size() == 3)
 	{
 		// Front
-		m_textures[0] = textures[1];
+		m_textures[static_cast<size_t>(BlockFaces::Front)] = textures[1];
 		// Back
-		m_textures[1] = textures[1];
+		m_textures[static_cast<size_t>(BlockFaces::Back)] = textures[1];
 		// Top
-		m_textures[2] = textures[0];
+		m_textures[static_cast<size_t>(BlockFaces::Top)] = textures[0];
 		// Bottom
-		m_textures[3] = textures[2];
+		m_textures[static_cast<size_t>(BlockFaces::Bottom)] = textures[2];
 		// Left
-		m_textures[4] = textures[1];
+		m_textures[static_cast<size_t>(BlockFaces::Left)] = textures[1];
 		// Right
-		m_textures[5] = textures[1];
+		m_textures[static_cast<size_t>(BlockFaces::Right)] = textures[1];
 		return;
 	}
 	throw std::runtime_error("Failed to build textures for block " + m_name);
