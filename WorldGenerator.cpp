@@ -15,9 +15,9 @@ std::unique_ptr<Chunk> WorldGenerator::GenerateChunk(ChunkPos& chunkPos)
         for (int z = 0; z < Chunk::DEPTH; ++z) {
             float noiseValue = noise.GetNoise(static_cast<float>(chunkPos.x + x) / Chunk::WIDTH, static_cast<float>(chunkPos.z + z) / Chunk::DEPTH);
 
-            int maxGenerationHeight = 64;
+            int maxGenerationHeight = 24;
 
-            int height = static_cast<int>((noiseValue + 1.0f) * maxGenerationHeight / 2.0f);
+            int height = 40 + static_cast<int>((noiseValue + 1.0f) * maxGenerationHeight / 2.0f);
 
             for (int y = 0; y < height; ++y) {
                 WorldPos pos = WorldPos(static_cast<float>(x), static_cast<float>(y), static_cast<float>(z));
