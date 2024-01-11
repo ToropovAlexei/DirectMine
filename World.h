@@ -33,8 +33,21 @@ private:
 	void CreateMainCB();
 	void UpdateMainCB();
 
+	bool HasChunkAt(ChunkPos& pos);
+
+	void UpdateChunksToLoad();
+	void UpdateChunksToUnload();
+	void UpdateChunksMesh();
+
+	void LoadChunks();
+	void UnloadChunks();
+
 private:
+	static const int chunkLoadingRadius = 2;
 	std::unordered_map<ChunkPos, std::unique_ptr<Chunk>, ChunkPosHash> m_chunks;
+	std::vector<ChunkPos> m_chunksToLoad;
+	std::vector<ChunkPos> m_chunksToUnload;
+	std::vector<ChunkPos> m_chunksToUpdateMesh;
 	std::unique_ptr<DX::DeviceResources>& m_deviceResources;
 	std::unique_ptr<Camera> m_cam;
 	std::unique_ptr<DirectX::Keyboard>& m_keyboard;

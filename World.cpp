@@ -21,15 +21,6 @@ World::World(std::unique_ptr<DX::DeviceResources>& deviceResources,
 	m_proj = DirectX::XMMATRIX();
 	m_chunkRenderer = std::make_unique<ChunkRenderer>(m_deviceResources);
 	CreateMainCB();
-
-	for (int x = 0; x < 4; x++)
-	{
-		for (int z = 0; z < 4; z++)
-		{
-			ChunkPos pos = ChunkPos(Chunk::WIDTH * x, Chunk::DEPTH * z);
-			m_chunks.insert({ pos, m_worldGenerator->GenerateChunk(pos) });
-		}
-	}
 	
 
 	//int numThreads = 4;
@@ -52,15 +43,20 @@ World::World(std::unique_ptr<DX::DeviceResources>& deviceResources,
 	//	thread.join();
 	//}
 
-	for (auto& chunk : m_chunks)
-	{
-		chunk.second->UpdateMesh(m_deviceResources->GetD3DDevice(), m_blockManager);
-		chunk.second->UpdateBuffers(m_deviceResources->GetD3DDevice());
-	}
+	//for (auto& chunk : m_chunks)
+	//{
+	//	chunk.second->UpdateMesh(m_deviceResources->GetD3DDevice(), m_blockManager);
+	//	chunk.second->UpdateBuffers(m_deviceResources->GetD3DDevice());
+	//}
 }
 
 void World::Update(DX::StepTimer const& timer)
 {
+	UpdateChunksToLoad();
+	UpdateChunksToUnload();
+	UnloadChunks();
+	LoadChunks();
+	UpdateChunksMesh();
 	float elapsedTime = float(timer.GetElapsedSeconds());
 	auto kb = m_keyboard->GetState();
 	const float speed = 25.0f;
@@ -185,5 +181,102 @@ void World::UpdateMainCB()
 	);
 	memcpy(msr.pData, &cb, sizeof(cb));
 	context->Unmap(m_mainCB.Get(), 0u);
+}
+
+bool World::HasChunkAt(ChunkPos& pos)
+{
+	return m_chunks.contains(pos);
+}
+
+void World::UpdateChunksToLoad()
+{
+	auto playerPos = m_cam->GetPosition3f();
+	int xPos = static_cast<int>(std::round(playerPos.x / Chunk::WIDTH)) * Chunk::WIDTH;
+	int zPos = static_cast<int>(std::round(playerPos.z / Chunk::DEPTH)) * Chunk::DEPTH;
+	int offset = Chunk::WIDTH * chunkLoadingRadius;
+	int xStart = xPos - offset;
+	int zStart = zPos - offset;
+	int xEnd = xPos + offset;
+	int zEnd = zPos + offset;
+
+	for (int x = xStart; x < xEnd; x += Chunk::WIDTH)
+	{
+		for (int z = zStart; z < zEnd; z += Chunk::WIDTH)
+		{
+			ChunkPos pos(x, z);
+			if (!HasChunkAt(pos))
+			{
+				m_chunksToLoad.push_back(pos);
+			}
+		}
+	}
+}
+
+void World::UpdateChunksToUnload()
+{
+	auto playerPos = m_cam->GetPosition3f();
+	int playerX = static_cast<int>(playerPos.x);
+	int playerZ = static_cast<int>(playerPos.z);
+	int offset = Chunk::WIDTH * (chunkLoadingRadius + 2);
+	for (auto& chunk : m_chunks)
+	{
+		int dx = playerX - chunk.first.x;
+		int dz = playerZ - chunk.first.z;
+		int distance = std::sqrt(dx * dx + dz * dz);
+		if (distance > offset)
+		{
+			m_chunksToUnload.push_back(chunk.first);
+		}
+	}
+}
+
+void World::UpdateChunksMesh()
+{
+	int numThreads = m_chunksToUpdateMesh.size();
+	std::vector<std::thread> threads;
+
+	for (size_t i = 0; i < m_chunksToUpdateMesh.size(); i += 2)
+	{
+		threads.emplace_back([this, i]() {
+			if (i < m_chunksToUpdateMesh.size())
+			{
+				m_chunks[m_chunksToUpdateMesh[i]]->UpdateMeshWithoutBuffers(m_blockManager);
+			}
+			if (i + 1 < m_chunksToUpdateMesh.size())
+			{
+				auto b = i;
+				m_chunks[m_chunksToUpdateMesh[i + 1]]->UpdateMeshWithoutBuffers(m_blockManager);
+			}
+			});
+	}
+
+	for (std::thread& thread : threads) {
+		thread.join();
+	}
+
+	for (auto& pos : m_chunksToUpdateMesh)
+	{
+		m_chunks[pos]->UpdateBuffers(m_deviceResources->GetD3DDevice());
+	}
+	m_chunksToUpdateMesh.clear();
+}
+
+void World::LoadChunks()
+{
+	for (auto& pos : m_chunksToLoad)
+	{
+		m_chunks.insert({ pos, m_worldGenerator->GenerateChunk(pos) });
+		m_chunksToUpdateMesh.push_back(pos);
+	}
+	m_chunksToLoad.clear();
+}
+
+void World::UnloadChunks()
+{
+	for (auto& chunkToUnload : m_chunksToUnload)
+	{
+		m_chunks.erase(chunkToUnload);
+	}
+	m_chunksToUnload.clear();
 }
 
