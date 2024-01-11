@@ -22,18 +22,12 @@ World::World(std::unique_ptr<DX::DeviceResources>& deviceResources,
 	m_chunkRenderer = std::make_unique<ChunkRenderer>(m_deviceResources);
 	CreateMainCB();
 
-	WorldPos pos = WorldPos(0.0f, 0.0f, 0.0f);
-	m_chunks.insert({ pos, m_worldGenerator->GenerateChunk(pos) });
-
-	for (int x = 0; x < 16; x++)
+	for (int x = 0; x < 4; x++)
 	{
-		for (int y = 0; y < 1; y++)
+		for (int z = 0; z < 4; z++)
 		{
-			for (int z = 0; z < 16; z++)
-			{
-				WorldPos pos = WorldPos(32.0f * x, 32.0f * y, 32.0f * z);
-				m_chunks.insert({ pos, m_worldGenerator->GenerateChunk(pos) });
-			}
+			ChunkPos pos = ChunkPos(Chunk::WIDTH * x, Chunk::DEPTH * z);
+			m_chunks.insert({ pos, m_worldGenerator->GenerateChunk(pos) });
 		}
 	}
 	
@@ -136,14 +130,14 @@ void World::OnWindowSizeChanged(float aspectRatio)
 
 void World::TEST_ADD_CHUNK(int x1, int y1, int z1, int x2, int y2, int z2)
 {
-	std::unordered_map<WorldPos, std::unique_ptr<Chunk>, WorldPosHash> generatedChunks;
+	std::unordered_map<ChunkPos, std::unique_ptr<Chunk>, ChunkPosHash> generatedChunks;
 	for (int x = x1; x < x2; x++)
 	{
 		for (int y = y1; y < y2; y++)
 		{
 			for (int z = z1; z < z2; z++)
 			{
-				WorldPos chunkPos = { 32.0f * x, 32.0f * y, 32.0f * z };
+				ChunkPos chunkPos = { 32 * x,  32 * z };
 				generatedChunks.insert({ chunkPos, std::make_unique<Chunk>(chunkPos) });
 				generatedChunks[chunkPos]->FillWith(); // TODO remove this
 				generatedChunks[chunkPos]->UpdateMeshWithoutBuffers(m_blockManager);

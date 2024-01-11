@@ -34,7 +34,7 @@ private:
 	void UpdateMainCB();
 
 private:
-	std::unordered_map<WorldPos, std::unique_ptr<Chunk>, WorldPosHash> m_chunks;
+	std::unordered_map<ChunkPos, std::unique_ptr<Chunk>, ChunkPosHash> m_chunks;
 	std::unique_ptr<DX::DeviceResources>& m_deviceResources;
 	std::unique_ptr<Camera> m_cam;
 	std::unique_ptr<DirectX::Keyboard>& m_keyboard;

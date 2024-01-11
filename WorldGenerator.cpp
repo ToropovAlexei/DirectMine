@@ -8,16 +8,18 @@ WorldGenerator::WorldGenerator(BlockManager& blockManager) :
     noise.SetFrequency(0.4f);
 }
 
-std::unique_ptr<Chunk> WorldGenerator::GenerateChunk(WorldPos& worldPos)
+std::unique_ptr<Chunk> WorldGenerator::GenerateChunk(ChunkPos& chunkPos)
 {
-    std::unique_ptr<Chunk> chunk = std::make_unique<Chunk>(worldPos);
+    std::unique_ptr<Chunk> chunk = std::make_unique<Chunk>(chunkPos);
     for (int x = 0; x < Chunk::WIDTH; ++x) {
         for (int z = 0; z < Chunk::DEPTH; ++z) {
-            float noiseValue = noise.GetNoise(static_cast<float>(worldPos.x + x) / Chunk::WIDTH, static_cast<float>(worldPos.z + z) / Chunk::DEPTH);
+            float noiseValue = noise.GetNoise(static_cast<float>(chunkPos.x + x) / Chunk::WIDTH, static_cast<float>(chunkPos.z + z) / Chunk::DEPTH);
 
-            int height = static_cast<int>((noiseValue + 1.0f) * Chunk::HEIGHT / 2.0f);
+            int maxGenerationHeight = 64;
 
-            for (int y = static_cast<int>(worldPos.y); y < height; ++y) {
+            int height = static_cast<int>((noiseValue + 1.0f) * maxGenerationHeight / 2.0f);
+
+            for (int y = 0; y < height; ++y) {
                 WorldPos pos = WorldPos(static_cast<float>(x), static_cast<float>(y), static_cast<float>(z));
                 if (y == 0)
                 {

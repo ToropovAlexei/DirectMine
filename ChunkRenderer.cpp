@@ -27,7 +27,7 @@ void ChunkRenderer::DrawChunk(Chunk* chunk)
     context->DrawIndexed(static_cast<UINT>(chunk->GetIndices().size()), 0u, 0u);
 }
 
-void ChunkRenderer::RenderChunks(std::unordered_map<WorldPos, std::unique_ptr<Chunk>, WorldPosHash>& chunks)
+void ChunkRenderer::RenderChunks(std::unordered_map<ChunkPos, std::unique_ptr<Chunk>, ChunkPosHash>& chunks)
 {
     auto context = m_deviceResources->GetD3DDeviceContext();
 

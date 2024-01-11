@@ -3,7 +3,7 @@
 #include "UVCoords.h"
 #include "TextureAtlas.h"
 
-Chunk::Chunk(WorldPos& worldPos) :
+Chunk::Chunk(ChunkPos& worldPos) :
     m_worldPos(worldPos)
 {
 }
@@ -165,7 +165,7 @@ void Chunk::UpdateMesh(ID3D11Device* device, BlockManager& blockManager)
 {
     for (auto& blockPair : m_blocks)
     {
-        WorldPos pos = m_worldPos + blockPair.first;
+        WorldPos pos = blockPair.first + m_worldPos;
         WorldPos topPos = blockPair.first + WorldPos(0.0f, 1.0f, 0.0f);
         WorldPos bottomPos = blockPair.first - WorldPos(0.0f, 1.0f, 0.0f);
         WorldPos leftPos = blockPair.first - WorldPos(1.0f, 0.0f, 0.0f);
@@ -211,7 +211,7 @@ void Chunk::UpdateMeshWithoutBuffers(BlockManager blockManager)
 {
     for (auto& blockPair : m_blocks)
     {
-        WorldPos pos = m_worldPos + blockPair.first;
+        WorldPos pos = blockPair.first + m_worldPos;
         WorldPos topPos = blockPair.first + WorldPos(0.0f, 1.0f, 0.0f);
         WorldPos bottomPos = blockPair.first - WorldPos(0.0f, 1.0f, 0.0f);
         WorldPos leftPos = blockPair.first - WorldPos(1.0f, 0.0f, 0.0f);
@@ -255,7 +255,7 @@ inline bool Chunk::HasBlockAt(WorldPos& pos)
     return m_blocks.contains(pos);
 }
 
-WorldPos& Chunk::GetPos() noexcept
+ChunkPos& Chunk::GetPos() noexcept
 {
     return m_worldPos;
 }

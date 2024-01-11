@@ -9,10 +9,10 @@
 class Chunk
 {
 public:
-	Chunk(WorldPos& worldPos);
+	Chunk(ChunkPos& chunkPos);
 
 	static const int WIDTH = 32;
-	static const int HEIGHT = 32;
+	static const int HEIGHT = 256;
 	static const int DEPTH = 32;
 	static constexpr int VOLUME = WIDTH * HEIGHT * HEIGHT;
 
@@ -29,7 +29,7 @@ public:
 
 	inline bool HasBlockAt(WorldPos& pos);
 
-	WorldPos& GetPos() noexcept;
+	ChunkPos& GetPos() noexcept;
 
 	std::vector<Vertex>& GetVertices();
 	std::vector<UINT>& GetIndices();
@@ -50,7 +50,7 @@ private:
 	std::vector<Vertex> m_vertices;
 	std::vector<UINT> m_indices;
 
-	WorldPos m_worldPos;
+	ChunkPos m_worldPos;
 
 	Microsoft::WRL::ComPtr<ID3D11Buffer> m_vertexBuffer;
 	Microsoft::WRL::ComPtr<ID3D11Buffer> m_indexBuffer;

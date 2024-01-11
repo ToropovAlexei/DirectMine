@@ -12,7 +12,7 @@ public:
 	ChunkRenderer(std::unique_ptr<DX::DeviceResources>& deviceResources);
 
     void DrawChunk(Chunk* chunk);
-    void RenderChunks(std::unordered_map<WorldPos, std::unique_ptr<Chunk>, WorldPosHash>& chunks);
+    void RenderChunks(std::unordered_map<ChunkPos, std::unique_ptr<Chunk>, ChunkPosHash>& chunks);
 
 private:
 	void BuildInputLayout();
