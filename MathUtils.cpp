@@ -48,7 +48,7 @@ int MathUtils::RoundDown(int numToRound, int multiple)
     }
     if (numToRound < 0)
     {
-        return -(abs(numToRound) + remainder);
+        return -(abs(numToRound) + multiple - remainder);
     }
 
     return numToRound - remainder;
