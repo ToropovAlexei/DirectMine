@@ -54,5 +54,24 @@ public:
 
         return pixelShader;
     }
+
+    static Microsoft::WRL::ComPtr<ID3D11GeometryShader> LoadGeometryShader(ID3D11Device* device, const wchar_t* filename)
+    {
+        Microsoft::WRL::ComPtr<ID3DBlob> shaderBlob;
+        HRESULT result = D3DReadFileToBlob(filename, &shaderBlob);
+        if (result != S_OK)
+        {
+            throw std::runtime_error("Failed to read geometry shader"); // TODO add filename
+        }
+
+        Microsoft::WRL::ComPtr<ID3D11GeometryShader> geometryShader;
+        result = device->CreateGeometryShader(shaderBlob->GetBufferPointer(), shaderBlob->GetBufferSize(), nullptr, &geometryShader);
+        if (result != S_OK)
+        {
+            throw std::runtime_error("Failed to create geometry shader"); // TODO add filename
+        }
+
+        return geometryShader;
+    }
 };
 

@@ -8,6 +8,7 @@
 #include "ChunkRenderer.h"
 #include "WorldPos.hpp"
 #include "WorldGenerator.h"
+#include "BlockOutlineRenderer.h"
 
 struct MainConstantBuffer
 {
@@ -41,11 +42,15 @@ private:
 	void LoadChunks();
 	void UnloadChunks();
 
+	bool CheckBlockCollision(WorldPos& worldPos);
+
+	std::optional<WorldPos> Raycast();
+	
 private:
 #ifdef NDEBUG
 	static const int chunkLoadingRadius = 16; // Release mode
 #else
-	static const int chunkLoadingRadius = 7; // Debug mode
+	static const int chunkLoadingRadius = 4; // Debug mode
 #endif
 	std::unordered_map<ChunkPos, std::unique_ptr<Chunk>, ChunkPosHash> m_chunks;
 	std::vector<ChunkPos> m_chunksToLoad;
@@ -60,6 +65,7 @@ private:
 	BlockManager m_blockManager;
 	std::unique_ptr<WorldGenerator> m_worldGenerator;
 	std::unique_ptr<ChunkRenderer> m_chunkRenderer;
+	std::unique_ptr<BlockOutlineRenderer> m_blockOutlineRenderer;
 	Microsoft::WRL::ComPtr<ID3D11Buffer> m_mainCB;
 
 	DirectX::XMMATRIX m_view;

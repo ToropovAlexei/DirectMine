@@ -3,6 +3,7 @@
 #include "TextureAtlas.h"
 #include <tbb/parallel_for.h>
 #include <tbb/blocked_range.h>
+#include "MathUtils.h"
 
 World::World(std::unique_ptr<DX::DeviceResources>& deviceResources, 
 	std::unique_ptr<DirectX::Keyboard>& keyboard, 
@@ -22,6 +23,7 @@ World::World(std::unique_ptr<DX::DeviceResources>& deviceResources,
 	m_view = DirectX::XMMATRIX();
 	m_proj = DirectX::XMMATRIX();
 	m_chunkRenderer = std::make_unique<ChunkRenderer>(m_deviceResources);
+	m_blockOutlineRenderer = std::make_unique<BlockOutlineRenderer>(m_deviceResources);
 	CreateMainCB();
 }
 
@@ -32,6 +34,9 @@ void World::Update(DX::StepTimer const& timer)
 	UnloadChunks();
 	LoadChunks();
 	UpdateChunksMesh();
+	auto rayCastResult = Raycast();
+	//std::optional<WorldPos> rayCastResult = WorldPos(0.0f, 60.0f, 0.0f);
+	m_blockOutlineRenderer->UpdateOutlinedCube(rayCastResult);
 	float elapsedTime = float(timer.GetElapsedSeconds());
 	auto kb = m_keyboard->GetState();
 	const float speed = 25.0f;
@@ -89,6 +94,7 @@ void World::Render()
 	auto context = m_deviceResources->GetD3DDeviceContext();
 	context->VSSetConstantBuffers(0u, 1u, m_mainCB.GetAddressOf());
 	m_chunkRenderer->RenderChunks(m_chunks);
+	m_blockOutlineRenderer->RenderCubeOutline();
 }
 
 void World::OnWindowSizeChanged(float aspectRatio)
@@ -240,5 +246,39 @@ void World::UnloadChunks()
 		m_chunks.erase(chunkToUnload);
 	}
 	m_chunksToUnload.clear();
+}
+
+bool World::CheckBlockCollision(WorldPos& worldPos)
+{
+	int xPos = MathUtils::RoundDown(worldPos.x, Chunk::WIDTH);
+	int zPos = MathUtils::RoundDown(worldPos.z, Chunk::DEPTH);
+	ChunkPos chunkPos = ChunkPos(xPos, zPos);
+	auto it = m_chunks.find(chunkPos);
+	if (it == m_chunks.end())
+	{
+		return false;
+	}
+	WorldPos blockPos = WorldPos(worldPos.x - xPos, worldPos.y, worldPos.z - zPos);
+	return it->second->HasBlockAt(blockPos);
+}
+
+std::optional<WorldPos> World::Raycast()
+{
+	DirectX::XMVECTOR currentPosition = m_cam->GetPosition();
+	DirectX::XMVECTOR step = DirectX::XMVector3Normalize(m_cam->GetLook());
+	float maxDistance = 10.0f;
+
+	for (float distance = 0.0f; distance < maxDistance; distance += DirectX::XMVectorGetX(DirectX::XMVector3Length(step))) {
+		WorldPos blockPos = WorldPos(static_cast<float>(static_cast<int>(DirectX::XMVectorGetX(currentPosition))),
+			static_cast<float>(static_cast<int>(DirectX::XMVectorGetY(currentPosition))),
+			static_cast<float>(static_cast<int>(DirectX::XMVectorGetZ(currentPosition))));
+		if (CheckBlockCollision(blockPos)) {
+			return blockPos;
+		}
+
+		currentPosition = DirectX::XMVectorAdd(currentPosition, step);
+	}
+
+	return std::nullopt;
 }
 

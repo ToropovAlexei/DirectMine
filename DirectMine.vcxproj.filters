@@ -100,6 +100,9 @@
     <ClInclude Include="BlockId.h" />
     <ClInclude Include="FastNoiseLite.h" />
     <ClInclude Include="WorldGenerator.h" />
+    <ClInclude Include="BlockOutlineRenderer.h">
+      <Filter>Render</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp" />
@@ -155,6 +158,9 @@
       <Filter>World\Cunk\Block</Filter>
     </ClCompile>
     <ClCompile Include="WorldGenerator.cpp" />
+    <ClCompile Include="BlockOutlineRenderer.cpp">
+      <Filter>Render</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="resource.rc" />
@@ -174,6 +180,15 @@
       <Filter>Shaders</Filter>
     </FxCompile>
     <FxCompile Include="VertexShader.hlsl">
+      <Filter>Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="BlockOutlineVS.hlsl">
+      <Filter>Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="BlockOutlinePS.hlsl">
+      <Filter>Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="BlockOutlineGS.hlsl">
       <Filter>Shaders</Filter>
     </FxCompile>
   </ItemGroup>

@@ -23,3 +23,33 @@ unsigned int MathUtils::GetNextPowerOfTwo(unsigned int number)
     ++number;
     return number;
 }
+
+int MathUtils::RoundUp(int numToRound, int multiple)
+{
+    int remainder = abs(numToRound) % multiple;
+    if (remainder == 0)
+    {
+        return numToRound;
+    }
+    if (numToRound < 0)
+    {
+        return -(abs(numToRound) - remainder);
+    }
+
+    return numToRound + multiple - remainder;
+}
+
+int MathUtils::RoundDown(int numToRound, int multiple)
+{
+    int remainder = abs(numToRound) % multiple;
+    if (remainder == 0)
+    {
+        return numToRound;
+    }
+    if (numToRound < 0)
+    {
+        return -(abs(numToRound) + remainder);
+    }
+
+    return numToRound - remainder;
+}

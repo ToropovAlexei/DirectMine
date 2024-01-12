@@ -2,6 +2,8 @@
 
 #include "pch.h"
 
+struct WorldPos;
+
 struct ChunkPos
 {
 	int x;

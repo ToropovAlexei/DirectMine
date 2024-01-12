@@ -30,7 +30,7 @@ void ChunkRenderer::DrawChunk(Chunk* chunk)
 void ChunkRenderer::RenderChunks(std::unordered_map<ChunkPos, std::unique_ptr<Chunk>, ChunkPosHash>& chunks)
 {
     auto context = m_deviceResources->GetD3DDeviceContext();
-
+    context->GSSetShader(nullptr, nullptr, 0u);
     context->PSSetShader(m_pixelShader.Get(), nullptr, 0u);
     context->VSSetShader(m_vertexShader.Get(), nullptr, 0u);
     context->IASetInputLayout(m_inputLayout.Get());
