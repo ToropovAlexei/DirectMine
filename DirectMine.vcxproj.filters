@@ -99,12 +99,14 @@
     </ClInclude>
     <ClInclude Include="BlockId.h" />
     <ClInclude Include="FastNoiseLite.h" />
-    <ClInclude Include="WorldGenerator.h" />
     <ClInclude Include="BlockOutlineRenderer.h">
       <Filter>Render</Filter>
     </ClInclude>
     <ClInclude Include="CrosshairRenderer.h">
       <Filter>Render</Filter>
+    </ClInclude>
+    <ClInclude Include="WorldGenerator.h">
+      <Filter>World</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -160,12 +162,14 @@
     <ClCompile Include="BlockManager.cpp">
       <Filter>World\Cunk\Block</Filter>
     </ClCompile>
-    <ClCompile Include="WorldGenerator.cpp" />
     <ClCompile Include="BlockOutlineRenderer.cpp">
       <Filter>Render</Filter>
     </ClCompile>
     <ClCompile Include="CrosshairRenderer.cpp">
       <Filter>Render</Filter>
+    </ClCompile>
+    <ClCompile Include="WorldGenerator.cpp">
+      <Filter>World</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
