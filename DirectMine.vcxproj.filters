@@ -103,6 +103,9 @@
     <ClInclude Include="BlockOutlineRenderer.h">
       <Filter>Render</Filter>
     </ClInclude>
+    <ClInclude Include="CrosshairRenderer.h">
+      <Filter>Render</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp" />
@@ -161,6 +164,9 @@
     <ClCompile Include="BlockOutlineRenderer.cpp">
       <Filter>Render</Filter>
     </ClCompile>
+    <ClCompile Include="CrosshairRenderer.cpp">
+      <Filter>Render</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="resource.rc" />
@@ -189,6 +195,12 @@
       <Filter>Shaders</Filter>
     </FxCompile>
     <FxCompile Include="BlockOutlineGS.hlsl">
+      <Filter>Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="CrosshairVS.hlsl">
+      <Filter>Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="CrosshairPS.hlsl">
       <Filter>Shaders</Filter>
     </FxCompile>
   </ItemGroup>

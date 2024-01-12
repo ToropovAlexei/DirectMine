@@ -9,6 +9,7 @@
 #include "WorldPos.hpp"
 #include "WorldGenerator.h"
 #include "BlockOutlineRenderer.h"
+#include "CrosshairRenderer.h"
 
 struct MainConstantBuffer
 {
@@ -66,6 +67,7 @@ private:
 	std::unique_ptr<WorldGenerator> m_worldGenerator;
 	std::unique_ptr<ChunkRenderer> m_chunkRenderer;
 	std::unique_ptr<BlockOutlineRenderer> m_blockOutlineRenderer;
+	std::unique_ptr<CrosshairRenderer> m_crosshairRenderer;
 	Microsoft::WRL::ComPtr<ID3D11Buffer> m_mainCB;
 
 	DirectX::XMMATRIX m_view;

@@ -24,6 +24,9 @@ World::World(std::unique_ptr<DX::DeviceResources>& deviceResources,
 	m_proj = DirectX::XMMATRIX();
 	m_chunkRenderer = std::make_unique<ChunkRenderer>(m_deviceResources);
 	m_blockOutlineRenderer = std::make_unique<BlockOutlineRenderer>(m_deviceResources);
+	auto size = m_deviceResources->GetOutputSize();
+	const float aspectRatio = static_cast<float>(size.right) / static_cast<float>(size.bottom);
+	m_crosshairRenderer = std::make_unique<CrosshairRenderer>(m_deviceResources, aspectRatio);
 	CreateMainCB();
 }
 
@@ -95,6 +98,7 @@ void World::Render()
 	context->VSSetConstantBuffers(0u, 1u, m_mainCB.GetAddressOf());
 	m_chunkRenderer->RenderChunks(m_chunks);
 	m_blockOutlineRenderer->RenderCubeOutline();
+	m_crosshairRenderer->Render();
 }
 
 void World::OnWindowSizeChanged(float aspectRatio)
@@ -103,6 +107,7 @@ void World::OnWindowSizeChanged(float aspectRatio)
 		DirectX::XM_PIDIV4,
 		aspectRatio,
 		0.1f, 1000.0f);
+	m_crosshairRenderer->UpdateAspectRatio(aspectRatio);
 }
 
 void World::CreateMainCB()
