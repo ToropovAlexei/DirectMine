@@ -43,7 +43,7 @@ private:
 
 private:
 #ifdef NDEBUG
-	static const int chunkLoadingRadius = 32; // Release mode
+	static const int chunkLoadingRadius = 16; // Release mode
 #else
 	static const int chunkLoadingRadius = 7; // Debug mode
 #endif

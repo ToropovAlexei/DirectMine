@@ -97,6 +97,9 @@
     <ClInclude Include="WorldPos.hpp">
       <Filter>World</Filter>
     </ClInclude>
+    <ClInclude Include="BlockId.h" />
+    <ClInclude Include="FastNoiseLite.h" />
+    <ClInclude Include="WorldGenerator.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp" />
@@ -151,6 +154,7 @@
     <ClCompile Include="BlockManager.cpp">
       <Filter>World\Cunk\Block</Filter>
     </ClCompile>
+    <ClCompile Include="WorldGenerator.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="resource.rc" />
