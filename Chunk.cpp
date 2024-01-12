@@ -250,7 +250,7 @@ void Chunk::UpdateMeshWithoutBuffers(BlockManager blockManager)
     }
 }
 
-inline bool Chunk::HasBlockAt(WorldPos& pos)
+inline bool Chunk::HasBlockAt(WorldPos& pos)  const noexcept
 {
     return m_blocks.contains(pos);
 }

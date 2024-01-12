@@ -27,7 +27,7 @@ public:
 
 	void UpdateBuffers(ID3D11Device* device);
 
-	inline bool HasBlockAt(WorldPos& pos);
+	inline bool HasBlockAt(WorldPos& pos) const noexcept;
 
 	ChunkPos& GetPos() noexcept;
 

@@ -1,6 +1,11 @@
 #include "pch.h"
 #include "World.h"
 #include "TextureAtlas.h"
+#include <tbb/parallel_for.h>
+#include <tbb/blocked_range.h>
+#include <tbb/concurrent_unordered_map.h>
+#include <tbb/concurrent_vector.h>
+#include <tbb/concurrent_set.h>
 
 World::World(std::unique_ptr<DX::DeviceResources>& deviceResources, 
 	std::unique_ptr<DirectX::Keyboard>& keyboard, 
@@ -220,10 +225,9 @@ void World::UpdateChunksToUnload()
 	int offset = Chunk::WIDTH * (chunkLoadingRadius + 2);
 	for (auto& chunk : m_chunks)
 	{
-		int dx = playerX - chunk.first.x;
-		int dz = playerZ - chunk.first.z;
-		int distance = std::sqrt(dx * dx + dz * dz);
-		if (distance > offset)
+		int dx = abs(playerX - chunk.first.x);
+		int dz = abs(playerZ - chunk.first.z);
+		if (dx > offset || dz > offset)
 		{
 			m_chunksToUnload.push_back(chunk.first);
 		}
@@ -232,43 +236,74 @@ void World::UpdateChunksToUnload()
 
 void World::UpdateChunksMesh()
 {
-	int numThreads = m_chunksToUpdateMesh.size();
-	std::vector<std::thread> threads;
-
-	for (size_t i = 0; i < m_chunksToUpdateMesh.size(); i += 2)
+	if (m_chunksToUpdateMesh.empty())
 	{
-		threads.emplace_back([this, i]() {
-			if (i < m_chunksToUpdateMesh.size())
-			{
+		return;
+	}
+	auto start = std::chrono::high_resolution_clock::now();
+	tbb::parallel_for(tbb::blocked_range<size_t>(0, m_chunksToUpdateMesh.size()),
+		[this](const tbb::blocked_range<size_t>& range) {
+			for (size_t i = range.begin(); i != range.end(); ++i) {
 				m_chunks[m_chunksToUpdateMesh[i]]->UpdateMeshWithoutBuffers(m_blockManager);
 			}
-			if (i + 1 < m_chunksToUpdateMesh.size())
-			{
-				auto b = i;
-				m_chunks[m_chunksToUpdateMesh[i + 1]]->UpdateMeshWithoutBuffers(m_blockManager);
-			}
-			});
-	}
+		});
 
-	for (std::thread& thread : threads) {
-		thread.join();
-	}
+	//int numThreads = m_chunksToUpdateMesh.size();
+	//std::vector<std::thread> threads;
+
+	//for (size_t i = 0; i < m_chunksToUpdateMesh.size(); i += 2)
+	//{
+	//	threads.emplace_back([this, i]() {
+	//		if (i < m_chunksToUpdateMesh.size())
+	//		{
+	//			m_chunks[m_chunksToUpdateMesh[i]]->UpdateMeshWithoutBuffers(m_blockManager);
+	//		}
+	//		if (i + 1 < m_chunksToUpdateMesh.size())
+	//		{
+	//			m_chunks[m_chunksToUpdateMesh[i + 1]]->UpdateMeshWithoutBuffers(m_blockManager);
+	//		}
+	//	});
+	//}
+
+	//for (std::thread& thread : threads) {
+	//	thread.join();
+	//}
 
 	for (auto& pos : m_chunksToUpdateMesh)
 	{
 		m_chunks[pos]->UpdateBuffers(m_deviceResources->GetD3DDevice());
 	}
 	m_chunksToUpdateMesh.clear();
+	auto end = std::chrono::high_resolution_clock::now();
+	auto duration = std::chrono::duration_cast<std::chrono::microseconds>(end - start);
+	std::string result = "Время выполнения UpdateChunksMesh: " + std::to_string(duration.count()) + " микросекунд\n";
+	OutputDebugStringA(result.c_str());
 }
 
 void World::LoadChunks()
 {
-	for (auto& pos : m_chunksToLoad)
+	if (m_chunksToLoad.empty())
 	{
-		m_chunks.insert({ pos, m_worldGenerator->GenerateChunk(pos) });
-		m_chunksToUpdateMesh.push_back(pos);
+		return;
 	}
+	auto start = std::chrono::high_resolution_clock::now();
+	//for (auto& pos : m_chunksToLoad)
+	//{
+	//	m_chunks.insert({ pos, m_worldGenerator->GenerateChunk(pos) });
+	//	m_chunksToUpdateMesh.push_back(pos);
+	//}
+	tbb::parallel_for(tbb::blocked_range<size_t>(0, m_chunksToLoad.size()),
+		[this](const tbb::blocked_range<size_t>& range) {
+			for (size_t i = range.begin(); i != range.end(); ++i) {
+				m_chunks.insert({ m_chunksToLoad[i], m_worldGenerator->GenerateChunk(m_chunksToLoad[i]) });
+				m_chunksToUpdateMesh.push_back(m_chunksToLoad[i]);
+			}
+		});
 	m_chunksToLoad.clear();
+	auto end = std::chrono::high_resolution_clock::now();
+	auto duration = std::chrono::duration_cast<std::chrono::microseconds>(end - start);
+	std::string result = "Время выполнения LoadChunks: " + std::to_string(duration.count()) + " микросекунд\n";
+	OutputDebugStringA(result.c_str());
 }
 
 void World::UnloadChunks()

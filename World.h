@@ -43,7 +43,11 @@ private:
 	void UnloadChunks();
 
 private:
-	static const int chunkLoadingRadius = 2;
+#ifdef NDEBUG
+	static const int chunkLoadingRadius = 8; // Release mode
+#else
+	static const int chunkLoadingRadius = 2; // Debug mode
+#endif
 	std::unordered_map<ChunkPos, std::unique_ptr<Chunk>, ChunkPosHash> m_chunks;
 	std::vector<ChunkPos> m_chunksToLoad;
 	std::vector<ChunkPos> m_chunksToUnload;
