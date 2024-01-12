@@ -270,10 +270,11 @@ bool World::CheckBlockCollision(WorldPos& worldPos)
 std::optional<WorldPos> World::Raycast()
 {
 	DirectX::XMVECTOR currentPosition = m_cam->GetPosition();
-	DirectX::XMVECTOR step = DirectX::XMVector3Normalize(m_cam->GetLook());
+	DirectX::XMVECTOR step = DirectX::XMVectorScale(DirectX::XMVector3Normalize(m_cam->GetLook()), 0.05f);
+	const float distanceStep = DirectX::XMVectorGetX(DirectX::XMVector3Length(step));
 	float maxDistance = 10.0f;
 
-	for (float distance = 0.0f; distance < maxDistance; distance += DirectX::XMVectorGetX(DirectX::XMVector3Length(step))) {
+	for (float distance = 0.0f; distance < maxDistance; distance += distanceStep) {
 		WorldPos blockPos = WorldPos(static_cast<float>(static_cast<int>(DirectX::XMVectorGetX(currentPosition))),
 			static_cast<float>(static_cast<int>(DirectX::XMVectorGetY(currentPosition))),
 			static_cast<float>(static_cast<int>(DirectX::XMVectorGetZ(currentPosition))));
