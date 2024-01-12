@@ -3,9 +3,6 @@
 #include "TextureAtlas.h"
 #include <tbb/parallel_for.h>
 #include <tbb/blocked_range.h>
-#include <tbb/concurrent_unordered_map.h>
-#include <tbb/concurrent_vector.h>
-#include <tbb/concurrent_set.h>
 
 World::World(std::unique_ptr<DX::DeviceResources>& deviceResources, 
 	std::unique_ptr<DirectX::Keyboard>& keyboard, 
@@ -26,33 +23,6 @@ World::World(std::unique_ptr<DX::DeviceResources>& deviceResources,
 	m_proj = DirectX::XMMATRIX();
 	m_chunkRenderer = std::make_unique<ChunkRenderer>(m_deviceResources);
 	CreateMainCB();
-	
-
-	//int numThreads = 4;
-	//std::vector<std::thread> threads;
-
-	//for (int i = 0; i < numThreads; i++)
-	//{
-	//	threads.emplace_back([this, i]() {
-	//		TEST_ADD_CHUNK(0, 0, i * 4, 2, 1, i * 4 + 4);
-	//		});
-	//}
-	//if (threads.size() >= numThreads) {
-	//	for (std::thread& thread : threads) {
-	//		thread.join();
-	//	}
-	//	threads.clear();
-	//}
-
-	//for (std::thread& thread : threads) {
-	//	thread.join();
-	//}
-
-	//for (auto& chunk : m_chunks)
-	//{
-	//	chunk.second->UpdateMesh(m_deviceResources->GetD3DDevice(), m_blockManager);
-	//	chunk.second->UpdateBuffers(m_deviceResources->GetD3DDevice());
-	//}
 }
 
 void World::Update(DX::StepTimer const& timer)
@@ -127,26 +97,6 @@ void World::OnWindowSizeChanged(float aspectRatio)
 		DirectX::XM_PIDIV4,
 		aspectRatio,
 		0.1f, 1000.0f);
-}
-
-void World::TEST_ADD_CHUNK(int x1, int y1, int z1, int x2, int y2, int z2)
-{
-	std::unordered_map<ChunkPos, std::unique_ptr<Chunk>, ChunkPosHash> generatedChunks;
-	for (int x = x1; x < x2; x++)
-	{
-		for (int y = y1; y < y2; y++)
-		{
-			for (int z = z1; z < z2; z++)
-			{
-				ChunkPos chunkPos = { 32 * x,  32 * z };
-				generatedChunks.insert({ chunkPos, std::make_unique<Chunk>(chunkPos) });
-				generatedChunks[chunkPos]->FillWith(); // TODO remove this
-				generatedChunks[chunkPos]->UpdateMeshWithoutBuffers(m_blockManager);
-			}
-		}
-	}
-	std::lock_guard<std::mutex> lock(mutex);
-	m_chunks.insert(std::make_move_iterator(generatedChunks.begin()), std::make_move_iterator(generatedChunks.end()));
 }
 
 void World::CreateMainCB()
@@ -248,27 +198,6 @@ void World::UpdateChunksMesh()
 			}
 		});
 
-	//int numThreads = m_chunksToUpdateMesh.size();
-	//std::vector<std::thread> threads;
-
-	//for (size_t i = 0; i < m_chunksToUpdateMesh.size(); i += 2)
-	//{
-	//	threads.emplace_back([this, i]() {
-	//		if (i < m_chunksToUpdateMesh.size())
-	//		{
-	//			m_chunks[m_chunksToUpdateMesh[i]]->UpdateMeshWithoutBuffers(m_blockManager);
-	//		}
-	//		if (i + 1 < m_chunksToUpdateMesh.size())
-	//		{
-	//			m_chunks[m_chunksToUpdateMesh[i + 1]]->UpdateMeshWithoutBuffers(m_blockManager);
-	//		}
-	//	});
-	//}
-
-	//for (std::thread& thread : threads) {
-	//	thread.join();
-	//}
-
 	for (auto& pos : m_chunksToUpdateMesh)
 	{
 		m_chunks[pos]->UpdateBuffers(m_deviceResources->GetD3DDevice());
@@ -287,16 +216,14 @@ void World::LoadChunks()
 		return;
 	}
 	auto start = std::chrono::high_resolution_clock::now();
-	//for (auto& pos : m_chunksToLoad)
-	//{
-	//	m_chunks.insert({ pos, m_worldGenerator->GenerateChunk(pos) });
-	//	m_chunksToUpdateMesh.push_back(pos);
-	//}
 	tbb::parallel_for(tbb::blocked_range<size_t>(0, m_chunksToLoad.size()),
 		[this](const tbb::blocked_range<size_t>& range) {
 			for (size_t i = range.begin(); i != range.end(); ++i) {
-				m_chunks.insert({ m_chunksToLoad[i], m_worldGenerator->GenerateChunk(m_chunksToLoad[i]) });
+				auto chunk = m_worldGenerator->GenerateChunk(m_chunksToLoad[i]);
+				mutex.lock();
+				m_chunks.insert({ m_chunksToLoad[i], std::move(chunk) });
 				m_chunksToUpdateMesh.push_back(m_chunksToLoad[i]);
+				mutex.unlock();
 			}
 		});
 	m_chunksToLoad.clear();

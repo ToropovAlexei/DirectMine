@@ -27,7 +27,6 @@ public:
 	void Render();
 
 	void OnWindowSizeChanged(float aspectRatio);
-	void TEST_ADD_CHUNK(int x1, int y1, int z1, int x2, int y2, int z2);
 
 private:
 	void CreateMainCB();
@@ -44,9 +43,9 @@ private:
 
 private:
 #ifdef NDEBUG
-	static const int chunkLoadingRadius = 8; // Release mode
+	static const int chunkLoadingRadius = 32; // Release mode
 #else
-	static const int chunkLoadingRadius = 2; // Debug mode
+	static const int chunkLoadingRadius = 7; // Debug mode
 #endif
 	std::unordered_map<ChunkPos, std::unique_ptr<Chunk>, ChunkPosHash> m_chunks;
 	std::vector<ChunkPos> m_chunksToLoad;

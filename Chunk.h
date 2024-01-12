@@ -11,9 +11,9 @@ class Chunk
 public:
 	Chunk(ChunkPos& chunkPos);
 
-	static const int WIDTH = 32;
+	static const int WIDTH = 16;
 	static const int HEIGHT = 256;
-	static const int DEPTH = 32;
+	static const int DEPTH = 16;
 	static constexpr int VOLUME = WIDTH * HEIGHT * HEIGHT;
 
 	const std::unordered_map<WorldPos, ChunkBlock, WorldPosHash>& GetBlocks() const noexcept;
