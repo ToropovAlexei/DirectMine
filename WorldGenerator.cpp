@@ -30,11 +30,11 @@ std::unique_ptr<Chunk> WorldGenerator::GenerateChunk(ChunkPos& chunkPos)
                 {
                     chunk->AddBlock(pos, BlockId::Grass);
                 }
-                else if (y == height - 2) {
+                else if (y > height - 4) {
                     chunk->AddBlock(pos, BlockId::Dirt);
                 }
                 else {
-                    float oreNoise = noise.GetNoise(static_cast<float>(x) / Chunk::WIDTH, static_cast<float>(z) / Chunk::DEPTH, 2.0f);
+                    float oreNoise = noise.GetNoise(static_cast<float>(chunkPos.x + x), static_cast<float>(chunkPos.z + z), 2.0f);
 
                     if (oreNoise > 0.6f) {
                         chunk->AddBlock(pos, BlockId::Stone);
