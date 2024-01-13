@@ -15,7 +15,7 @@ public:
 		Right
 	};
 public:
-	Block() = default;
+	Block();
 	Block(BlockId id, std::string name, std::vector<std::string> textures);
 
 	std::string& GetName();

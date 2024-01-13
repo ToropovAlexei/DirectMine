@@ -1,6 +1,5 @@
 #pragma once
 
-#include "Cube.h"
 #include "Chunk.h"
 #include "TextureAtlas.h"
 #include "DeviceResources.h"

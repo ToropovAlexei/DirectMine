@@ -11,9 +11,6 @@
     <Filter Include="Shaders">
       <UniqueIdentifier>{a818c34d-166e-4a64-a96f-387b5e2865f8}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Blocks">
-      <UniqueIdentifier>{c4b2118b-a00e-4e79-b793-d0b6b3a23554}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Textures">
       <UniqueIdentifier>{aace79c6-2b09-48ca-951b-ba2a9209bf0a}</UniqueIdentifier>
     </Filter>
@@ -46,12 +43,6 @@
       <Filter>Common</Filter>
     </ClInclude>
     <ClInclude Include="Camera.h" />
-    <ClInclude Include="Cube.h">
-      <Filter>Blocks</Filter>
-    </ClInclude>
-    <ClInclude Include="TexturesManager.h">
-      <Filter>Textures</Filter>
-    </ClInclude>
     <ClInclude Include="ChunkRenderer.h">
       <Filter>Render</Filter>
     </ClInclude>
@@ -72,9 +63,6 @@
     </ClInclude>
     <ClInclude Include="MathUtils.h">
       <Filter>Utils</Filter>
-    </ClInclude>
-    <ClInclude Include="Mesh.h">
-      <Filter>Graphics</Filter>
     </ClInclude>
     <ClInclude Include="UVCoords.h">
       <Filter>Graphics</Filter>
@@ -117,12 +105,6 @@
       <Filter>Common</Filter>
     </ClCompile>
     <ClCompile Include="Camera.cpp" />
-    <ClCompile Include="Cube.cpp">
-      <Filter>Blocks</Filter>
-    </ClCompile>
-    <ClCompile Include="TexturesManager.cpp">
-      <Filter>Textures</Filter>
-    </ClCompile>
     <ClCompile Include="ChunkRenderer.cpp">
       <Filter>Render</Filter>
     </ClCompile>
@@ -143,9 +125,6 @@
     </ClCompile>
     <ClCompile Include="MathUtils.cpp">
       <Filter>Utils</Filter>
-    </ClCompile>
-    <ClCompile Include="Mesh.cpp">
-      <Filter>Graphics</Filter>
     </ClCompile>
     <ClCompile Include="UVCoords.cpp">
       <Filter>Graphics</Filter>

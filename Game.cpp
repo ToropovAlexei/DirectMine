@@ -73,17 +73,15 @@ void Game::Tick()
 // Updates the world.
 void Game::Update(DX::StepTimer const& timer)
 {
-    float elapsedTime = float(timer.GetElapsedSeconds());
-
     // TODO: Add your game logic here.
+
+    m_world->Update(timer);
     
     auto kb = m_keyboard->GetState();
     if (kb.Escape)
     {
         ExitGame();
     }
-
-    m_world->Update(timer);
 }
 #pragma endregion
 
@@ -189,8 +187,6 @@ void Game::GetDefaultSize(int& width, int& height) const noexcept
 // These are the resources that depend on the device.
 void Game::CreateDeviceDependentResources()
 {
-    auto device = m_deviceResources->GetD3DDevice();
-
     // TODO: Initialize device dependent objects here (independent of window size).
     m_world = std::make_unique<World>(m_deviceResources, m_keyboard, m_mouse, m_tracker);
 }

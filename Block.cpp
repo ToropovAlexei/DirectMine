@@ -1,6 +1,11 @@
 #include "pch.h"
 #include "Block.h"
 
+Block::Block() :
+	m_id(BlockId::Air)
+{
+}
+
 Block::Block(BlockId id, std::string name, std::vector<std::string> textures) :
 	m_name(name),
 	m_id(id)

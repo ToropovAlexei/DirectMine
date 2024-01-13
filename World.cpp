@@ -255,8 +255,8 @@ void World::UnloadChunks()
 
 bool World::CheckBlockCollision(WorldPos& worldPos)
 {
-	int xPos = MathUtils::RoundDown(worldPos.x, Chunk::WIDTH);
-	int zPos = MathUtils::RoundDown(worldPos.z, Chunk::DEPTH);
+	int xPos = MathUtils::RoundDown(static_cast<int>(worldPos.x), Chunk::WIDTH);
+	int zPos = MathUtils::RoundDown(static_cast<int>(worldPos.z), Chunk::DEPTH);
 	ChunkPos chunkPos = ChunkPos(xPos, zPos);
 	auto it = m_chunks.find(chunkPos);
 	if (it == m_chunks.end())
