@@ -2,6 +2,7 @@
 #include "Chunk.h"
 #include "UVCoords.h"
 #include "TextureAtlas.h"
+#include "MathUtils.h"
 
 Chunk::Chunk(ChunkPos& worldPos) :
     m_worldPos(worldPos)
@@ -207,27 +208,27 @@ void Chunk::UpdateMesh(ID3D11Device* device, BlockManager& blockManager)
     BuildIndexBuffer(device);
 }
 
-void Chunk::UpdateMeshWithoutBuffers(BlockManager& blockManager)
+void Chunk::UpdateMeshWithoutBuffers(BlockManager& blockManager, std::unordered_map<ChunkPos, std::unique_ptr<Chunk>, ChunkPosHash>& chunks)
 {
     for (auto& blockPair : m_blocks)
     {
         WorldPos pos = blockPair.first + m_worldPos;
         WorldPos topPos = blockPair.first + WorldPos(0.0f, 1.0f, 0.0f);
         WorldPos bottomPos = blockPair.first - WorldPos(0.0f, 1.0f, 0.0f);
-        WorldPos leftPos = blockPair.first - WorldPos(1.0f, 0.0f, 0.0f);
-        WorldPos rightPos = blockPair.first + WorldPos(1.0f, 0.0f, 0.0f);
-        WorldPos frontPos = blockPair.first - WorldPos(0.0f, 0.0f, 1.0f);
-        WorldPos backPos = blockPair.first + WorldPos(0.0f, 0.0f, 1.0f);
+        WorldPos leftPos = pos - WorldPos(1.0f, 0.0f, 0.0f);
+        WorldPos rightPos = pos + WorldPos(1.0f, 0.0f, 0.0f);
+        WorldPos frontPos = pos - WorldPos(0.0f, 0.0f, 1.0f);
+        WorldPos backPos = pos + WorldPos(0.0f, 0.0f, 1.0f);
 
         BlockId blockId = blockPair.second.GetId();
         Block& block = blockManager.GetBlockById(blockId);
         DirectX::XMFLOAT3 blockPos = DirectX::XMFLOAT3(pos.x, pos.y, pos.z);
 
-        if (pos.z == 0 || !HasBlockAt(frontPos))
+        if (!HasBlockInWorld(frontPos, chunks))
         {
             AddFrontFace(blockPos, block.GetFaceTexture(Block::BlockFaces::Front));
         }
-        if (pos.z == DEPTH - 1 || !HasBlockAt(backPos))
+        if (!HasBlockInWorld(backPos, chunks))
         {
             AddBackFace(blockPos, block.GetFaceTexture(Block::BlockFaces::Back));
         }
@@ -239,15 +240,29 @@ void Chunk::UpdateMeshWithoutBuffers(BlockManager& blockManager)
         {
             AddBottomFace(blockPos, block.GetFaceTexture(Block::BlockFaces::Bottom));
         }
-        if (pos.x == 0 || !HasBlockAt(leftPos))
+        if (!HasBlockInWorld(leftPos, chunks))
         {
             AddLeftFace(blockPos, block.GetFaceTexture(Block::BlockFaces::Left));
         }
-        if (pos.x == WIDTH - 1 || !HasBlockAt(rightPos))
+        if (!HasBlockInWorld(rightPos, chunks))
         {
             AddRightFace(blockPos, block.GetFaceTexture(Block::BlockFaces::Right));
         }
     }
+}
+
+inline bool Chunk::HasBlockInWorld(WorldPos& worldPos, std::unordered_map<ChunkPos, std::unique_ptr<Chunk>, ChunkPosHash>& chunks)
+{
+    int xPos = MathUtils::RoundDown(static_cast<int>(worldPos.x), Chunk::WIDTH);
+    int zPos = MathUtils::RoundDown(static_cast<int>(worldPos.z), Chunk::DEPTH);
+    ChunkPos chunkPos = ChunkPos(xPos, zPos);
+    auto it = chunks.find(chunkPos);
+    if (it == chunks.end())
+    {
+        return false;
+    }
+    WorldPos blockPos = WorldPos(worldPos.x - xPos, worldPos.y, worldPos.z - zPos);
+    return it->second->HasBlockAt(blockPos);
 }
 
 inline bool Chunk::HasBlockAt(WorldPos& pos)  const noexcept
