@@ -28,7 +28,7 @@ void Chunk::FillWith()
 	}
 }
 
-void Chunk::AddBlock(WorldPos& worldPos, BlockId blockId)
+void Chunk::AddBlock(WorldPos& worldPos, BlockId blockId) noexcept
 {
     m_blocks.insert({ worldPos, ChunkBlock(blockId) });
 }
@@ -53,7 +53,7 @@ Microsoft::WRL::ComPtr<ID3D11Buffer> Chunk::GetIndexBuffer()
     return m_indexBuffer;
 }
 
-inline void Chunk::AddFrontFace(DirectX::XMFLOAT3& pos, std::string& texture)
+inline void Chunk::AddFrontFace(DirectX::XMFLOAT3& pos, std::string& texture) noexcept
 {
     UVCoords uvCoords = TextureAtlas::GetTextureCoords(texture);
     UINT offset = static_cast<UINT>(m_vertices.size());
@@ -71,7 +71,7 @@ inline void Chunk::AddFrontFace(DirectX::XMFLOAT3& pos, std::string& texture)
     m_indices.emplace_back(2 + offset);
 }
 
-inline void Chunk::AddBackFace(DirectX::XMFLOAT3& pos, std::string& texture)
+inline void Chunk::AddBackFace(DirectX::XMFLOAT3& pos, std::string& texture) noexcept
 {
     UVCoords uvCoords = TextureAtlas::GetTextureCoords(texture);
     UINT offset = static_cast<UINT>(m_vertices.size());
@@ -89,7 +89,7 @@ inline void Chunk::AddBackFace(DirectX::XMFLOAT3& pos, std::string& texture)
     m_indices.emplace_back(3 + offset);
 }
 
-inline void Chunk::AddTopFace(DirectX::XMFLOAT3& pos, std::string& texture)
+inline void Chunk::AddTopFace(DirectX::XMFLOAT3& pos, std::string& texture) noexcept
 {
     UVCoords uvCoords = TextureAtlas::GetTextureCoords(texture);
     UINT offset = static_cast<UINT>(m_vertices.size());
@@ -107,7 +107,7 @@ inline void Chunk::AddTopFace(DirectX::XMFLOAT3& pos, std::string& texture)
     m_indices.emplace_back(2 + offset);
 }
 
-inline void Chunk::AddBottomFace(DirectX::XMFLOAT3& pos, std::string& texture)
+inline void Chunk::AddBottomFace(DirectX::XMFLOAT3& pos, std::string& texture) noexcept
 {
     UVCoords uvCoords = TextureAtlas::GetTextureCoords(texture);
     UINT offset = static_cast<UINT>(m_vertices.size());
@@ -125,7 +125,7 @@ inline void Chunk::AddBottomFace(DirectX::XMFLOAT3& pos, std::string& texture)
     m_indices.emplace_back(3 + offset);
 }
 
-inline void Chunk::AddLeftFace(DirectX::XMFLOAT3& pos, std::string& texture)
+inline void Chunk::AddLeftFace(DirectX::XMFLOAT3& pos, std::string& texture) noexcept
 {
     UVCoords uvCoords = TextureAtlas::GetTextureCoords(texture);
     UINT offset = static_cast<UINT>(m_vertices.size());
@@ -143,7 +143,7 @@ inline void Chunk::AddLeftFace(DirectX::XMFLOAT3& pos, std::string& texture)
     m_indices.emplace_back(2 + offset);
 }
 
-inline void Chunk::AddRightFace(DirectX::XMFLOAT3& pos, std::string& texture)
+inline void Chunk::AddRightFace(DirectX::XMFLOAT3& pos, std::string& texture) noexcept
 {
     UVCoords uvCoords = TextureAtlas::GetTextureCoords(texture);
     UINT offset = static_cast<UINT>(m_vertices.size());
@@ -207,7 +207,7 @@ void Chunk::UpdateMesh(ID3D11Device* device, BlockManager& blockManager)
     BuildIndexBuffer(device);
 }
 
-void Chunk::UpdateMeshWithoutBuffers(BlockManager blockManager)
+void Chunk::UpdateMeshWithoutBuffers(BlockManager& blockManager)
 {
     for (auto& blockPair : m_blocks)
     {

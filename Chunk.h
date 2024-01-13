@@ -20,10 +20,10 @@ public:
 
 	void FillWith();
 
-	void AddBlock(WorldPos& worldPos, BlockId blockId);
+	void AddBlock(WorldPos& worldPos, BlockId blockId) noexcept;
 
 	void UpdateMesh(ID3D11Device* device, BlockManager& blockManager);
-	void UpdateMeshWithoutBuffers(BlockManager blockManager);
+	void UpdateMeshWithoutBuffers(BlockManager& blockManager);
 
 	void UpdateBuffers(ID3D11Device* device);
 
@@ -37,12 +37,12 @@ public:
 	Microsoft::WRL::ComPtr<ID3D11Buffer> GetIndexBuffer();
 
 private:
-	inline void AddFrontFace(DirectX::XMFLOAT3& pos, std::string& texture);
-	inline void AddBackFace(DirectX::XMFLOAT3& pos, std::string& texture);
-	inline void AddTopFace(DirectX::XMFLOAT3& pos, std::string& texture);
-	inline void AddBottomFace(DirectX::XMFLOAT3& pos, std::string& texture);
-	inline void AddLeftFace(DirectX::XMFLOAT3& pos, std::string& texture);
-	inline void AddRightFace(DirectX::XMFLOAT3& pos, std::string& texture);
+	inline void AddFrontFace(DirectX::XMFLOAT3& pos, std::string& texture) noexcept;
+	inline void AddBackFace(DirectX::XMFLOAT3& pos, std::string& texture) noexcept;
+	inline void AddTopFace(DirectX::XMFLOAT3& pos, std::string& texture) noexcept;
+	inline void AddBottomFace(DirectX::XMFLOAT3& pos, std::string& texture) noexcept;
+	inline void AddLeftFace(DirectX::XMFLOAT3& pos, std::string& texture) noexcept;
+	inline void AddRightFace(DirectX::XMFLOAT3& pos, std::string& texture) noexcept;
 
 private:
 	std::unordered_map<WorldPos, ChunkBlock, WorldPosHash> m_blocks;
