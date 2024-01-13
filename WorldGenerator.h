@@ -12,6 +12,7 @@ public:
 
 private:
 	FastNoiseLite noise;
+	FastNoiseLite caveNoiseGen;
 	static const int maxHeight = 64;
 	BlockManager& m_blockManager;
 };
