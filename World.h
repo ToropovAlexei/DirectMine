@@ -49,9 +49,9 @@ private:
 	
 private:
 #ifdef NDEBUG
-	static const int chunkLoadingRadius = 16; // Release mode
+	static const int chunkLoadingRadius = 24; // Release mode
 #else
-	static const int chunkLoadingRadius = 2; // Debug mode
+	static const int chunkLoadingRadius = 12; // Debug mode
 #endif
 	std::unordered_map<ChunkPos, std::unique_ptr<Chunk>, ChunkPosHash> m_chunks;
 	std::vector<ChunkPos> m_chunksToLoad;

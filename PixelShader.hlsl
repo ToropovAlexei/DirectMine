@@ -10,11 +10,11 @@ struct VertexOut
 
 #define FOG_COLOR float4(0.8f, 0.8f, 0.8f, 1.0f)
 #ifndef NDEBUG
-    #define FOG_START 180.0f
-    #define FOG_END 230.0f
+    #define FOG_START 320.0f
+    #define FOG_END 360.0f
 #else
-    #define FOG_START 100.0f
-    #define FOG_END 150.0f
+    #define FOG_START 250.0f
+    #define FOG_END 290.0f
 #endif
 
 float CalculateFogFactor(float depth)

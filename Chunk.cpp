@@ -220,7 +220,7 @@ void Chunk::UpdateMeshWithoutBuffers(BlockManager blockManager)
         WorldPos backPos = blockPair.first + WorldPos(0.0f, 0.0f, 1.0f);
 
         BlockId blockId = blockPair.second.GetId();
-        Block block = blockManager.GetBlockById(blockId);
+        Block& block = blockManager.GetBlockById(blockId);
         DirectX::XMFLOAT3 blockPos = DirectX::XMFLOAT3(pos.x, pos.y, pos.z);
 
         if (pos.z == 0 || !HasBlockAt(frontPos))
