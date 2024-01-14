@@ -59,6 +59,11 @@ void World::Update(DX::StepTimer const& timer)
 	{
 		m_cam->Walk(-speed * elapsedTime);
 	}
+	if (kb.F)
+	{
+		
+		m_mouse->SetMode(m_mouse->GetState().positionMode == DirectX::Mouse::MODE_RELATIVE ? DirectX::Mouse::MODE_ABSOLUTE : DirectX::Mouse::MODE_RELATIVE);
+	}
 
 	auto mouse = m_mouse->GetState();
 	m_tracker->Update(mouse);
@@ -70,16 +75,7 @@ void World::Update(DX::StepTimer const& timer)
 		m_cam->Pitch(dy);
 		m_cam->RotateY(dx);
 	}
-
-	if (m_tracker->leftButton == DirectX::Mouse::ButtonStateTracker::ButtonState::PRESSED)
-	{
-		m_mouse->SetMode(DirectX::Mouse::MODE_RELATIVE);
-	}
-	else if (m_tracker->leftButton == DirectX::Mouse::ButtonStateTracker::ButtonState::RELEASED)
-	{
-		m_mouse->SetMode(DirectX::Mouse::MODE_ABSOLUTE);
-	}
-	if (m_tracker->rightButton == DirectX::Mouse::ButtonStateTracker::ButtonState::PRESSED && rayCastResult.has_value())
+	if (m_tracker->leftButton == DirectX::Mouse::ButtonStateTracker::ButtonState::PRESSED && rayCastResult.has_value())
 	{
 		RemoveBlockAt(rayCastResult.value());
 	}
