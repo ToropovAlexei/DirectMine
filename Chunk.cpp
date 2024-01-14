@@ -29,6 +29,16 @@ void Chunk::FillWith()
 	}
 }
 
+void Chunk::RemoveBlock(WorldPos& worldPos) noexcept
+{
+    auto it = m_blocks.find(worldPos);
+    if (it == m_blocks.end())
+    {
+        return;
+    }
+    m_blocks.erase(it);
+}
+
 void Chunk::AddBlock(WorldPos& worldPos, BlockId blockId) noexcept
 {
     m_blocks.insert({ worldPos, ChunkBlock(blockId) });
@@ -164,6 +174,8 @@ inline void Chunk::AddRightFace(DirectX::XMFLOAT3& pos, std::string& texture) no
 
 void Chunk::UpdateMesh(ID3D11Device* device, BlockManager& blockManager)
 {
+    m_vertices.clear();
+    m_indices.clear();
     for (auto& blockPair : m_blocks)
     {
         WorldPos pos = blockPair.first + m_worldPos;
@@ -210,6 +222,8 @@ void Chunk::UpdateMesh(ID3D11Device* device, BlockManager& blockManager)
 
 void Chunk::UpdateMeshWithoutBuffers(BlockManager& blockManager, std::unordered_map<ChunkPos, std::unique_ptr<Chunk>, ChunkPosHash>& chunks)
 {
+    m_vertices.clear();
+    m_indices.clear();
     for (auto& blockPair : m_blocks)
     {
         WorldPos pos = blockPair.first + m_worldPos;

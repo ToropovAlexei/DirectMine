@@ -45,13 +45,15 @@ private:
 
 	bool CheckBlockCollision(WorldPos& worldPos);
 
+	void RemoveBlockAt(WorldPos& worldPos);
+
 	std::optional<WorldPos> Raycast();
 	
 private:
 #ifdef NDEBUG
 	static const int chunkLoadingRadius = 24; // Release mode
 #else
-	static const int chunkLoadingRadius = 8; // Debug mode
+	static const int chunkLoadingRadius = 4; // Debug mode
 #endif
 	std::unordered_map<ChunkPos, std::unique_ptr<Chunk>, ChunkPosHash> m_chunks;
 	std::vector<ChunkPos> m_chunksToLoad;

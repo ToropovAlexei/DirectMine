@@ -79,6 +79,10 @@ void World::Update(DX::StepTimer const& timer)
 	{
 		m_mouse->SetMode(DirectX::Mouse::MODE_ABSOLUTE);
 	}
+	if (m_tracker->rightButton == DirectX::Mouse::ButtonStateTracker::ButtonState::PRESSED && rayCastResult.has_value())
+	{
+		RemoveBlockAt(rayCastResult.value());
+	}
 
 	std::wstring title = L"DirectX 11 FPS: "
 	+ std::to_wstring(timer.GetFramesPerSecond())
@@ -265,6 +269,22 @@ bool World::CheckBlockCollision(WorldPos& worldPos)
 	}
 	WorldPos blockPos = WorldPos(worldPos.x - xPos, worldPos.y, worldPos.z - zPos);
 	return it->second->HasBlockAt(blockPos);
+}
+
+void World::RemoveBlockAt(WorldPos& worldPos)
+{
+	int xPos = MathUtils::RoundDown(static_cast<int>(worldPos.x), Chunk::WIDTH);
+	int zPos = MathUtils::RoundDown(static_cast<int>(worldPos.z), Chunk::DEPTH);
+	ChunkPos chunkPos = ChunkPos(xPos, zPos);
+	auto it = m_chunks.find(chunkPos);
+	if (it == m_chunks.end())
+	{
+		return;
+	}
+	WorldPos blockPos = WorldPos(worldPos.x - xPos, worldPos.y, worldPos.z - zPos);
+	it->second->RemoveBlock(blockPos);
+	it->second->UpdateMeshWithoutBuffers(m_blockManager, m_chunks);
+	it->second->UpdateBuffers(m_deviceResources->GetD3DDevice());
 }
 
 std::optional<WorldPos> World::Raycast()

@@ -20,6 +20,8 @@ public:
 
 	void FillWith();
 
+	void RemoveBlock(WorldPos& worldPos) noexcept;
+
 	void AddBlock(WorldPos& worldPos, BlockId blockId) noexcept;
 
 	void UpdateMesh(ID3D11Device* device, BlockManager& blockManager);
