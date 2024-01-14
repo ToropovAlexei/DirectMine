@@ -22,6 +22,7 @@ Game::Game() noexcept(false)
 	m_keyboard = std::make_unique<Keyboard>();
 	m_mouse = std::make_unique<Mouse>();
     m_tracker = std::make_unique<DirectX::Mouse::ButtonStateTracker>();
+    m_keysTracker = std::make_unique<DirectX::Keyboard::KeyboardStateTracker>();
 }
 
 // Initialize the Direct3D resources required to run.
@@ -188,7 +189,7 @@ void Game::GetDefaultSize(int& width, int& height) const noexcept
 void Game::CreateDeviceDependentResources()
 {
     // TODO: Initialize device dependent objects here (independent of window size).
-    m_world = std::make_unique<World>(m_deviceResources, m_keyboard, m_mouse, m_tracker);
+    m_world = std::make_unique<World>(m_deviceResources, m_keyboard, m_mouse, m_tracker, m_keysTracker);
 }
 
 // Allocate all memory resources that change on a window SizeChanged event.

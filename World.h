@@ -22,7 +22,8 @@ public:
 	World(std::unique_ptr<DX::DeviceResources>& deviceResources, 
 		std::unique_ptr<DirectX::Keyboard>& keyboard, 
 		std::unique_ptr<DirectX::Mouse>& mouse, 
-		std::unique_ptr<DirectX::Mouse::ButtonStateTracker>& tracker);
+		std::unique_ptr<DirectX::Mouse::ButtonStateTracker>& tracker,
+		std::unique_ptr<DirectX::Keyboard::KeyboardStateTracker>& keysTracker);
 
 	void Update(DX::StepTimer const& timer);
 
@@ -64,6 +65,7 @@ private:
 	std::unique_ptr<DirectX::Keyboard>& m_keyboard;
 	std::unique_ptr<DirectX::Mouse>& m_mouse;
 	std::unique_ptr<DirectX::Mouse::ButtonStateTracker>& m_tracker;
+	std::unique_ptr<DirectX::Keyboard::KeyboardStateTracker>& m_keysTracker;
 
 	BlockManager m_blockManager;
 	std::unique_ptr<WorldGenerator> m_worldGenerator;

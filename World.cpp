@@ -8,11 +8,13 @@
 World::World(std::unique_ptr<DX::DeviceResources>& deviceResources, 
 	std::unique_ptr<DirectX::Keyboard>& keyboard, 
 	std::unique_ptr<DirectX::Mouse>& mouse, 
-	std::unique_ptr<DirectX::Mouse::ButtonStateTracker>& tracker) :
+	std::unique_ptr<DirectX::Mouse::ButtonStateTracker>& tracker,
+	std::unique_ptr<DirectX::Keyboard::KeyboardStateTracker>& keysTracker) :
 	m_deviceResources(deviceResources),
 	m_keyboard(keyboard),
 	m_mouse(mouse),
-	m_tracker(tracker)
+	m_tracker(tracker),
+	m_keysTracker(keysTracker)
 {
 	m_blockManager = BlockManager();
 	m_blockManager.LoadBlocks();
@@ -42,6 +44,7 @@ void World::Update(DX::StepTimer const& timer)
 	m_blockOutlineRenderer->UpdateOutlinedCube(rayCastResult);
 	float elapsedTime = float(timer.GetElapsedSeconds());
 	auto kb = m_keyboard->GetState();
+	m_keysTracker->Update(kb);
 	const float speed = 25.0f;
 	if (kb.A)
 	{
@@ -59,9 +62,8 @@ void World::Update(DX::StepTimer const& timer)
 	{
 		m_cam->Walk(-speed * elapsedTime);
 	}
-	if (kb.F)
+	if (m_keysTracker->IsKeyPressed(DirectX::Keyboard::F))
 	{
-		
 		m_mouse->SetMode(m_mouse->GetState().positionMode == DirectX::Mouse::MODE_RELATIVE ? DirectX::Mouse::MODE_ABSOLUTE : DirectX::Mouse::MODE_RELATIVE);
 	}
 

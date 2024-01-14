@@ -63,6 +63,7 @@ private:
     std::unique_ptr<DirectX::Keyboard> m_keyboard;
     std::unique_ptr<DirectX::Mouse> m_mouse;
     std::unique_ptr<DirectX::Mouse::ButtonStateTracker> m_tracker;
+    std::unique_ptr<DirectX::Keyboard::KeyboardStateTracker> m_keysTracker;
 
     std::unique_ptr<World> m_world;
 
