@@ -297,6 +297,10 @@ void Chunk::UpdateBuffers(ID3D11Device* device)
 
 void Chunk::BuildVertexBuffer(ID3D11Device* device)
 {
+    if (m_vertices.empty())
+    {
+        return;
+    }
     D3D11_BUFFER_DESC bd = {};
     bd.BindFlags = D3D11_BIND_VERTEX_BUFFER;
     bd.Usage = D3D11_USAGE_DEFAULT;
@@ -311,6 +315,10 @@ void Chunk::BuildVertexBuffer(ID3D11Device* device)
 
 void Chunk::BuildIndexBuffer(ID3D11Device* device)
 {
+    if (m_indices.empty())
+    {
+        return;
+    }
     D3D11_BUFFER_DESC ibd = {};
     ibd.BindFlags = D3D11_BIND_INDEX_BUFFER;
     ibd.Usage = D3D11_USAGE_DEFAULT;

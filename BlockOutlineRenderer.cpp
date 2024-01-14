@@ -25,7 +25,6 @@ void BlockOutlineRenderer::RenderCubeOutline()
     context->IASetIndexBuffer(m_indexBuffer.Get(), DXGI_FORMAT_R32_UINT, 0u);
     context->PSSetShader(m_pixelShader.Get(), nullptr, 0u);
     context->VSSetShader(m_vertexShader.Get(), nullptr, 0u);
-    context->GSSetShader(m_geometryShader.Get(), nullptr, 0u);
     context->IASetInputLayout(m_inputLayout.Get());
     context->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_LINELIST);
     context->DrawIndexed(static_cast<UINT>(m_indices.size()), 0u, 0u);
@@ -82,14 +81,14 @@ void BlockOutlineRenderer::UpdateVertices()
     }
     auto& worldPos = m_worldPos.value();
     m_vertices = {
-        OutlineVertex({ 0.0f + worldPos.x, 0.0f + worldPos.y, 0.0f + worldPos.z }),
-        OutlineVertex({ 0.0f + worldPos.x, 1.0f + worldPos.y, 0.0f + worldPos.z }),
-        OutlineVertex({ 0.0f + worldPos.x, 0.0f + worldPos.y, 1.0f + worldPos.z }),
-        OutlineVertex({ 0.0f + worldPos.x, 1.0f + worldPos.y, 1.0f + worldPos.z }),
-        OutlineVertex({ 1.0f + worldPos.x, 0.0f + worldPos.y, 0.0f + worldPos.z }),
-        OutlineVertex({ 1.0f + worldPos.x, 1.0f + worldPos.y, 0.0f + worldPos.z }),
-        OutlineVertex({ 1.0f + worldPos.x, 0.0f + worldPos.y, 1.0f + worldPos.z }),
-        OutlineVertex({ 1.0f + worldPos.x, 1.0f + worldPos.y, 1.0f + worldPos.z }),
+        OutlineVertex({ -0.005f + worldPos.x, -0.005f + worldPos.y, -0.005f + worldPos.z }),
+        OutlineVertex({ -0.005f + worldPos.x, 1.005f + worldPos.y, -0.005f + worldPos.z }),
+        OutlineVertex({ -0.005f + worldPos.x, -0.005f + worldPos.y, 1.005f + worldPos.z }),
+        OutlineVertex({ -0.005f + worldPos.x, 1.005f + worldPos.y, 1.005f + worldPos.z }),
+        OutlineVertex({ 1.005f + worldPos.x, -0.005f + worldPos.y, -0.005f + worldPos.z }),
+        OutlineVertex({ 1.005f + worldPos.x, 1.005f + worldPos.y, -0.005f + worldPos.z }),
+        OutlineVertex({ 1.005f + worldPos.x, -0.005f + worldPos.y, 1.005f + worldPos.z }),
+        OutlineVertex({ 1.005f + worldPos.x, 1.005f + worldPos.y, 1.005f + worldPos.z }),
     };
     UpdateVertexBuffer();
 }
