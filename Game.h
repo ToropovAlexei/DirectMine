@@ -9,6 +9,7 @@
 #include "Camera.h"
 #include "World.h"
 #include "TextureAtlas.h"
+#include "MSAAHelper.h"
 
 // A basic game implementation that creates a D3D11 device and
 // provides a game loop.
@@ -64,6 +65,7 @@ private:
     std::unique_ptr<DirectX::Mouse> m_mouse;
     std::unique_ptr<DirectX::Mouse::ButtonStateTracker> m_tracker;
     std::unique_ptr<DirectX::Keyboard::KeyboardStateTracker> m_keysTracker;
+    std::unique_ptr<DX::MSAAHelper> m_msaaHelper;
 
     std::unique_ptr<World> m_world;
 

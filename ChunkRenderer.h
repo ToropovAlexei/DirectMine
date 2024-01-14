@@ -17,6 +17,7 @@ private:
 	void BuildInputLayout();
     void BuildSampler();
     void BuildBlendState();
+    void BuildRasterState();
 
 private:
     std::unique_ptr<DX::DeviceResources>& m_deviceResources;
@@ -25,6 +26,7 @@ private:
     Microsoft::WRL::ComPtr<ID3D11InputLayout> m_inputLayout;
     Microsoft::WRL::ComPtr<ID3D11SamplerState> m_sampler;
     Microsoft::WRL::ComPtr<ID3D11BlendState> m_blendState;
+    Microsoft::WRL::ComPtr<ID3D11RasterizerState> m_rasterState;
 
     UINT m_stride = sizeof(Vertex);
     UINT m_offset = 0u;

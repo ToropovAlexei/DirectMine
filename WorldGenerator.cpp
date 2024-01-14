@@ -18,6 +18,9 @@ std::unique_ptr<Chunk> WorldGenerator::GenerateChunk(ChunkPos& chunkPos)
     auto start = std::chrono::high_resolution_clock::now();
     std::unique_ptr<Chunk> chunk = std::make_unique<Chunk>(chunkPos);
 
+    WorldPos wp{ 0, 0, 0 };
+    //chunk->AddBlock(wp, BlockId::Bedrock);
+
     for (int x = 0; x < Chunk::WIDTH; ++x) {
         for (int z = 0; z < Chunk::DEPTH; ++z) {
             float heightNoise = noise.GetNoise(static_cast<float>(chunkPos.x + x) / Chunk::WIDTH, static_cast<float>(chunkPos.z + z) / Chunk::DEPTH);

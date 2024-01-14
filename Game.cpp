@@ -6,6 +6,12 @@
 #include "Game.h"
 #include "ShadersLoader.h"
 
+namespace
+{
+    constexpr UINT MSAA_COUNT = 4;
+    constexpr UINT MSAA_QUALITY = 0;
+}
+
 extern void ExitGame() noexcept;
 
 using namespace DirectX;
@@ -14,11 +20,16 @@ using Microsoft::WRL::ComPtr;
 
 Game::Game() noexcept(false)
 {
-    m_deviceResources = std::make_unique<DX::DeviceResources>();
+    m_deviceResources = std::make_unique<DX::DeviceResources>(DXGI_FORMAT_B8G8R8A8_UNORM,
+        DXGI_FORMAT_UNKNOWN);
     // TODO: Provide parameters for swapchain format, depth/stencil format, and backbuffer count.
     //   Add DX::DeviceResources::c_AllowTearing to opt-in to variable rate displays.
     //   Add DX::DeviceResources::c_EnableHDR for HDR10 display.
     m_deviceResources->RegisterDeviceNotify(this);
+    m_msaaHelper = std::make_unique<DX::MSAAHelper>(
+        m_deviceResources->GetBackBufferFormat(),
+        DXGI_FORMAT_D32_FLOAT,
+        MSAA_COUNT);
 	m_keyboard = std::make_unique<Keyboard>();
 	m_mouse = std::make_unique<Mouse>();
     m_tracker = std::make_unique<DirectX::Mouse::ButtonStateTracker>();
@@ -105,6 +116,7 @@ void Game::Render()
     m_deviceResources->PIXEndEvent();
 
     // Show the new frame.
+    m_msaaHelper->Resolve(m_deviceResources->GetD3DDeviceContext(), m_deviceResources->GetRenderTarget());
     m_deviceResources->Present();
 }
 
@@ -115,8 +127,8 @@ void Game::Clear()
 
     // Clear the views.
     auto context = m_deviceResources->GetD3DDeviceContext();
-    auto renderTarget = m_deviceResources->GetRenderTargetView();
-    auto depthStencil = m_deviceResources->GetDepthStencilView();
+    auto renderTarget = m_msaaHelper->GetMSAARenderTargetView();
+    auto depthStencil = m_msaaHelper->GetMSAADepthStencilView();
 
     context->ClearRenderTargetView(renderTarget, Colors::CornflowerBlue);
     context->ClearDepthStencilView(depthStencil, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
@@ -189,6 +201,7 @@ void Game::GetDefaultSize(int& width, int& height) const noexcept
 void Game::CreateDeviceDependentResources()
 {
     // TODO: Initialize device dependent objects here (independent of window size).
+    m_msaaHelper->SetDevice(m_deviceResources->GetD3DDevice());
     m_world = std::make_unique<World>(m_deviceResources, m_keyboard, m_mouse, m_tracker, m_keysTracker);
 }
 
@@ -198,12 +211,14 @@ void Game::CreateWindowSizeDependentResources()
     // TODO: Initialize windows-size dependent objects here.
 	auto size = m_deviceResources->GetOutputSize();
 	const float aspectRatio = static_cast<float>(size.right) / static_cast<float>(size.bottom);
+    m_msaaHelper->SetWindow(size);
     m_world->OnWindowSizeChanged(aspectRatio);
 }
 
 void Game::OnDeviceLost()
 {
     // TODO: Add Direct3D resource cleanup here.
+    m_msaaHelper->ReleaseDevice();
 }
 
 void Game::OnDeviceRestored()

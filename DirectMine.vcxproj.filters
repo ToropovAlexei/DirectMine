@@ -96,6 +96,9 @@
     <ClInclude Include="WorldGenerator.h">
       <Filter>World</Filter>
     </ClInclude>
+    <ClInclude Include="MSAAHelper.h">
+      <Filter>Common</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp" />
@@ -149,6 +152,9 @@
     </ClCompile>
     <ClCompile Include="WorldGenerator.cpp">
       <Filter>World</Filter>
+    </ClCompile>
+    <ClCompile Include="MSAAHelper.cpp">
+      <Filter>Common</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

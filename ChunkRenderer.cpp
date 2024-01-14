@@ -8,6 +8,7 @@ ChunkRenderer::ChunkRenderer(std::unique_ptr<DX::DeviceResources>& deviceResourc
     BuildInputLayout();
     BuildSampler();
     BuildBlendState();
+    BuildRasterState();
     m_vertexShader = ShadersLoader::LoadVertexShader(deviceResources->GetD3DDevice(), L"VertexShader.cso");
     m_pixelShader = ShadersLoader::LoadPixelShader(deviceResources->GetD3DDevice(), L"PixelShader.cso");
 }
@@ -38,6 +39,7 @@ void ChunkRenderer::RenderChunks(std::unordered_map<ChunkPos, std::unique_ptr<Ch
     context->PSSetSamplers(0u, 1u, m_sampler.GetAddressOf());
     context->OMSetBlendState(m_blendState.Get(), nullptr, 0xFFFFFFFF);
     context->PSSetShaderResources(0u, 1u, TextureAtlas::GetAtlasSRV().GetAddressOf());
+    context->RSSetState(m_rasterState.Get());
 
     for (auto& chunk : chunks)
     {
@@ -67,9 +69,9 @@ void ChunkRenderer::BuildSampler()
 {
     D3D11_SAMPLER_DESC samplerDesc = {};
     samplerDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_POINT;
-    samplerDesc.AddressU = D3D11_TEXTURE_ADDRESS_WRAP;
-    samplerDesc.AddressV = D3D11_TEXTURE_ADDRESS_WRAP;
-    samplerDesc.AddressW = D3D11_TEXTURE_ADDRESS_WRAP;
+    samplerDesc.AddressU = D3D11_TEXTURE_ADDRESS_CLAMP;
+    samplerDesc.AddressV = D3D11_TEXTURE_ADDRESS_CLAMP;
+    samplerDesc.AddressW = D3D11_TEXTURE_ADDRESS_CLAMP;
     m_deviceResources->GetD3DDevice()->CreateSamplerState(&samplerDesc, &m_sampler);
 }
 
@@ -87,4 +89,21 @@ void ChunkRenderer::BuildBlendState()
     blendDesc.RenderTarget[0].RenderTargetWriteMask = D3D11_COLOR_WRITE_ENABLE_ALL;
 
     m_deviceResources->GetD3DDevice()->CreateBlendState(&blendDesc, &m_blendState);
+}
+
+void ChunkRenderer::BuildRasterState()
+{
+    D3D11_RASTERIZER_DESC rasterizerDesc;
+    rasterizerDesc.FillMode = D3D11_FILL_SOLID;
+    rasterizerDesc.CullMode = D3D11_CULL_BACK;
+    rasterizerDesc.FrontCounterClockwise = false;
+    rasterizerDesc.DepthBias = 0;
+    rasterizerDesc.DepthBiasClamp = 0.0f;
+    rasterizerDesc.SlopeScaledDepthBias = 0.0f;
+    rasterizerDesc.DepthClipEnable = true;
+    rasterizerDesc.ScissorEnable = false;
+    rasterizerDesc.MultisampleEnable = true;
+    rasterizerDesc.AntialiasedLineEnable = true; // Включение сглажив
+
+    m_deviceResources->GetD3DDevice()->CreateRasterizerState(&rasterizerDesc, &m_rasterState);
 }
