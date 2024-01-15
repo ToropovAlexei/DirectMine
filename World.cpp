@@ -41,7 +41,8 @@ void World::Update(DX::StepTimer const& timer)
 	UpdateChunksMesh();
 	auto rayCastResult = Raycast();
 	//std::optional<WorldPos> rayCastResult = WorldPos(0.0f, 60.0f, 0.0f);
-	m_blockOutlineRenderer->UpdateOutlinedCube(rayCastResult);
+	auto outlinedBlock = rayCastResult.has_value() ? std::optional<WorldPos>(rayCastResult.value().first) : std::nullopt;
+	m_blockOutlineRenderer->UpdateOutlinedCube(outlinedBlock);
 	float elapsedTime = float(timer.GetElapsedSeconds());
 	auto kb = m_keyboard->GetState();
 	m_keysTracker->Update(kb);
@@ -79,7 +80,13 @@ void World::Update(DX::StepTimer const& timer)
 	}
 	if (m_tracker->leftButton == DirectX::Mouse::ButtonStateTracker::ButtonState::PRESSED && rayCastResult.has_value())
 	{
-		RemoveBlockAt(rayCastResult.value());
+		RemoveBlockAt(rayCastResult.value().first);
+	}
+	if (m_tracker->rightButton == DirectX::Mouse::ButtonStateTracker::ButtonState::PRESSED && rayCastResult.has_value())
+	{
+		WorldPos offset = GetOffsetByBlockDirection(rayCastResult.value().second);
+		WorldPos placePos = rayCastResult.value().first + offset;
+		PlaceBlockAt(placePos, BlockId::Cobblestone);
 	}
 
 	std::wstring title = L"DirectX 11 FPS: "
@@ -285,7 +292,23 @@ void World::RemoveBlockAt(WorldPos& worldPos)
 	it->second->UpdateBuffers(m_deviceResources->GetD3DDevice());
 }
 
-std::optional<WorldPos> World::Raycast()
+void World::PlaceBlockAt(WorldPos& worldPos, BlockId blockId)
+{
+	int xPos = MathUtils::RoundDown(static_cast<int>(worldPos.x), Chunk::WIDTH);
+	int zPos = MathUtils::RoundDown(static_cast<int>(worldPos.z), Chunk::DEPTH);
+	ChunkPos chunkPos = ChunkPos(xPos, zPos);
+	auto it = m_chunks.find(chunkPos);
+	if (it == m_chunks.end())
+	{
+		return;
+	}
+	WorldPos blockPos = WorldPos(worldPos.x - xPos, worldPos.y, worldPos.z - zPos);
+	it->second->AddBlock(blockPos, blockId);
+	it->second->UpdateMeshWithoutBuffers(m_blockManager, m_chunks);
+	it->second->UpdateBuffers(m_deviceResources->GetD3DDevice());
+}
+
+std::optional<std::pair<WorldPos, ChunkBlock::BlockDirection>> World::Raycast()
 {
 	DirectX::XMVECTOR currentPosition = m_cam->GetPosition();
 	DirectX::XMVECTOR step = DirectX::XMVectorScale(DirectX::XMVector3Normalize(m_cam->GetLook()), 0.05f);
@@ -297,12 +320,68 @@ std::optional<WorldPos> World::Raycast()
 			std::floor(DirectX::XMVectorGetY(currentPosition)),
 			std::floor(DirectX::XMVectorGetZ(currentPosition)));
 		if (CheckBlockCollision(blockPos)) {
-			return blockPos;
+			DirectX::XMFLOAT3 collisionPoint;
+			DirectX::XMStoreFloat3(&collisionPoint, currentPosition);
+			return std::pair<WorldPos, ChunkBlock::BlockDirection>(blockPos, GetNearFace(collisionPoint));
 		}
 
 		currentPosition = DirectX::XMVectorAdd(currentPosition, step);
 	}
 
 	return std::nullopt;
+}
+
+ChunkBlock::BlockDirection World::GetNearFace(DirectX::XMFLOAT3& collisionPoint)
+{
+	float blockX = std::floor(collisionPoint.x) + 0.5f;
+	float blockY = std::floor(collisionPoint.y) + 0.5f;
+	float blockZ = std::floor(collisionPoint.z) + 0.5f;
+	float diffX = collisionPoint.x - blockX;
+	float diffY = collisionPoint.y - blockY;
+	float diffZ = collisionPoint.z - blockZ;
+
+	float absDiffX = std::abs(diffX);
+	float absDiffY = std::abs(diffY);
+	float absDiffZ = std::abs(diffZ);
+
+	float minDiff = std::max(absDiffX, std::max(absDiffY, absDiffZ));
+
+	if (minDiff == absDiffX) {
+		if (diffX < 0) {
+			return ChunkBlock::BlockDirection::West;
+		}
+		return ChunkBlock::BlockDirection::East;
+	}
+	if (minDiff == absDiffY) {
+		if (diffY < 0) {
+			return ChunkBlock::BlockDirection::Down;
+		}
+		return ChunkBlock::BlockDirection::Up;
+	}
+	if (diffZ < 0) {
+		return ChunkBlock::BlockDirection::South;
+	}
+	return ChunkBlock::BlockDirection::North;
+}
+
+WorldPos World::GetOffsetByBlockDirection(ChunkBlock::BlockDirection dir)
+{
+	switch (dir)
+	{
+	case ChunkBlock::BlockDirection::East:
+		return WorldPos(1.0f, 0.0f, 0.0f);
+	case ChunkBlock::BlockDirection::West:
+		return WorldPos(-1.0f, 0.0f, 0.0f);
+	case ChunkBlock::BlockDirection::Up:
+		return WorldPos(0.0f, 1.0f, 0.0f);
+	case ChunkBlock::BlockDirection::Down:
+		return WorldPos(0.0f, -1.0f, 0.0f);
+	case ChunkBlock::BlockDirection::North:
+		return WorldPos(0.0f, 0.0f, 1.0f);
+	case ChunkBlock::BlockDirection::South:
+		return WorldPos(0.0f, 0.0f, -1.0f);
+	default:
+		return WorldPos(0.0f, 0.0f, 0.0f);
+	}
 }
 

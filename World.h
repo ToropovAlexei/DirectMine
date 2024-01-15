@@ -48,7 +48,13 @@ private:
 
 	void RemoveBlockAt(WorldPos& worldPos);
 
-	std::optional<WorldPos> Raycast();
+	void PlaceBlockAt(WorldPos& worldPos, BlockId blockId);
+
+	std::optional<std::pair<WorldPos, ChunkBlock::BlockDirection>> Raycast();
+
+	ChunkBlock::BlockDirection GetNearFace(DirectX::XMFLOAT3& collisionPoint);
+
+	WorldPos GetOffsetByBlockDirection(ChunkBlock::BlockDirection dir);
 	
 private:
 #ifdef NDEBUG
