@@ -24,9 +24,9 @@ public:
 
 	std::optional<ChunkBlock> GetBlock(WorldPos& worldPos) noexcept;
 
-	void UpdateMeshWithoutBuffers(BlockManager& blockManager, std::unordered_map<ChunkPos, std::unique_ptr<Chunk>, ChunkPosHash>& chunks);
+	void UpdateMeshWithoutBuffers(BlockManager& blockManager, std::unordered_map<ChunkPos, std::shared_ptr<Chunk>, ChunkPosHash>& chunks);
 
-	inline bool HasBlockInWorld(WorldPos& worldPos, std::unordered_map<ChunkPos, std::unique_ptr<Chunk>, ChunkPosHash>& chunks);
+	inline bool HasBlockInWorld(WorldPos& worldPos, std::unordered_map<ChunkPos, std::shared_ptr<Chunk>, ChunkPosHash>& chunks);
 
 	void UpdateBuffers(ID3D11Device* device);
 

@@ -176,7 +176,7 @@ inline void Chunk::AddRightFace(DirectX::XMFLOAT3& pos, std::string& texture) no
     m_indices.emplace_back(3 + offset);
 }
 
-void Chunk::UpdateMeshWithoutBuffers(BlockManager& blockManager, std::unordered_map<ChunkPos, std::unique_ptr<Chunk>, ChunkPosHash>& chunks)
+void Chunk::UpdateMeshWithoutBuffers(BlockManager& blockManager, std::unordered_map<ChunkPos, std::shared_ptr<Chunk>, ChunkPosHash>& chunks)
 {
     m_vertices.clear();
     m_indices.clear();
@@ -221,7 +221,7 @@ void Chunk::UpdateMeshWithoutBuffers(BlockManager& blockManager, std::unordered_
     }
 }
 
-inline bool Chunk::HasBlockInWorld(WorldPos& worldPos, std::unordered_map<ChunkPos, std::unique_ptr<Chunk>, ChunkPosHash>& chunks)
+inline bool Chunk::HasBlockInWorld(WorldPos& worldPos, std::unordered_map<ChunkPos, std::shared_ptr<Chunk>, ChunkPosHash>& chunks)
 {
     int xPos = MathUtils::RoundDown(static_cast<int>(worldPos.x), Chunk::WIDTH);
     int zPos = MathUtils::RoundDown(static_cast<int>(worldPos.z), Chunk::DEPTH);

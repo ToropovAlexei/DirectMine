@@ -164,6 +164,16 @@ bool World::HasChunkAt(ChunkPos& pos)
 	return m_chunks.contains(pos);
 }
 
+std::shared_ptr<Chunk> World::GetChunkAt(ChunkPos& chunkPos)
+{
+	auto it = m_chunks.find(chunkPos);
+	if (it == m_chunks.end())
+	{
+		return nullptr;
+	}
+	return it->second;
+}
+
 std::optional<ChunkBlock> World::GetBlockAt(WorldPos& worldPos) noexcept
 {
 	int xPos = MathUtils::RoundDown(static_cast<int>(worldPos.x), Chunk::WIDTH);
@@ -305,6 +315,50 @@ void World::RemoveBlockAt(WorldPos& worldPos)
 	it->second->RemoveBlock(blockPos);
 	it->second->UpdateMeshWithoutBuffers(m_blockManager, m_chunks);
 	it->second->UpdateBuffers(m_deviceResources->GetD3DDevice());
+
+	if (blockPos.x == 0)
+	{
+		ChunkPos leftChunk = chunkPos - ChunkPos(Chunk::WIDTH, 0);
+		auto chunk = GetChunkAt(leftChunk);
+		if (chunk != nullptr)
+		{
+			chunk->UpdateMeshWithoutBuffers(m_blockManager, m_chunks);
+			chunk->UpdateBuffers(m_deviceResources->GetD3DDevice());
+		}
+		return;
+	}
+	if (blockPos.x == Chunk::WIDTH - 1)
+	{
+		ChunkPos rightChunk = chunkPos + ChunkPos(Chunk::WIDTH, 0);
+		auto chunk = GetChunkAt(rightChunk);
+		if (chunk != nullptr)
+		{
+			chunk->UpdateMeshWithoutBuffers(m_blockManager, m_chunks);
+			chunk->UpdateBuffers(m_deviceResources->GetD3DDevice());
+		}
+		return;
+	}
+	if (blockPos.z == 0)
+	{
+		ChunkPos frontChunk = chunkPos - ChunkPos(0, Chunk::DEPTH);
+		auto chunk = GetChunkAt(frontChunk);
+		if (chunk != nullptr)
+		{
+			chunk->UpdateMeshWithoutBuffers(m_blockManager, m_chunks);
+			chunk->UpdateBuffers(m_deviceResources->GetD3DDevice());
+		}
+		return;
+	}
+	if (blockPos.z == Chunk::DEPTH - 1)
+	{
+		ChunkPos backChunk = chunkPos + ChunkPos(0, Chunk::DEPTH);
+		auto chunk = GetChunkAt(backChunk);
+		if (chunk != nullptr)
+		{
+			chunk->UpdateMeshWithoutBuffers(m_blockManager, m_chunks);
+			chunk->UpdateBuffers(m_deviceResources->GetD3DDevice());
+		}
+	}
 }
 
 void World::PlaceBlockAt(WorldPos& worldPos, BlockId blockId)
@@ -321,6 +375,50 @@ void World::PlaceBlockAt(WorldPos& worldPos, BlockId blockId)
 	it->second->AddBlock(blockPos, blockId);
 	it->second->UpdateMeshWithoutBuffers(m_blockManager, m_chunks);
 	it->second->UpdateBuffers(m_deviceResources->GetD3DDevice());
+
+	if (blockPos.x == 0)
+	{
+		ChunkPos leftChunk = chunkPos - ChunkPos(Chunk::WIDTH, 0);
+		auto chunk = GetChunkAt(leftChunk);
+		if (chunk != nullptr)
+		{
+			chunk->UpdateMeshWithoutBuffers(m_blockManager, m_chunks);
+			chunk->UpdateBuffers(m_deviceResources->GetD3DDevice());
+		}
+		return;
+	}
+	if (blockPos.x == Chunk::WIDTH - 1)
+	{
+		ChunkPos rightChunk = chunkPos + ChunkPos(Chunk::WIDTH, 0);
+		auto chunk = GetChunkAt(rightChunk);
+		if (chunk != nullptr)
+		{
+			chunk->UpdateMeshWithoutBuffers(m_blockManager, m_chunks);
+			chunk->UpdateBuffers(m_deviceResources->GetD3DDevice());
+		}
+		return;
+	}
+	if (blockPos.z == 0)
+	{
+		ChunkPos frontChunk = chunkPos - ChunkPos(0, Chunk::DEPTH);
+		auto chunk = GetChunkAt(frontChunk);
+		if (chunk != nullptr)
+		{
+			chunk->UpdateMeshWithoutBuffers(m_blockManager, m_chunks);
+			chunk->UpdateBuffers(m_deviceResources->GetD3DDevice());
+		}
+		return;
+	}
+	if (blockPos.z == Chunk::DEPTH - 1)
+	{
+		ChunkPos backChunk = chunkPos + ChunkPos(0, Chunk::DEPTH);
+		auto chunk = GetChunkAt(backChunk);
+		if (chunk != nullptr)
+		{
+			chunk->UpdateMeshWithoutBuffers(m_blockManager, m_chunks);
+			chunk->UpdateBuffers(m_deviceResources->GetD3DDevice());
+		}
+	}
 }
 
 std::optional<std::pair<WorldPos, ChunkBlock::BlockDirection>> World::Raycast()

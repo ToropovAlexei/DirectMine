@@ -37,6 +37,8 @@ private:
 
 	bool HasChunkAt(ChunkPos& pos);
 
+	std::shared_ptr<Chunk> GetChunkAt(ChunkPos& chunkPos);
+
 	std::optional<ChunkBlock> GetBlockAt(WorldPos& worldPos) noexcept;
 
 	void UpdateChunksToLoad();
@@ -59,7 +61,7 @@ private:
 #else
 	static const int chunkLoadingRadius = 4; // Debug mode
 #endif
-	std::unordered_map<ChunkPos, std::unique_ptr<Chunk>, ChunkPosHash> m_chunks;
+	std::unordered_map<ChunkPos, std::shared_ptr<Chunk>, ChunkPosHash> m_chunks;
 	std::vector<ChunkPos> m_chunksToLoad;
 	std::vector<ChunkPos> m_chunksToUnload;
 	std::vector<ChunkPos> m_chunksToUpdateMesh;
