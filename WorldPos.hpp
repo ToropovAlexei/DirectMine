@@ -45,9 +45,9 @@ struct ChunkPosHash
 
 struct WorldPos
 {
-	float x;
-	float y;
-	float z;
+	int x;
+	int y;
+	int z;
 
 	bool operator==(const WorldPos& other) const
 	{
@@ -84,14 +84,6 @@ struct WorldPosHash
 {
 	std::size_t operator()(const WorldPos& pos) const
 	{
-		// Преобразование значений типа float в биты
-		std::size_t xHash = std::hash<float>{}(pos.x);
-		std::size_t yHash = std::hash<float>{}(pos.y);
-		std::size_t zHash = std::hash<float>{}(pos.z);
-
-		// Комбинирование хэшей с помощью побитового исключающего ИЛИ (XOR)
-		std::size_t combinedHash = xHash ^ yHash ^ zHash;
-
-		return combinedHash;
+		return std::hash<int>{}(pos.x) ^ std::hash<int>{}(pos.y) ^ std::hash<int>{}(pos.z);
 	}
 };

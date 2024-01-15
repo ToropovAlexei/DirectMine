@@ -18,13 +18,10 @@ public:
 
 	const std::unordered_map<WorldPos, ChunkBlock, WorldPosHash>& GetBlocks() const noexcept;
 
-	void FillWith();
-
 	void RemoveBlock(WorldPos& worldPos) noexcept;
 
 	void AddBlock(WorldPos& worldPos, BlockId blockId) noexcept;
 
-	void UpdateMesh(ID3D11Device* device, BlockManager& blockManager);
 	void UpdateMeshWithoutBuffers(BlockManager& blockManager, std::unordered_map<ChunkPos, std::unique_ptr<Chunk>, ChunkPosHash>& chunks);
 
 	inline bool HasBlockInWorld(WorldPos& worldPos, std::unordered_map<ChunkPos, std::unique_ptr<Chunk>, ChunkPosHash>& chunks);

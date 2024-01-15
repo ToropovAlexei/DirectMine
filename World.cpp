@@ -316,9 +316,9 @@ std::optional<std::pair<WorldPos, ChunkBlock::BlockDirection>> World::Raycast()
 	float maxDistance = 10.0f;
 
 	for (float distance = 0.0f; distance < maxDistance; distance += distanceStep) {
-		WorldPos blockPos = WorldPos(std::floor(DirectX::XMVectorGetX(currentPosition)),
-			std::floor(DirectX::XMVectorGetY(currentPosition)),
-			std::floor(DirectX::XMVectorGetZ(currentPosition)));
+		WorldPos blockPos = WorldPos(static_cast<int>(std::floor(DirectX::XMVectorGetX(currentPosition))),
+			static_cast<int>(std::floor(DirectX::XMVectorGetY(currentPosition))),
+				static_cast<int>(std::floor(DirectX::XMVectorGetZ(currentPosition))));
 		if (CheckBlockCollision(blockPos)) {
 			DirectX::XMFLOAT3 collisionPoint;
 			DirectX::XMStoreFloat3(&collisionPoint, currentPosition);
@@ -369,19 +369,19 @@ WorldPos World::GetOffsetByBlockDirection(ChunkBlock::BlockDirection dir)
 	switch (dir)
 	{
 	case ChunkBlock::BlockDirection::East:
-		return WorldPos(1.0f, 0.0f, 0.0f);
+		return WorldPos(1, 0, 0);
 	case ChunkBlock::BlockDirection::West:
-		return WorldPos(-1.0f, 0.0f, 0.0f);
+		return WorldPos(-1, 0, 0);
 	case ChunkBlock::BlockDirection::Up:
-		return WorldPos(0.0f, 1.0f, 0.0f);
+		return WorldPos(0, 1, 0);
 	case ChunkBlock::BlockDirection::Down:
-		return WorldPos(0.0f, -1.0f, 0.0f);
+		return WorldPos(0, -1, 0);
 	case ChunkBlock::BlockDirection::North:
-		return WorldPos(0.0f, 0.0f, 1.0f);
+		return WorldPos(0, 0, 1);
 	case ChunkBlock::BlockDirection::South:
-		return WorldPos(0.0f, 0.0f, -1.0f);
+		return WorldPos(0, 0, -1);
 	default:
-		return WorldPos(0.0f, 0.0f, 0.0f);
+		return WorldPos(0, 0, 0);
 	}
 }
 

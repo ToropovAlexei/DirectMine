@@ -14,21 +14,6 @@ const std::unordered_map<WorldPos, ChunkBlock, WorldPosHash>& Chunk::GetBlocks()
 	return m_blocks;
 }
 
-void Chunk::FillWith()
-{
-	for (size_t x = 0; x < Chunk::WIDTH; x++)
-	{
-		for (size_t y = 0; y < Chunk::HEIGHT; y++)
-		{
-			for (size_t z = 0; z < Chunk::DEPTH; z++)
-			{
-                WorldPos pos = WorldPos(static_cast<float>(x), static_cast<float>(y), static_cast<float>(z));
-                m_blocks.insert({ pos, ChunkBlock(static_cast<BlockId>(rand() % 12)) });
-			}
-		}
-	}
-}
-
 void Chunk::RemoveBlock(WorldPos& worldPos) noexcept
 {
     auto it = m_blocks.find(worldPos);
@@ -172,54 +157,6 @@ inline void Chunk::AddRightFace(DirectX::XMFLOAT3& pos, std::string& texture) no
     m_indices.emplace_back(3 + offset);
 }
 
-void Chunk::UpdateMesh(ID3D11Device* device, BlockManager& blockManager)
-{
-    m_vertices.clear();
-    m_indices.clear();
-    for (auto& blockPair : m_blocks)
-    {
-        WorldPos pos = blockPair.first + m_worldPos;
-        WorldPos topPos = blockPair.first + WorldPos(0.0f, 1.0f, 0.0f);
-        WorldPos bottomPos = blockPair.first - WorldPos(0.0f, 1.0f, 0.0f);
-        WorldPos leftPos = blockPair.first - WorldPos(1.0f, 0.0f, 0.0f);
-        WorldPos rightPos = blockPair.first + WorldPos(1.0f, 0.0f, 0.0f);
-        WorldPos frontPos = blockPair.first - WorldPos(0.0f, 0.0f, 1.0f);
-        WorldPos backPos = blockPair.first + WorldPos(0.0f, 0.0f, 1.0f);
-
-        BlockId blockId = blockPair.second.GetId();
-        Block& block = blockManager.GetBlockById(blockId);
-        DirectX::XMFLOAT3 blockPos = DirectX::XMFLOAT3(pos.x, pos.y, pos.z);
-
-        if (pos.z == 0 || !HasBlockAt(frontPos))
-        {
-            AddFrontFace(blockPos, block.GetFaceTexture(Block::BlockFaces::Front));
-        }
-        if (pos.z == DEPTH - 1 || !HasBlockAt(backPos))
-        {
-            AddBackFace(blockPos, block.GetFaceTexture(Block::BlockFaces::Back));
-        }
-        if (pos.y == HEIGHT - 1 || !HasBlockAt(topPos))
-        {
-            AddTopFace(blockPos, block.GetFaceTexture(Block::BlockFaces::Top));
-        }
-        if (pos.y == 0 || !HasBlockAt(bottomPos))
-        {
-            AddBottomFace(blockPos, block.GetFaceTexture(Block::BlockFaces::Bottom));
-        }
-        if (pos.x == 0 || !HasBlockAt(leftPos))
-        {
-            AddLeftFace(blockPos, block.GetFaceTexture(Block::BlockFaces::Left));
-        }
-        if (pos.x == WIDTH - 1 || !HasBlockAt(rightPos))
-        {
-            AddRightFace(blockPos, block.GetFaceTexture(Block::BlockFaces::Right));
-        }
-    }
-
-    BuildVertexBuffer(device);
-    BuildIndexBuffer(device);
-}
-
 void Chunk::UpdateMeshWithoutBuffers(BlockManager& blockManager, std::unordered_map<ChunkPos, std::unique_ptr<Chunk>, ChunkPosHash>& chunks)
 {
     m_vertices.clear();
@@ -227,16 +164,16 @@ void Chunk::UpdateMeshWithoutBuffers(BlockManager& blockManager, std::unordered_
     for (auto& blockPair : m_blocks)
     {
         WorldPos pos = blockPair.first + m_worldPos;
-        WorldPos topPos = blockPair.first + WorldPos(0.0f, 1.0f, 0.0f);
-        WorldPos bottomPos = blockPair.first - WorldPos(0.0f, 1.0f, 0.0f);
-        WorldPos leftPos = pos - WorldPos(1.0f, 0.0f, 0.0f);
-        WorldPos rightPos = pos + WorldPos(1.0f, 0.0f, 0.0f);
-        WorldPos frontPos = pos - WorldPos(0.0f, 0.0f, 1.0f);
-        WorldPos backPos = pos + WorldPos(0.0f, 0.0f, 1.0f);
+        WorldPos topPos = blockPair.first + WorldPos(0, 1, 0);
+        WorldPos bottomPos = blockPair.first - WorldPos(0, 1, 0);
+        WorldPos leftPos = pos - WorldPos(1, 0, 0);
+        WorldPos rightPos = pos + WorldPos(1, 0, 0);
+        WorldPos frontPos = pos - WorldPos(0, 0, 1);
+        WorldPos backPos = pos + WorldPos(0, 0, 1);
 
         BlockId blockId = blockPair.second.GetId();
         Block& block = blockManager.GetBlockById(blockId);
-        DirectX::XMFLOAT3 blockPos = DirectX::XMFLOAT3(pos.x, pos.y, pos.z);
+        DirectX::XMFLOAT3 blockPos = DirectX::XMFLOAT3(static_cast<float>(pos.x), static_cast<float>(pos.y), static_cast<float>(pos.z));
 
         if (!HasBlockInWorld(frontPos, chunks))
         {
