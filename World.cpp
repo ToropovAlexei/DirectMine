@@ -293,9 +293,9 @@ std::optional<WorldPos> World::Raycast()
 	float maxDistance = 10.0f;
 
 	for (float distance = 0.0f; distance < maxDistance; distance += distanceStep) {
-		WorldPos blockPos = WorldPos(static_cast<float>(static_cast<int>(DirectX::XMVectorGetX(currentPosition))),
-			static_cast<float>(static_cast<int>(DirectX::XMVectorGetY(currentPosition))),
-			static_cast<float>(static_cast<int>(DirectX::XMVectorGetZ(currentPosition))));
+		WorldPos blockPos = WorldPos(std::floor(DirectX::XMVectorGetX(currentPosition)),
+			std::floor(DirectX::XMVectorGetY(currentPosition)),
+			std::floor(DirectX::XMVectorGetZ(currentPosition)));
 		if (CheckBlockCollision(blockPos)) {
 			return blockPos;
 		}
