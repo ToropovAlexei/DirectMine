@@ -38,7 +38,7 @@ void ChunkRenderer::RenderChunks(std::unordered_map<ChunkPos, std::unique_ptr<Ch
     context->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
     context->PSSetSamplers(0u, 1u, m_sampler.GetAddressOf());
     context->OMSetBlendState(m_blendState.Get(), nullptr, 0xFFFFFFFF);
-    context->PSSetShaderResources(0u, 1u, TextureAtlas::GetAtlasSRV().GetAddressOf());
+    context->PSSetShaderResources(0u, 1u, TextureAtlas::Get3dTextureSRV().GetAddressOf());
     context->RSSetState(m_rasterState.Get());
 
     for (auto& chunk : chunks)
@@ -54,7 +54,7 @@ void ChunkRenderer::BuildInputLayout()
     D3D11_INPUT_ELEMENT_DESC inputLayoutDesc[] =
     {
         { "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0 },
-        { "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, 12, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+        { "TEXCOORD", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 12, D3D11_INPUT_PER_VERTEX_DATA, 0 },
     };
 
     auto vertexShaderBlob = ShadersLoader::LoadBlob(L"VertexShader.cso");

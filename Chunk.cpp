@@ -66,13 +66,13 @@ Microsoft::WRL::ComPtr<ID3D11Buffer> Chunk::GetIndexBuffer()
 
 inline void Chunk::AddFrontFace(DirectX::XMFLOAT3& pos, std::string& texture) noexcept
 {
-    UVCoords uvCoords = TextureAtlas::GetTextureCoords(texture);
+    float idx = TextureAtlas::GetTextureIdx(texture);
     UINT offset = static_cast<UINT>(m_vertices.size());
 
-    m_vertices.emplace_back(Vertex({ 0.0f + pos.x, 0.0f + pos.y, 0.0f + pos.z }, {uvCoords.u1, uvCoords.v2}));
-    m_vertices.emplace_back(Vertex({ 1.0f + pos.x, 0.0f + pos.y, 0.0f + pos.z }, { uvCoords.u2, uvCoords.v2 }));
-    m_vertices.emplace_back(Vertex({ 1.0f + pos.x, 1.0f + pos.y, 0.0f + pos.z }, { uvCoords.u2, uvCoords.v1 }));
-    m_vertices.emplace_back(Vertex({ 0.0f + pos.x, 1.0f + pos.y, 0.0f + pos.z }, { uvCoords.u1, uvCoords.v1 }));
+    m_vertices.emplace_back(Vertex({ 0.0f + pos.x, 0.0f + pos.y, 0.0f + pos.z }, { 0.0f, 1.0f, idx }));
+    m_vertices.emplace_back(Vertex({ 1.0f + pos.x, 0.0f + pos.y, 0.0f + pos.z }, { 1.0f, 1.0f, idx }));
+    m_vertices.emplace_back(Vertex({ 1.0f + pos.x, 1.0f + pos.y, 0.0f + pos.z }, { 1.0f, 0.0f, idx }));
+    m_vertices.emplace_back(Vertex({ 0.0f + pos.x, 1.0f + pos.y, 0.0f + pos.z }, { 0.0f, 0.0f, idx }));
 
     m_indices.emplace_back(0 + offset);
     m_indices.emplace_back(2 + offset);
@@ -84,13 +84,13 @@ inline void Chunk::AddFrontFace(DirectX::XMFLOAT3& pos, std::string& texture) no
 
 inline void Chunk::AddBackFace(DirectX::XMFLOAT3& pos, std::string& texture) noexcept
 {
-    UVCoords uvCoords = TextureAtlas::GetTextureCoords(texture);
+    float idx = TextureAtlas::GetTextureIdx(texture);
     UINT offset = static_cast<UINT>(m_vertices.size());
 
-    m_vertices.emplace_back(Vertex({ 0.0f + pos.x, 0.0f + pos.y, 1.0f + pos.z }, { uvCoords.u2, uvCoords.v2 }));
-    m_vertices.emplace_back(Vertex({ 1.0f + pos.x, 0.0f + pos.y, 1.0f + pos.z }, { uvCoords.u1, uvCoords.v2 }));
-    m_vertices.emplace_back(Vertex({ 1.0f + pos.x, 1.0f + pos.y, 1.0f + pos.z }, { uvCoords.u1, uvCoords.v1 }));
-    m_vertices.emplace_back(Vertex({ 0.0f + pos.x, 1.0f + pos.y, 1.0f + pos.z }, { uvCoords.u2, uvCoords.v1 }));
+    m_vertices.emplace_back(Vertex({ 0.0f + pos.x, 0.0f + pos.y, 1.0f + pos.z }, { 1.0f, 1.0f, idx }));
+    m_vertices.emplace_back(Vertex({ 1.0f + pos.x, 0.0f + pos.y, 1.0f + pos.z }, { 0.0f, 1.0f, idx }));
+    m_vertices.emplace_back(Vertex({ 1.0f + pos.x, 1.0f + pos.y, 1.0f + pos.z }, { 0.0f, 0.0f, idx }));
+    m_vertices.emplace_back(Vertex({ 0.0f + pos.x, 1.0f + pos.y, 1.0f + pos.z }, { 1.0f, 0.0f, idx }));
 
     m_indices.emplace_back(0 + offset);
     m_indices.emplace_back(1 + offset);
@@ -102,13 +102,13 @@ inline void Chunk::AddBackFace(DirectX::XMFLOAT3& pos, std::string& texture) noe
 
 inline void Chunk::AddTopFace(DirectX::XMFLOAT3& pos, std::string& texture) noexcept
 {
-    UVCoords uvCoords = TextureAtlas::GetTextureCoords(texture);
+    float idx = TextureAtlas::GetTextureIdx(texture);
     UINT offset = static_cast<UINT>(m_vertices.size());
 
-    m_vertices.emplace_back(Vertex({ 0.0f + pos.x, 1.0f + pos.y, 0.0f + pos.z }, { uvCoords.u1, uvCoords.v2 }));
-    m_vertices.emplace_back(Vertex({ 1.0f + pos.x, 1.0f + pos.y, 0.0f + pos.z }, { uvCoords.u2, uvCoords.v2 }));
-    m_vertices.emplace_back(Vertex({ 1.0f + pos.x, 1.0f + pos.y, 1.0f + pos.z }, { uvCoords.u2, uvCoords.v1 }));
-    m_vertices.emplace_back(Vertex({ 0.0f + pos.x, 1.0f + pos.y, 1.0f + pos.z }, { uvCoords.u1, uvCoords.v1 }));
+    m_vertices.emplace_back(Vertex({ 0.0f + pos.x, 1.0f + pos.y, 0.0f + pos.z }, { 0.0f, 1.0f, idx }));
+    m_vertices.emplace_back(Vertex({ 1.0f + pos.x, 1.0f + pos.y, 0.0f + pos.z }, { 1.0f, 1.0f, idx }));
+    m_vertices.emplace_back(Vertex({ 1.0f + pos.x, 1.0f + pos.y, 1.0f + pos.z }, { 1.0f, 0.0f, idx }));
+    m_vertices.emplace_back(Vertex({ 0.0f + pos.x, 1.0f + pos.y, 1.0f + pos.z }, { 0.0f, 0.0f, idx }));
 
     m_indices.emplace_back(0 + offset);
     m_indices.emplace_back(2 + offset);
@@ -120,13 +120,13 @@ inline void Chunk::AddTopFace(DirectX::XMFLOAT3& pos, std::string& texture) noex
 
 inline void Chunk::AddBottomFace(DirectX::XMFLOAT3& pos, std::string& texture) noexcept
 {
-    UVCoords uvCoords = TextureAtlas::GetTextureCoords(texture);
+    float idx = TextureAtlas::GetTextureIdx(texture);
     UINT offset = static_cast<UINT>(m_vertices.size());
 
-    m_vertices.emplace_back(Vertex({ 0.0f + pos.x, 0.0f + pos.y, 0.0f + pos.z }, { uvCoords.u2, uvCoords.v2 }));
-    m_vertices.emplace_back(Vertex({ 1.0f + pos.x, 0.0f + pos.y, 0.0f + pos.z }, { uvCoords.u1, uvCoords.v2 }));
-    m_vertices.emplace_back(Vertex({ 1.0f + pos.x, 0.0f + pos.y, 1.0f + pos.z }, { uvCoords.u1, uvCoords.v1 }));
-    m_vertices.emplace_back(Vertex({ 0.0f + pos.x, 0.0f + pos.y, 1.0f + pos.z }, { uvCoords.u2, uvCoords.v1 }));
+    m_vertices.emplace_back(Vertex({ 0.0f + pos.x, 0.0f + pos.y, 0.0f + pos.z }, { 1.0f, 1.0f, idx }));
+    m_vertices.emplace_back(Vertex({ 1.0f + pos.x, 0.0f + pos.y, 0.0f + pos.z }, { 0.0f, 1.0f, idx }));
+    m_vertices.emplace_back(Vertex({ 1.0f + pos.x, 0.0f + pos.y, 1.0f + pos.z }, { 0.0f, 0.0f, idx }));
+    m_vertices.emplace_back(Vertex({ 0.0f + pos.x, 0.0f + pos.y, 1.0f + pos.z }, { 1.0f, 0.0f, idx }));
 
     m_indices.emplace_back(0 + offset);
     m_indices.emplace_back(1 + offset);
@@ -138,13 +138,13 @@ inline void Chunk::AddBottomFace(DirectX::XMFLOAT3& pos, std::string& texture) n
 
 inline void Chunk::AddLeftFace(DirectX::XMFLOAT3& pos, std::string& texture) noexcept
 {
-    UVCoords uvCoords = TextureAtlas::GetTextureCoords(texture);
+    float idx = TextureAtlas::GetTextureIdx(texture);
     UINT offset = static_cast<UINT>(m_vertices.size());
 
-    m_vertices.emplace_back(Vertex({ 0.0f + pos.x, 0.0f + pos.y, 0.0f + pos.z }, { uvCoords.u2, uvCoords.v2 }));
-    m_vertices.emplace_back(Vertex({ 0.0f + pos.x, 1.0f + pos.y, 0.0f + pos.z }, { uvCoords.u2, uvCoords.v1 }));
-    m_vertices.emplace_back(Vertex({ 0.0f + pos.x, 1.0f + pos.y, 1.0f + pos.z }, { uvCoords.u1, uvCoords.v1 }));
-    m_vertices.emplace_back(Vertex({ 0.0f + pos.x, 0.0f + pos.y, 1.0f + pos.z }, { uvCoords.u1, uvCoords.v2 }));
+    m_vertices.emplace_back(Vertex({ 0.0f + pos.x, 0.0f + pos.y, 0.0f + pos.z }, { 1.0f, 1.0f, idx }));
+    m_vertices.emplace_back(Vertex({ 0.0f + pos.x, 1.0f + pos.y, 0.0f + pos.z }, { 1.0f, 0.0f, idx }));
+    m_vertices.emplace_back(Vertex({ 0.0f + pos.x, 1.0f + pos.y, 1.0f + pos.z }, { 0.0f, 0.0f, idx }));
+    m_vertices.emplace_back(Vertex({ 0.0f + pos.x, 0.0f + pos.y, 1.0f + pos.z }, { 0.0f, 1.0f, idx }));
 
     m_indices.emplace_back(0 + offset);
     m_indices.emplace_back(2 + offset);
@@ -156,13 +156,13 @@ inline void Chunk::AddLeftFace(DirectX::XMFLOAT3& pos, std::string& texture) noe
 
 inline void Chunk::AddRightFace(DirectX::XMFLOAT3& pos, std::string& texture) noexcept
 {
-    UVCoords uvCoords = TextureAtlas::GetTextureCoords(texture);
+    float idx = TextureAtlas::GetTextureIdx(texture);
     UINT offset = static_cast<UINT>(m_vertices.size());
 
-    m_vertices.emplace_back(Vertex({ 1.0f + pos.x, 0.0f + pos.y, 0.0f + pos.z }, { uvCoords.u1, uvCoords.v2 }));
-    m_vertices.emplace_back(Vertex({ 1.0f + pos.x, 1.0f + pos.y, 0.0f + pos.z }, { uvCoords.u1, uvCoords.v1 }));
-    m_vertices.emplace_back(Vertex({ 1.0f + pos.x, 1.0f + pos.y, 1.0f + pos.z }, { uvCoords.u2, uvCoords.v1 }));
-    m_vertices.emplace_back(Vertex({ 1.0f + pos.x, 0.0f + pos.y, 1.0f + pos.z }, { uvCoords.u2, uvCoords.v2 }));
+    m_vertices.emplace_back(Vertex({ 1.0f + pos.x, 0.0f + pos.y, 0.0f + pos.z }, { 0.0f, 1.0f, idx }));
+    m_vertices.emplace_back(Vertex({ 1.0f + pos.x, 1.0f + pos.y, 0.0f + pos.z }, { 0.0f, 0.0f, idx }));
+    m_vertices.emplace_back(Vertex({ 1.0f + pos.x, 1.0f + pos.y, 1.0f + pos.z }, { 1.0f, 0.0f, idx }));
+    m_vertices.emplace_back(Vertex({ 1.0f + pos.x, 0.0f + pos.y, 1.0f + pos.z }, { 1.0f, 1.0f, idx }));
 
     m_indices.emplace_back(0 + offset);
     m_indices.emplace_back(1 + offset);

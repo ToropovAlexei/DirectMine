@@ -1,10 +1,10 @@
-Texture2D tex : register(t0);
+Texture3D tex : register(t0);
 SamplerState splr : register(s0);
 
 struct VertexOut
 {
     float4 PosH : SV_POSITION;
-    float2 TexC : TEXCOORD;
+    float3 TexC : TEXCOORD;
     float Depth : DEPTH;
 };
 
