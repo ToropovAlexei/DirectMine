@@ -5,7 +5,7 @@
 class ChunkBlock
 {
 public:
-	enum class BlockDirection
+	enum class BlockDirection : uint8_t
 	{
 		North,
 		West,
