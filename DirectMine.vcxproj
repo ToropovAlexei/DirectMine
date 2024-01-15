@@ -216,6 +216,7 @@
     <ClInclude Include="World.h" />
     <ClInclude Include="WorldGenerator.h" />
     <ClInclude Include="WorldPos.hpp" />
+    <ClInclude Include="WorldUtils.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Block.cpp" />

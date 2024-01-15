@@ -22,6 +22,8 @@ public:
 
 	void AddBlock(WorldPos& worldPos, BlockId blockId) noexcept;
 
+	std::optional<ChunkBlock> GetBlock(WorldPos& worldPos) noexcept;
+
 	void UpdateMeshWithoutBuffers(BlockManager& blockManager, std::unordered_map<ChunkPos, std::unique_ptr<Chunk>, ChunkPosHash>& chunks);
 
 	inline bool HasBlockInWorld(WorldPos& worldPos, std::unordered_map<ChunkPos, std::unique_ptr<Chunk>, ChunkPosHash>& chunks);

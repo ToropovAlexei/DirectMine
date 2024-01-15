@@ -37,6 +37,8 @@ private:
 
 	bool HasChunkAt(ChunkPos& pos);
 
+	std::optional<ChunkBlock> GetBlockAt(WorldPos& worldPos) noexcept;
+
 	void UpdateChunksToLoad();
 	void UpdateChunksToUnload();
 	void UpdateChunksMesh();
@@ -47,14 +49,9 @@ private:
 	bool CheckBlockCollision(WorldPos& worldPos);
 
 	void RemoveBlockAt(WorldPos& worldPos);
-
 	void PlaceBlockAt(WorldPos& worldPos, BlockId blockId);
 
 	std::optional<std::pair<WorldPos, ChunkBlock::BlockDirection>> Raycast();
-
-	ChunkBlock::BlockDirection GetNearFace(DirectX::XMFLOAT3& collisionPoint);
-
-	WorldPos GetOffsetByBlockDirection(ChunkBlock::BlockDirection dir);
 	
 private:
 #ifdef NDEBUG

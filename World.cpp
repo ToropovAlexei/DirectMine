@@ -4,6 +4,7 @@
 #include <tbb/parallel_for.h>
 #include <tbb/blocked_range.h>
 #include "MathUtils.h"
+#include "WorldUtils.h"
 
 World::World(std::unique_ptr<DX::DeviceResources>& deviceResources, 
 	std::unique_ptr<DirectX::Keyboard>& keyboard, 
@@ -84,7 +85,7 @@ void World::Update(DX::StepTimer const& timer)
 	}
 	if (m_tracker->rightButton == DirectX::Mouse::ButtonStateTracker::ButtonState::PRESSED && rayCastResult.has_value())
 	{
-		WorldPos offset = GetOffsetByBlockDirection(rayCastResult.value().second);
+		WorldPos offset = WorldUtils::GetOffsetByBlockDirection(rayCastResult.value().second);
 		WorldPos placePos = rayCastResult.value().first + offset;
 		PlaceBlockAt(placePos, BlockId::Cobblestone);
 	}
@@ -161,6 +162,20 @@ void World::UpdateMainCB()
 bool World::HasChunkAt(ChunkPos& pos)
 {
 	return m_chunks.contains(pos);
+}
+
+std::optional<ChunkBlock> World::GetBlockAt(WorldPos& worldPos) noexcept
+{
+	int xPos = MathUtils::RoundDown(static_cast<int>(worldPos.x), Chunk::WIDTH);
+	int zPos = MathUtils::RoundDown(static_cast<int>(worldPos.z), Chunk::DEPTH);
+	ChunkPos chunkPos = ChunkPos(xPos, zPos);
+	auto it = m_chunks.find(chunkPos);
+	if (it == m_chunks.end())
+	{
+		return std::nullopt;
+	}
+	WorldPos blockPos = WorldPos(worldPos.x - xPos, worldPos.y, worldPos.z - zPos);
+	return it->second->GetBlock(blockPos);
 }
 
 void World::UpdateChunksToLoad()
@@ -322,7 +337,7 @@ std::optional<std::pair<WorldPos, ChunkBlock::BlockDirection>> World::Raycast()
 		if (CheckBlockCollision(blockPos)) {
 			DirectX::XMFLOAT3 collisionPoint;
 			DirectX::XMStoreFloat3(&collisionPoint, currentPosition);
-			return std::pair<WorldPos, ChunkBlock::BlockDirection>(blockPos, GetNearFace(collisionPoint));
+			return std::pair<WorldPos, ChunkBlock::BlockDirection>(blockPos, WorldUtils::GetNearBlockFaceToPoint(collisionPoint));
 		}
 
 		currentPosition = DirectX::XMVectorAdd(currentPosition, step);
@@ -330,58 +345,3 @@ std::optional<std::pair<WorldPos, ChunkBlock::BlockDirection>> World::Raycast()
 
 	return std::nullopt;
 }
-
-ChunkBlock::BlockDirection World::GetNearFace(DirectX::XMFLOAT3& collisionPoint)
-{
-	float blockX = std::floor(collisionPoint.x) + 0.5f;
-	float blockY = std::floor(collisionPoint.y) + 0.5f;
-	float blockZ = std::floor(collisionPoint.z) + 0.5f;
-	float diffX = collisionPoint.x - blockX;
-	float diffY = collisionPoint.y - blockY;
-	float diffZ = collisionPoint.z - blockZ;
-
-	float absDiffX = std::abs(diffX);
-	float absDiffY = std::abs(diffY);
-	float absDiffZ = std::abs(diffZ);
-
-	float minDiff = std::max(absDiffX, std::max(absDiffY, absDiffZ));
-
-	if (minDiff == absDiffX) {
-		if (diffX < 0) {
-			return ChunkBlock::BlockDirection::West;
-		}
-		return ChunkBlock::BlockDirection::East;
-	}
-	if (minDiff == absDiffY) {
-		if (diffY < 0) {
-			return ChunkBlock::BlockDirection::Down;
-		}
-		return ChunkBlock::BlockDirection::Up;
-	}
-	if (diffZ < 0) {
-		return ChunkBlock::BlockDirection::South;
-	}
-	return ChunkBlock::BlockDirection::North;
-}
-
-WorldPos World::GetOffsetByBlockDirection(ChunkBlock::BlockDirection dir)
-{
-	switch (dir)
-	{
-	case ChunkBlock::BlockDirection::East:
-		return WorldPos(1, 0, 0);
-	case ChunkBlock::BlockDirection::West:
-		return WorldPos(-1, 0, 0);
-	case ChunkBlock::BlockDirection::Up:
-		return WorldPos(0, 1, 0);
-	case ChunkBlock::BlockDirection::Down:
-		return WorldPos(0, -1, 0);
-	case ChunkBlock::BlockDirection::North:
-		return WorldPos(0, 0, 1);
-	case ChunkBlock::BlockDirection::South:
-		return WorldPos(0, 0, -1);
-	default:
-		return WorldPos(0, 0, 0);
-	}
-}
-

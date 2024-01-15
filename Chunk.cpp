@@ -16,6 +16,9 @@ const std::unordered_map<WorldPos, ChunkBlock, WorldPosHash>& Chunk::GetBlocks()
 
 void Chunk::RemoveBlock(WorldPos& worldPos) noexcept
 {
+    assert(worldPos.x < Chunk::WIDTH);
+    assert(worldPos.y < Chunk::HEIGHT);
+    assert(worldPos.z < Chunk::DEPTH);
     auto it = m_blocks.find(worldPos);
     if (it == m_blocks.end())
     {
@@ -26,7 +29,23 @@ void Chunk::RemoveBlock(WorldPos& worldPos) noexcept
 
 void Chunk::AddBlock(WorldPos& worldPos, BlockId blockId) noexcept
 {
+    assert(worldPos.x < Chunk::WIDTH);
+    assert(worldPos.y < Chunk::HEIGHT);
+    assert(worldPos.z < Chunk::DEPTH);
     m_blocks.insert({ worldPos, ChunkBlock(blockId) });
+}
+
+std::optional<ChunkBlock> Chunk::GetBlock(WorldPos& worldPos) noexcept
+{
+    assert(worldPos.x < Chunk::WIDTH);
+    assert(worldPos.y < Chunk::HEIGHT);
+    assert(worldPos.z < Chunk::DEPTH);
+    auto it = m_blocks.find(worldPos);
+    if (it == m_blocks.end())
+    {
+        return std::nullopt;
+    }
+    return it->second;
 }
 
 std::vector<Vertex>& Chunk::GetVertices()
@@ -216,9 +235,12 @@ inline bool Chunk::HasBlockInWorld(WorldPos& worldPos, std::unordered_map<ChunkP
     return it->second->HasBlockAt(blockPos);
 }
 
-inline bool Chunk::HasBlockAt(WorldPos& pos)  const noexcept
+inline bool Chunk::HasBlockAt(WorldPos& chunkPos)  const noexcept
 {
-    return m_blocks.contains(pos);
+    assert(chunkPos.x < Chunk::WIDTH);
+    assert(chunkPos.y < Chunk::HEIGHT);
+    assert(chunkPos.z < Chunk::DEPTH);
+    return m_blocks.contains(chunkPos);
 }
 
 ChunkPos& Chunk::GetPos() noexcept
