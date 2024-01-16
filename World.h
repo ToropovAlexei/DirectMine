@@ -10,6 +10,7 @@
 #include "WorldGenerator.h"
 #include "BlockOutlineRenderer.h"
 #include "CrosshairRenderer.h"
+#include "ChunksManager.h"
 
 struct MainConstantBuffer
 {
@@ -35,24 +36,6 @@ private:
 	void CreateMainCB();
 	void UpdateMainCB();
 
-	bool HasChunkAt(ChunkPos& pos);
-
-	std::shared_ptr<Chunk> GetChunkAt(ChunkPos& chunkPos);
-
-	std::optional<ChunkBlock> GetBlockAt(WorldPos& worldPos) noexcept;
-
-	void UpdateChunksToLoad();
-	void UpdateChunksToUnload();
-	void UpdateChunksMesh();
-
-	void LoadChunks();
-	void UnloadChunks();
-
-	bool CheckBlockCollision(WorldPos& worldPos);
-
-	void RemoveBlockAt(WorldPos& worldPos);
-	void PlaceBlockAt(WorldPos& worldPos, BlockId blockId);
-
 	std::optional<std::pair<WorldPos, ChunkBlock::BlockDirection>> Raycast();
 	
 private:
@@ -61,10 +44,6 @@ private:
 #else
 	static const int chunkLoadingRadius = 4; // Debug mode
 #endif
-	std::unordered_map<ChunkPos, std::shared_ptr<Chunk>, ChunkPosHash> m_chunks;
-	std::vector<ChunkPos> m_chunksToLoad;
-	std::vector<ChunkPos> m_chunksToUnload;
-	std::vector<ChunkPos> m_chunksToUpdateMesh;
 	std::unique_ptr<DX::DeviceResources>& m_deviceResources;
 	std::unique_ptr<Camera> m_cam;
 	std::unique_ptr<DirectX::Keyboard>& m_keyboard;
@@ -74,10 +53,10 @@ private:
 
 	BlockManager m_blockManager;
 	std::unique_ptr<WorldGenerator> m_worldGenerator;
-	std::unique_ptr<ChunkRenderer> m_chunkRenderer;
 	std::unique_ptr<BlockOutlineRenderer> m_blockOutlineRenderer;
 	std::unique_ptr<CrosshairRenderer> m_crosshairRenderer;
 	Microsoft::WRL::ComPtr<ID3D11Buffer> m_mainCB;
+	std::unique_ptr<ChunksManager> m_chunksManager;
 
 	DirectX::XMMATRIX m_view;
 	DirectX::XMMATRIX m_proj;

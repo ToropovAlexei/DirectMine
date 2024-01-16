@@ -35,6 +35,14 @@ void Chunk::AddBlock(WorldPos& worldPos, BlockId blockId) noexcept
     m_blocks.insert({ worldPos, ChunkBlock(blockId) });
 }
 
+void Chunk::AddBlock(WorldPos& worldPos, ChunkBlock block) noexcept
+{
+    assert(worldPos.x < Chunk::WIDTH);
+    assert(worldPos.y < Chunk::HEIGHT);
+    assert(worldPos.z < Chunk::DEPTH);
+    m_blocks.insert({ worldPos, block });
+}
+
 std::optional<ChunkBlock> Chunk::GetBlock(WorldPos& worldPos) noexcept
 {
     assert(worldPos.x < Chunk::WIDTH);
@@ -241,6 +249,16 @@ inline bool Chunk::HasBlockAt(WorldPos& chunkPos)  const noexcept
     assert(chunkPos.y < Chunk::HEIGHT);
     assert(chunkPos.z < Chunk::DEPTH);
     return m_blocks.contains(chunkPos);
+}
+
+bool Chunk::IsModified() const noexcept
+{
+    return m_isModified;
+}
+
+void Chunk::SetIsModified(bool isModified) noexcept
+{
+    m_isModified = isModified;
 }
 
 ChunkPos& Chunk::GetPos() noexcept

@@ -57,6 +57,7 @@
 #include <thread>
 #include <mutex>
 #include <unordered_set>
+#include <shared_mutex>
 
 #ifdef _DEBUG
 #include <dxgidebug.h>

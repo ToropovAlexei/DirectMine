@@ -20,12 +20,14 @@ World::World(std::unique_ptr<DX::DeviceResources>& deviceResources,
 	m_blockManager = BlockManager();
 	m_blockManager.LoadBlocks();
 	m_worldGenerator = std::make_unique<WorldGenerator>(m_blockManager);
+
 	TextureAtlas::BuildAtlas(m_deviceResources->GetD3DDevice(), m_deviceResources->GetD3DDeviceContext());
 	m_cam = std::make_unique<Camera>();
 	m_cam->UpdateViewMatrix();
+	DirectX::XMFLOAT3 playerPos = m_cam->GetPosition3f();
+	m_chunksManager = std::make_unique<ChunksManager>(m_deviceResources, playerPos);
 	m_view = DirectX::XMMATRIX();
 	m_proj = DirectX::XMMATRIX();
-	m_chunkRenderer = std::make_unique<ChunkRenderer>(m_deviceResources);
 	m_blockOutlineRenderer = std::make_unique<BlockOutlineRenderer>(m_deviceResources);
 	auto size = m_deviceResources->GetOutputSize();
 	const float aspectRatio = static_cast<float>(size.right) / static_cast<float>(size.bottom);
@@ -35,19 +37,16 @@ World::World(std::unique_ptr<DX::DeviceResources>& deviceResources,
 
 void World::Update(DX::StepTimer const& timer)
 {
-	UpdateChunksToLoad();
-	UpdateChunksToUnload();
-	UnloadChunks();
-	LoadChunks();
-	UpdateChunksMesh();
 	auto rayCastResult = Raycast();
 	//std::optional<WorldPos> rayCastResult = WorldPos(0.0f, 60.0f, 0.0f);
 	auto outlinedBlock = rayCastResult.has_value() ? std::optional<WorldPos>(rayCastResult.value().first) : std::nullopt;
 	m_blockOutlineRenderer->UpdateOutlinedCube(outlinedBlock);
 	float elapsedTime = float(timer.GetElapsedSeconds());
+	DirectX::XMFLOAT3 playerPos = m_cam->GetPosition3f();
+	m_chunksManager->UpdatePlayerPos(playerPos);
 	auto kb = m_keyboard->GetState();
 	m_keysTracker->Update(kb);
-	const float speed = 25.0f;
+	const float speed = 50.0f;
 	if (kb.A)
 	{
 		m_cam->Strafe(-speed * elapsedTime);
@@ -81,13 +80,13 @@ void World::Update(DX::StepTimer const& timer)
 	}
 	if (m_tracker->leftButton == DirectX::Mouse::ButtonStateTracker::ButtonState::PRESSED && rayCastResult.has_value())
 	{
-		RemoveBlockAt(rayCastResult.value().first);
+		m_chunksManager->RemoveBlockAt(rayCastResult.value().first);
 	}
 	if (m_tracker->rightButton == DirectX::Mouse::ButtonStateTracker::ButtonState::PRESSED && rayCastResult.has_value())
 	{
 		WorldPos offset = WorldUtils::GetOffsetByBlockDirection(rayCastResult.value().second);
 		WorldPos placePos = rayCastResult.value().first + offset;
-		PlaceBlockAt(placePos, BlockId::Cobblestone);
+		m_chunksManager->PlaceBlockAt(placePos, ChunkBlock(BlockId::Cobblestone));
 	}
 
 	std::wstring title = L"DirectX 11 FPS: "
@@ -106,7 +105,7 @@ void World::Render()
 {
 	auto context = m_deviceResources->GetD3DDeviceContext();
 	context->VSSetConstantBuffers(0u, 1u, m_mainCB.GetAddressOf());
-	m_chunkRenderer->RenderChunks(m_chunks);
+	m_chunksManager->RenderChunks();
 	m_blockOutlineRenderer->RenderCubeOutline();
 	m_crosshairRenderer->Render();
 }
@@ -159,268 +158,6 @@ void World::UpdateMainCB()
 	context->Unmap(m_mainCB.Get(), 0u);
 }
 
-bool World::HasChunkAt(ChunkPos& pos)
-{
-	return m_chunks.contains(pos);
-}
-
-std::shared_ptr<Chunk> World::GetChunkAt(ChunkPos& chunkPos)
-{
-	auto it = m_chunks.find(chunkPos);
-	if (it == m_chunks.end())
-	{
-		return nullptr;
-	}
-	return it->second;
-}
-
-std::optional<ChunkBlock> World::GetBlockAt(WorldPos& worldPos) noexcept
-{
-	int xPos = MathUtils::RoundDown(static_cast<int>(worldPos.x), Chunk::WIDTH);
-	int zPos = MathUtils::RoundDown(static_cast<int>(worldPos.z), Chunk::DEPTH);
-	ChunkPos chunkPos = ChunkPos(xPos, zPos);
-	auto it = m_chunks.find(chunkPos);
-	if (it == m_chunks.end())
-	{
-		return std::nullopt;
-	}
-	WorldPos blockPos = WorldPos(worldPos.x - xPos, worldPos.y, worldPos.z - zPos);
-	return it->second->GetBlock(blockPos);
-}
-
-void World::UpdateChunksToLoad()
-{
-	auto playerPos = m_cam->GetPosition3f();
-	int xPos = static_cast<int>(std::round(playerPos.x / Chunk::WIDTH)) * Chunk::WIDTH;
-	int zPos = static_cast<int>(std::round(playerPos.z / Chunk::DEPTH)) * Chunk::DEPTH;
-	int offset = Chunk::WIDTH * chunkLoadingRadius;
-	int xStart = xPos - offset;
-	int zStart = zPos - offset;
-	int xEnd = xPos + offset;
-	int zEnd = zPos + offset;
-
-	for (int x = xStart; x < xEnd; x += Chunk::WIDTH)
-	{
-		for (int z = zStart; z < zEnd; z += Chunk::WIDTH)
-		{
-			ChunkPos pos(x, z);
-			if (!HasChunkAt(pos))
-			{
-				m_chunksToLoad.push_back(pos);
-			}
-		}
-	}
-}
-
-void World::UpdateChunksToUnload()
-{
-	auto playerPos = m_cam->GetPosition3f();
-	int playerX = static_cast<int>(playerPos.x);
-	int playerZ = static_cast<int>(playerPos.z);
-	int offset = Chunk::WIDTH * (chunkLoadingRadius + 2);
-	for (auto& chunk : m_chunks)
-	{
-		int dx = abs(playerX - chunk.first.x);
-		int dz = abs(playerZ - chunk.first.z);
-		if (dx > offset || dz > offset)
-		{
-			m_chunksToUnload.push_back(chunk.first);
-		}
-	}
-}
-
-void World::UpdateChunksMesh()
-{
-	if (m_chunksToUpdateMesh.empty())
-	{
-		return;
-	}
-	auto start = std::chrono::high_resolution_clock::now();
-	tbb::parallel_for(tbb::blocked_range<size_t>(0, m_chunksToUpdateMesh.size()),
-		[this](const tbb::blocked_range<size_t>& range) {
-			for (size_t i = range.begin(); i != range.end(); ++i) {
-				m_chunks[m_chunksToUpdateMesh[i]]->UpdateMeshWithoutBuffers(m_blockManager, m_chunks);
-			}
-		});
-
-	for (auto& pos : m_chunksToUpdateMesh)
-	{
-		m_chunks[pos]->UpdateBuffers(m_deviceResources->GetD3DDevice());
-	}
-	m_chunksToUpdateMesh.clear();
-	auto end = std::chrono::high_resolution_clock::now();
-	auto duration = std::chrono::duration_cast<std::chrono::microseconds>(end - start);
-	std::string result = "Время выполнения UpdateChunksMesh: " + std::to_string(duration.count()) + " микросекунд\n";
-	OutputDebugStringA(result.c_str());
-}
-
-void World::LoadChunks()
-{
-	if (m_chunksToLoad.empty())
-	{
-		return;
-	}
-	auto start = std::chrono::high_resolution_clock::now();
-	tbb::parallel_for(tbb::blocked_range<size_t>(0, m_chunksToLoad.size()),
-		[this](const tbb::blocked_range<size_t>& range) {
-			for (size_t i = range.begin(); i != range.end(); ++i) {
-				auto chunk = m_worldGenerator->GenerateChunk(m_chunksToLoad[i]);
-				mutex.lock();
-				m_chunks.insert({ m_chunksToLoad[i], std::move(chunk) });
-				m_chunksToUpdateMesh.push_back(m_chunksToLoad[i]);
-				mutex.unlock();
-			}
-		});
-	m_chunksToLoad.clear();
-	auto end = std::chrono::high_resolution_clock::now();
-	auto duration = std::chrono::duration_cast<std::chrono::microseconds>(end - start);
-	std::string result = "Время выполнения LoadChunks: " + std::to_string(duration.count()) + " микросекунд\n";
-	OutputDebugStringA(result.c_str());
-}
-
-void World::UnloadChunks()
-{
-	for (auto& chunkToUnload : m_chunksToUnload)
-	{
-		m_chunks.erase(chunkToUnload);
-	}
-	m_chunksToUnload.clear();
-}
-
-bool World::CheckBlockCollision(WorldPos& worldPos)
-{
-	int xPos = MathUtils::RoundDown(static_cast<int>(worldPos.x), Chunk::WIDTH);
-	int zPos = MathUtils::RoundDown(static_cast<int>(worldPos.z), Chunk::DEPTH);
-	ChunkPos chunkPos = ChunkPos(xPos, zPos);
-	auto it = m_chunks.find(chunkPos);
-	if (it == m_chunks.end())
-	{
-		return false;
-	}
-	WorldPos blockPos = WorldPos(worldPos.x - xPos, worldPos.y, worldPos.z - zPos);
-	return it->second->HasBlockAt(blockPos);
-}
-
-void World::RemoveBlockAt(WorldPos& worldPos)
-{
-	int xPos = MathUtils::RoundDown(static_cast<int>(worldPos.x), Chunk::WIDTH);
-	int zPos = MathUtils::RoundDown(static_cast<int>(worldPos.z), Chunk::DEPTH);
-	ChunkPos chunkPos = ChunkPos(xPos, zPos);
-	auto it = m_chunks.find(chunkPos);
-	if (it == m_chunks.end())
-	{
-		return;
-	}
-	WorldPos blockPos = WorldPos(worldPos.x - xPos, worldPos.y, worldPos.z - zPos);
-	it->second->RemoveBlock(blockPos);
-	it->second->UpdateMeshWithoutBuffers(m_blockManager, m_chunks);
-	it->second->UpdateBuffers(m_deviceResources->GetD3DDevice());
-
-	if (blockPos.x == 0)
-	{
-		ChunkPos leftChunk = chunkPos - ChunkPos(Chunk::WIDTH, 0);
-		auto chunk = GetChunkAt(leftChunk);
-		if (chunk != nullptr)
-		{
-			chunk->UpdateMeshWithoutBuffers(m_blockManager, m_chunks);
-			chunk->UpdateBuffers(m_deviceResources->GetD3DDevice());
-		}
-		return;
-	}
-	if (blockPos.x == Chunk::WIDTH - 1)
-	{
-		ChunkPos rightChunk = chunkPos + ChunkPos(Chunk::WIDTH, 0);
-		auto chunk = GetChunkAt(rightChunk);
-		if (chunk != nullptr)
-		{
-			chunk->UpdateMeshWithoutBuffers(m_blockManager, m_chunks);
-			chunk->UpdateBuffers(m_deviceResources->GetD3DDevice());
-		}
-		return;
-	}
-	if (blockPos.z == 0)
-	{
-		ChunkPos frontChunk = chunkPos - ChunkPos(0, Chunk::DEPTH);
-		auto chunk = GetChunkAt(frontChunk);
-		if (chunk != nullptr)
-		{
-			chunk->UpdateMeshWithoutBuffers(m_blockManager, m_chunks);
-			chunk->UpdateBuffers(m_deviceResources->GetD3DDevice());
-		}
-		return;
-	}
-	if (blockPos.z == Chunk::DEPTH - 1)
-	{
-		ChunkPos backChunk = chunkPos + ChunkPos(0, Chunk::DEPTH);
-		auto chunk = GetChunkAt(backChunk);
-		if (chunk != nullptr)
-		{
-			chunk->UpdateMeshWithoutBuffers(m_blockManager, m_chunks);
-			chunk->UpdateBuffers(m_deviceResources->GetD3DDevice());
-		}
-	}
-}
-
-void World::PlaceBlockAt(WorldPos& worldPos, BlockId blockId)
-{
-	int xPos = MathUtils::RoundDown(static_cast<int>(worldPos.x), Chunk::WIDTH);
-	int zPos = MathUtils::RoundDown(static_cast<int>(worldPos.z), Chunk::DEPTH);
-	ChunkPos chunkPos = ChunkPos(xPos, zPos);
-	auto it = m_chunks.find(chunkPos);
-	if (it == m_chunks.end())
-	{
-		return;
-	}
-	WorldPos blockPos = WorldPos(worldPos.x - xPos, worldPos.y, worldPos.z - zPos);
-	it->second->AddBlock(blockPos, blockId);
-	it->second->UpdateMeshWithoutBuffers(m_blockManager, m_chunks);
-	it->second->UpdateBuffers(m_deviceResources->GetD3DDevice());
-
-	if (blockPos.x == 0)
-	{
-		ChunkPos leftChunk = chunkPos - ChunkPos(Chunk::WIDTH, 0);
-		auto chunk = GetChunkAt(leftChunk);
-		if (chunk != nullptr)
-		{
-			chunk->UpdateMeshWithoutBuffers(m_blockManager, m_chunks);
-			chunk->UpdateBuffers(m_deviceResources->GetD3DDevice());
-		}
-		return;
-	}
-	if (blockPos.x == Chunk::WIDTH - 1)
-	{
-		ChunkPos rightChunk = chunkPos + ChunkPos(Chunk::WIDTH, 0);
-		auto chunk = GetChunkAt(rightChunk);
-		if (chunk != nullptr)
-		{
-			chunk->UpdateMeshWithoutBuffers(m_blockManager, m_chunks);
-			chunk->UpdateBuffers(m_deviceResources->GetD3DDevice());
-		}
-		return;
-	}
-	if (blockPos.z == 0)
-	{
-		ChunkPos frontChunk = chunkPos - ChunkPos(0, Chunk::DEPTH);
-		auto chunk = GetChunkAt(frontChunk);
-		if (chunk != nullptr)
-		{
-			chunk->UpdateMeshWithoutBuffers(m_blockManager, m_chunks);
-			chunk->UpdateBuffers(m_deviceResources->GetD3DDevice());
-		}
-		return;
-	}
-	if (blockPos.z == Chunk::DEPTH - 1)
-	{
-		ChunkPos backChunk = chunkPos + ChunkPos(0, Chunk::DEPTH);
-		auto chunk = GetChunkAt(backChunk);
-		if (chunk != nullptr)
-		{
-			chunk->UpdateMeshWithoutBuffers(m_blockManager, m_chunks);
-			chunk->UpdateBuffers(m_deviceResources->GetD3DDevice());
-		}
-	}
-}
-
 std::optional<std::pair<WorldPos, ChunkBlock::BlockDirection>> World::Raycast()
 {
 	DirectX::XMVECTOR currentPosition = m_cam->GetPosition();
@@ -432,7 +169,7 @@ std::optional<std::pair<WorldPos, ChunkBlock::BlockDirection>> World::Raycast()
 		WorldPos blockPos = WorldPos(static_cast<int>(std::floor(DirectX::XMVectorGetX(currentPosition))),
 			static_cast<int>(std::floor(DirectX::XMVectorGetY(currentPosition))),
 				static_cast<int>(std::floor(DirectX::XMVectorGetZ(currentPosition))));
-		if (CheckBlockCollision(blockPos)) {
+		if (m_chunksManager->CheckBlockCollision(blockPos)) {
 			DirectX::XMFLOAT3 collisionPoint;
 			DirectX::XMStoreFloat3(&collisionPoint, currentPosition);
 			return std::pair<WorldPos, ChunkBlock::BlockDirection>(blockPos, WorldUtils::GetNearBlockFaceToPoint(collisionPoint));

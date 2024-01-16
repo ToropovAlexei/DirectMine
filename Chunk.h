@@ -21,6 +21,7 @@ public:
 	void RemoveBlock(WorldPos& worldPos) noexcept;
 
 	void AddBlock(WorldPos& worldPos, BlockId blockId) noexcept;
+	void AddBlock(WorldPos& worldPos, ChunkBlock block) noexcept;
 
 	std::optional<ChunkBlock> GetBlock(WorldPos& worldPos) noexcept;
 
@@ -31,6 +32,9 @@ public:
 	void UpdateBuffers(ID3D11Device* device);
 
 	inline bool HasBlockAt(WorldPos& pos) const noexcept;
+
+	bool IsModified() const noexcept;
+	void SetIsModified(bool isModified) noexcept;
 
 	ChunkPos& GetPos() noexcept;
 
@@ -48,6 +52,7 @@ private:
 	inline void AddRightFace(DirectX::XMFLOAT3& pos, std::string& texture) noexcept;
 
 private:
+	bool m_isModified = true;
 	std::unordered_map<WorldPos, ChunkBlock, WorldPosHash> m_blocks;
 
 	std::vector<Vertex> m_vertices;

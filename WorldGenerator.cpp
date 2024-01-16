@@ -13,10 +13,10 @@ WorldGenerator::WorldGenerator(BlockManager& blockManager) :
     caveNoiseGen.SetFractalOctaves(2);
 }
 
-std::unique_ptr<Chunk> WorldGenerator::GenerateChunk(ChunkPos& chunkPos)
+Chunk WorldGenerator::GenerateChunk(ChunkPos& chunkPos)
 {
     auto start = std::chrono::high_resolution_clock::now();
-    std::unique_ptr<Chunk> chunk = std::make_unique<Chunk>(chunkPos);
+    Chunk chunk = Chunk(chunkPos);
 
     for (int x = 0; x < Chunk::WIDTH; ++x) {
         for (int z = 0; z < Chunk::DEPTH; ++z) {
@@ -29,14 +29,14 @@ std::unique_ptr<Chunk> WorldGenerator::GenerateChunk(ChunkPos& chunkPos)
                 WorldPos pos = WorldPos(x, y, z);
                 if (y == 0)
                 {
-                    chunk->AddBlock(pos, BlockId::Bedrock);
+                    chunk.AddBlock(pos, BlockId::Bedrock);
                 }
                 else if (y == height - 1)
                 {
-                    chunk->AddBlock(pos, BlockId::Grass);
+                    chunk.AddBlock(pos, BlockId::Grass);
                 }
                 else if (y > height - 4) {
-                    chunk->AddBlock(pos, BlockId::Dirt);
+                    chunk.AddBlock(pos, BlockId::Dirt);
                 }
                 else {
                     float oreNoise = noise.GetNoise(static_cast<float>(chunkPos.x + x), static_cast<float>(chunkPos.z + z), 2.0f);
@@ -45,20 +45,20 @@ std::unique_ptr<Chunk> WorldGenerator::GenerateChunk(ChunkPos& chunkPos)
                         continue;
                     }
                     else if (oreNoise > 0.6f) {
-                        chunk->AddBlock(pos, BlockId::Stone);
+                        chunk.AddBlock(pos, BlockId::Stone);
                     }
                     else if (oreNoise > 0.3f) {
-                        chunk->AddBlock(pos, BlockId::IronOre);
+                        chunk.AddBlock(pos, BlockId::IronOre);
                     }
                     else if (oreNoise > 0.1f) {
-                        chunk->AddBlock(pos, BlockId::GoldOre);
+                        chunk.AddBlock(pos, BlockId::GoldOre);
                     }
                     else if (oreNoise > 0.05f) {
-                        chunk->AddBlock(pos, BlockId::DiamondOre);
+                        chunk.AddBlock(pos, BlockId::DiamondOre);
                     }
                     else
                     {
-                        chunk->AddBlock(pos, BlockId::Stone);
+                        chunk.AddBlock(pos, BlockId::Stone);
                     }
                 }
             }
