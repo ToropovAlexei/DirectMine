@@ -38,6 +38,20 @@ void ChunksManager::InsertChunk(const ChunkPos& chunkPos, Chunk& chunk)
 {
 	std::unique_lock<std::shared_mutex> lock(m_mutex);
 	m_chunks.insert({ chunkPos, std::make_shared<Chunk>(chunk) });
+	ChunkPos leftChunk = chunkPos - ChunkPos(Chunk::WIDTH, 0);
+	ChunkPos rightChunk = chunkPos + ChunkPos(Chunk::WIDTH, 0);
+	ChunkPos frontChunk = chunkPos - ChunkPos(0, Chunk::DEPTH);
+	ChunkPos backChunk = chunkPos + ChunkPos(0, Chunk::DEPTH);
+	std::array<ChunkPos, 4> chunks = {leftChunk, rightChunk, frontChunk, backChunk};
+	for (auto& nextChunkPos : chunks)
+	{
+		auto it = m_chunks.find(nextChunkPos);
+		if (it == m_chunks.end())
+		{
+			continue;
+		}
+		it->second->SetIsModified(true);
+	}
 }
 
 void ChunksManager::UpdatePlayerPos(DirectX::XMFLOAT3& playerPos) noexcept
@@ -213,6 +227,59 @@ void ChunksManager::UnloadFarChunks()
 
 void ChunksManager::LoadChunks()
 {
+	// Works incorrect
+	/*int xCenter = static_cast<int>(std::round(m_playerPos.x / Chunk::WIDTH)) * Chunk::WIDTH;
+	int zCenter = static_cast<int>(std::round(m_playerPos.z / Chunk::DEPTH)) * Chunk::DEPTH;
+
+	std::vector<ChunkPos> chunksToLoad;
+
+	int radius = 0;
+	while (radius < loadDistance && chunksToLoad.size() < maxAsyncChunksLoading)
+	{
+		int xStart = xCenter - radius * Chunk::WIDTH;
+		int xEnd = xCenter + radius * Chunk::WIDTH;
+		int zStart = zCenter - radius * Chunk::DEPTH;
+		int zEnd = zCenter + radius * Chunk::DEPTH;
+
+		for (int x = xStart; x <= xEnd; x += Chunk::WIDTH)
+		{
+			if (chunksToLoad.size() >= maxAsyncChunksLoading)
+			{
+				break;
+			}
+			ChunkPos posFront(x, zStart);
+			std::shared_lock<std::shared_mutex> lock(m_mutex);
+			if (!m_chunks.contains(posFront))
+			{
+				chunksToLoad.push_back(posFront);
+			}
+			ChunkPos posBack(x, zEnd);
+			if (!m_chunks.contains(posBack))
+			{
+				chunksToLoad.push_back(posBack);
+			}
+		}
+		for (int z = zStart + 1; z <= zEnd - 1; z += Chunk::DEPTH)
+		{
+			if (chunksToLoad.size() >= maxAsyncChunksLoading)
+			{
+				break;
+			}
+			ChunkPos posLeft(xStart, z);
+			std::shared_lock<std::shared_mutex> lock(m_mutex);
+			if (!m_chunks.contains(posLeft))
+			{
+				chunksToLoad.push_back(posLeft);
+			}
+			ChunkPos posRight(xEnd, z);
+			if (!m_chunks.contains(posRight))
+			{
+				chunksToLoad.push_back(posRight);
+			}
+		}
+		radius++;
+	}*/
+
 	int xPos = static_cast<int>(std::round(m_playerPos.x / Chunk::WIDTH)) * Chunk::WIDTH;
 	int zPos = static_cast<int>(std::round(m_playerPos.z / Chunk::DEPTH)) * Chunk::DEPTH;
 	int offset = Chunk::WIDTH * loadDistance;
@@ -220,7 +287,6 @@ void ChunksManager::LoadChunks()
 	int zStart = zPos - offset;
 	int xEnd = xPos + offset;
 	int zEnd = zPos + offset;
-
 	std::vector<ChunkPos> chunksToLoad;
 
 	for (int x = xStart; x < xEnd; x += Chunk::WIDTH)

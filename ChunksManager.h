@@ -28,7 +28,11 @@ private:
 	std::shared_ptr<Chunk> GetChunkAt(ChunkPos& chunkPos);
 
 private:
-	static const int loadDistance = 32;
+#ifdef NDEBUG
+	static const int loadDistance = 24; // Release mode
+#else
+	static const int loadDistance = 4; // Debug mode
+#endif
 	static const int maxAsyncChunksLoading = 16;
 	DirectX::XMFLOAT3 m_playerPos;
 	std::unordered_map<ChunkPos, std::shared_ptr<Chunk>, ChunkPosHash> m_chunks;

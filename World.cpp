@@ -38,7 +38,6 @@ World::World(std::unique_ptr<DX::DeviceResources>& deviceResources,
 void World::Update(DX::StepTimer const& timer)
 {
 	auto rayCastResult = Raycast();
-	//std::optional<WorldPos> rayCastResult = WorldPos(0.0f, 60.0f, 0.0f);
 	auto outlinedBlock = rayCastResult.has_value() ? std::optional<WorldPos>(rayCastResult.value().first) : std::nullopt;
 	m_blockOutlineRenderer->UpdateOutlinedCube(outlinedBlock);
 	float elapsedTime = float(timer.GetElapsedSeconds());

@@ -246,7 +246,7 @@ inline bool Chunk::HasBlockInWorld(WorldPos& worldPos, std::unordered_map<ChunkP
 inline bool Chunk::HasBlockAt(WorldPos& chunkPos)  const noexcept
 {
     assert(chunkPos.x < Chunk::WIDTH);
-    assert(chunkPos.y < Chunk::HEIGHT);
+    //assert(chunkPos.y < Chunk::HEIGHT);
     assert(chunkPos.z < Chunk::DEPTH);
     return m_blocks.contains(chunkPos);
 }

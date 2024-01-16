@@ -39,11 +39,6 @@ private:
 	std::optional<std::pair<WorldPos, ChunkBlock::BlockDirection>> Raycast();
 	
 private:
-#ifdef NDEBUG
-	static const int chunkLoadingRadius = 24; // Release mode
-#else
-	static const int chunkLoadingRadius = 4; // Debug mode
-#endif
 	std::unique_ptr<DX::DeviceResources>& m_deviceResources;
 	std::unique_ptr<Camera> m_cam;
 	std::unique_ptr<DirectX::Keyboard>& m_keyboard;
