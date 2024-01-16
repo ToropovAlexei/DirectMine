@@ -261,6 +261,16 @@ void Chunk::SetIsModified(bool isModified) noexcept
     m_isModified = isModified;
 }
 
+bool Chunk::ShouldRender() const noexcept
+{
+    return m_shouldRender;
+}
+
+void Chunk::SetShouldRender(bool shouldRender) noexcept
+{
+    m_shouldRender = shouldRender;
+}
+
 ChunkPos& Chunk::GetPos() noexcept
 {
     return m_worldPos;

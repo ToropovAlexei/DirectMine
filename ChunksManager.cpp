@@ -38,6 +38,7 @@ void ChunksManager::InsertChunk(const ChunkPos& chunkPos, Chunk& chunk)
 {
 	std::unique_lock<std::shared_mutex> lock(m_mutex);
 	m_chunks.insert({ chunkPos, std::make_shared<Chunk>(chunk) });
+	// Нежелательно моргают чанки
 	ChunkPos leftChunk = chunkPos - ChunkPos(Chunk::WIDTH, 0);
 	ChunkPos rightChunk = chunkPos + ChunkPos(Chunk::WIDTH, 0);
 	ChunkPos frontChunk = chunkPos - ChunkPos(0, Chunk::DEPTH);
@@ -344,6 +345,7 @@ void ChunksManager::UpdateModifiedChunks()
 	for (auto& pos : modifiedChunks)
 	{
 		m_chunks[pos]->UpdateBuffers(m_deviceResources->GetD3DDevice());
+		m_chunks[pos]->SetShouldRender(true);
 		m_chunks[pos]->SetIsModified(false);
 	}
 }

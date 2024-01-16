@@ -36,6 +36,9 @@ public:
 	bool IsModified() const noexcept;
 	void SetIsModified(bool isModified) noexcept;
 
+	bool ShouldRender() const noexcept;
+	void SetShouldRender(bool shouldRender) noexcept;
+
 	ChunkPos& GetPos() noexcept;
 
 	std::vector<Vertex>& GetVertices();
@@ -53,6 +56,7 @@ private:
 
 private:
 	bool m_isModified = true;
+	bool m_shouldRender = false;
 	std::unordered_map<WorldPos, ChunkBlock, WorldPosHash> m_blocks;
 
 	std::vector<Vertex> m_vertices;

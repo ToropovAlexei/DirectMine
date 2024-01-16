@@ -43,6 +43,10 @@ void ChunkRenderer::RenderChunks(std::unordered_map<ChunkPos, std::shared_ptr<Ch
 
     for (auto& chunk : chunks)
     {
+        if (!chunk.second->ShouldRender())
+        {
+            continue;
+        }
         context->IASetVertexBuffers(0u, 1u, chunk.second->GetVertexBuffer().GetAddressOf(), &m_stride, &m_offset);
         context->IASetIndexBuffer(chunk.second->GetIndexBuffer().Get(), DXGI_FORMAT_R32_UINT, 0u);
         context->DrawIndexed(static_cast<UINT>(chunk.second->GetIndices().size()), 0u, 0u);
