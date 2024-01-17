@@ -38,7 +38,6 @@ void ChunksManager::InsertChunk(const ChunkPos& chunkPos, Chunk& chunk)
 {
 	std::unique_lock<std::shared_mutex> lock(m_mutex);
 	m_chunks.insert({ chunkPos, std::make_shared<Chunk>(chunk) });
-	// Нежелательно моргают чанки
 	ChunkPos leftChunk = chunkPos - ChunkPos(Chunk::WIDTH, 0);
 	ChunkPos rightChunk = chunkPos + ChunkPos(Chunk::WIDTH, 0);
 	ChunkPos frontChunk = chunkPos - ChunkPos(0, Chunk::DEPTH);
@@ -62,7 +61,7 @@ void ChunksManager::UpdatePlayerPos(DirectX::XMFLOAT3& playerPos) noexcept
 
 void ChunksManager::RenderChunks()
 {
-	std::shared_lock<std::shared_mutex> lock(m_mutex);
+	std::unique_lock<std::shared_mutex> lock(m_mutex);
 	m_chunkRenderer->RenderChunks(m_chunks);
 }
 
