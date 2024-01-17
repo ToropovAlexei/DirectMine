@@ -30,10 +30,11 @@ private:
 private:
 #ifdef NDEBUG
 	static const int loadDistance = 24; // Release mode
+	static const int maxAsyncChunksLoading = 16; // Release mode
 #else
-	static const int loadDistance = 4; // Debug mode
+	static const int loadDistance = 8; // Debug mode
+	static const int maxAsyncChunksLoading = 2; // Debug mode
 #endif
-	static const int maxAsyncChunksLoading = 16;
 	DirectX::XMFLOAT3 m_playerPos;
 	std::unordered_map<ChunkPos, std::shared_ptr<Chunk>, ChunkPosHash> m_chunks;
 	std::unique_ptr<DX::DeviceResources>& m_deviceResources;

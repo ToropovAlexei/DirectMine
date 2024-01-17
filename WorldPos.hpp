@@ -34,10 +34,12 @@ struct ChunkPosHash
 {
 	std::size_t operator()(const ChunkPos& pos) const
 	{
-		std::size_t xHash = std::hash<int>{}(pos.x);
-		std::size_t zHash = std::hash<int>{}(pos.z);
+		std::size_t h1 = std::hash<int>{}(pos.x);
+		std::size_t h2 = std::hash<int>{}(pos.z);
 
-		std::size_t combinedHash = xHash ^ zHash;
+		std::size_t combinedHash = 17;
+		combinedHash = combinedHash * 31 + h1;
+		combinedHash = combinedHash * 31 + h2;
 
 		return combinedHash;
 	}
