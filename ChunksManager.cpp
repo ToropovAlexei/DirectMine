@@ -227,8 +227,7 @@ void ChunksManager::UnloadFarChunks()
 
 void ChunksManager::LoadChunks()
 {
-	// Works incorrect
-	/*int xCenter = static_cast<int>(std::round(m_playerPos.x / Chunk::WIDTH)) * Chunk::WIDTH;
+	int xCenter = static_cast<int>(std::round(m_playerPos.x / Chunk::WIDTH)) * Chunk::WIDTH;
 	int zCenter = static_cast<int>(std::round(m_playerPos.z / Chunk::DEPTH)) * Chunk::DEPTH;
 
 	std::vector<ChunkPos> chunksToLoad;
@@ -236,6 +235,15 @@ void ChunksManager::LoadChunks()
 	int radius = 0;
 	while (radius < loadDistance && chunksToLoad.size() < maxAsyncChunksLoading)
 	{
+		if (radius == 0)
+		{
+			ChunkPos pos(xCenter, zCenter);
+			if (!m_chunks.contains(pos))
+			{
+				chunksToLoad.push_back(pos);
+			}
+			radius++;
+		}
 		int xStart = xCenter - radius * Chunk::WIDTH;
 		int xEnd = xCenter + radius * Chunk::WIDTH;
 		int zStart = zCenter - radius * Chunk::DEPTH;
@@ -259,7 +267,7 @@ void ChunksManager::LoadChunks()
 				chunksToLoad.push_back(posBack);
 			}
 		}
-		for (int z = zStart + 1; z <= zEnd - 1; z += Chunk::DEPTH)
+		for (int z = zStart + Chunk::DEPTH; z <= zEnd - Chunk::DEPTH; z += Chunk::DEPTH)
 		{
 			if (chunksToLoad.size() >= maxAsyncChunksLoading)
 			{
@@ -278,37 +286,8 @@ void ChunksManager::LoadChunks()
 			}
 		}
 		radius++;
-	}*/
-
-	int xPos = static_cast<int>(std::round(m_playerPos.x / Chunk::WIDTH)) * Chunk::WIDTH;
-	int zPos = static_cast<int>(std::round(m_playerPos.z / Chunk::DEPTH)) * Chunk::DEPTH;
-	int offset = Chunk::WIDTH * loadDistance;
-	int xStart = xPos - offset;
-	int zStart = zPos - offset;
-	int xEnd = xPos + offset;
-	int zEnd = zPos + offset;
-	std::vector<ChunkPos> chunksToLoad;
-
-	for (int x = xStart; x < xEnd; x += Chunk::WIDTH)
-	{
-		for (int z = zStart; z < zEnd; z += Chunk::WIDTH)
-		{
-			ChunkPos pos(x, z);
-			std::shared_lock<std::shared_mutex> lock(m_mutex);
-			if (!m_chunks.contains(pos))
-			{
-				chunksToLoad.push_back(pos);
-			}
-			if (chunksToLoad.size() == maxAsyncChunksLoading)
-			{
-				break;
-			}
-		}
-		if (chunksToLoad.size() == maxAsyncChunksLoading)
-		{
-			break;
-		}
 	}
+
 	tbb::parallel_for(tbb::blocked_range<size_t>(0, chunksToLoad.size()),
 		[this, &chunksToLoad](const tbb::blocked_range<size_t>& range) {
 			for (size_t i = range.begin(); i != range.end(); ++i) {
@@ -320,18 +299,29 @@ void ChunksManager::LoadChunks()
 
 void ChunksManager::UpdateModifiedChunks()
 {
-	std::vector<ChunkPos> modifiedChunks;
+	int playerX = static_cast<int>(m_playerPos.x);
+	int playerZ = static_cast<int>(m_playerPos.z);
+
+	auto comp = [&playerX, &playerZ](ChunkPos left, ChunkPos right) {
+		double dist1 = std::pow(playerX - left.x, 2) + std::pow(playerZ - left.z, 2);
+		double dist2 = std::pow(playerX - right.x, 2) + std::pow(playerZ - right.z, 2);
+
+		return dist1 > dist2;
+		};
+	std::priority_queue<ChunkPos, std::vector<ChunkPos>, decltype(comp)> prior(comp);
 	std::shared_lock<std::shared_mutex> lock(m_mutex);
 	for (auto& chunkPair : m_chunks)
 	{
 		if (chunkPair.second->IsModified())
 		{
-			modifiedChunks.push_back(chunkPair.first);
+			prior.push(chunkPair.first);
 		}
-		if (modifiedChunks.size() == maxAsyncChunksLoading)
-		{
-			break;
-		}
+	}
+	std::vector<ChunkPos> modifiedChunks;
+	while (!prior.empty() && modifiedChunks.size() < maxAsyncChunksToUpdate)
+	{
+		modifiedChunks.push_back(prior.top());
+		prior.pop();
 	}
 
 	tbb::parallel_for(tbb::blocked_range<size_t>(0, modifiedChunks.size()),
