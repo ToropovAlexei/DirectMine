@@ -40,8 +40,8 @@ void ChunksManager::InsertChunk(const ChunkPos& chunkPos, Chunk& chunk)
 	m_chunks.insert({ chunkPos, std::make_shared<Chunk>(chunk) });
 	ChunkPos leftChunk = chunkPos - ChunkPos(Chunk::WIDTH, 0);
 	ChunkPos rightChunk = chunkPos + ChunkPos(Chunk::WIDTH, 0);
-	ChunkPos frontChunk = chunkPos - ChunkPos(0, Chunk::DEPTH);
-	ChunkPos backChunk = chunkPos + ChunkPos(0, Chunk::DEPTH);
+	ChunkPos frontChunk = chunkPos - ChunkPos(0, Chunk::WIDTH);
+	ChunkPos backChunk = chunkPos + ChunkPos(0, Chunk::WIDTH);
 	std::array<ChunkPos, 4> chunks = {leftChunk, rightChunk, frontChunk, backChunk};
 	for (auto& nextChunkPos : chunks)
 	{
@@ -69,7 +69,7 @@ void ChunksManager::RemoveBlockAt(WorldPos& worldPos)
 {
 	std::shared_lock<std::shared_mutex> lock(m_mutex);
 	int xPos = MathUtils::RoundDown(static_cast<int>(worldPos.x), Chunk::WIDTH);
-	int zPos = MathUtils::RoundDown(static_cast<int>(worldPos.z), Chunk::DEPTH);
+	int zPos = MathUtils::RoundDown(static_cast<int>(worldPos.z), Chunk::WIDTH);
 	ChunkPos chunkPos = ChunkPos(xPos, zPos);
 	auto it = m_chunks.find(chunkPos);
 	if (it == m_chunks.end())
@@ -77,7 +77,7 @@ void ChunksManager::RemoveBlockAt(WorldPos& worldPos)
 		return;
 	}
 	WorldPos blockPos = WorldPos(worldPos.x - xPos, worldPos.y, worldPos.z - zPos);
-	it->second->RemoveBlock(blockPos);
+	it->second->RemoveBlock(blockPos.x, blockPos.y, blockPos.z);
 	it->second->UpdateMeshWithoutBuffers(m_blockManager, m_chunks);
 	it->second->UpdateBuffers(m_deviceResources->GetD3DDevice());
 
@@ -101,16 +101,16 @@ void ChunksManager::RemoveBlockAt(WorldPos& worldPos)
 	}
 	if (blockPos.z == 0)
 	{
-		ChunkPos frontChunk = chunkPos - ChunkPos(0, Chunk::DEPTH);
+		ChunkPos frontChunk = chunkPos - ChunkPos(0, Chunk::WIDTH);
 		auto chunk = GetChunkAt(frontChunk);
 		if (chunk != nullptr)
 		{
 			chunk->SetIsModified(true);
 		}
 	}
-	if (blockPos.z == Chunk::DEPTH - 1)
+	if (blockPos.z == Chunk::WIDTH - 1)
 	{
-		ChunkPos backChunk = chunkPos + ChunkPos(0, Chunk::DEPTH);
+		ChunkPos backChunk = chunkPos + ChunkPos(0, Chunk::WIDTH);
 		auto chunk = GetChunkAt(backChunk);
 		if (chunk != nullptr)
 		{
@@ -123,7 +123,7 @@ void ChunksManager::PlaceBlockAt(WorldPos& worldPos, ChunkBlock block)
 {
 	std::shared_lock<std::shared_mutex> lock(m_mutex);
 	int xPos = MathUtils::RoundDown(static_cast<int>(worldPos.x), Chunk::WIDTH);
-	int zPos = MathUtils::RoundDown(static_cast<int>(worldPos.z), Chunk::DEPTH);
+	int zPos = MathUtils::RoundDown(static_cast<int>(worldPos.z), Chunk::WIDTH);
 	ChunkPos chunkPos = ChunkPos(xPos, zPos);
 	auto it = m_chunks.find(chunkPos);
 	if (it == m_chunks.end())
@@ -131,7 +131,7 @@ void ChunksManager::PlaceBlockAt(WorldPos& worldPos, ChunkBlock block)
 		return;
 	}
 	WorldPos blockPos = WorldPos(worldPos.x - xPos, worldPos.y, worldPos.z - zPos);
-	it->second->AddBlock(blockPos, block);
+	it->second->AddBlock(blockPos.x, blockPos.y, blockPos.z, block);
 	it->second->UpdateMeshWithoutBuffers(m_blockManager, m_chunks);
 	it->second->UpdateBuffers(m_deviceResources->GetD3DDevice());
 
@@ -155,16 +155,16 @@ void ChunksManager::PlaceBlockAt(WorldPos& worldPos, ChunkBlock block)
 	}
 	if (blockPos.z == 0)
 	{
-		ChunkPos frontChunk = chunkPos - ChunkPos(0, Chunk::DEPTH);
+		ChunkPos frontChunk = chunkPos - ChunkPos(0, Chunk::WIDTH);
 		auto chunk = GetChunkAt(frontChunk);
 		if (chunk != nullptr)
 		{
 			chunk->SetIsModified(true);
 		}
 	}
-	if (blockPos.z == Chunk::DEPTH - 1)
+	if (blockPos.z == Chunk::WIDTH - 1)
 	{
-		ChunkPos backChunk = chunkPos + ChunkPos(0, Chunk::DEPTH);
+		ChunkPos backChunk = chunkPos + ChunkPos(0, Chunk::WIDTH);
 		auto chunk = GetChunkAt(backChunk);
 		if (chunk != nullptr)
 		{
@@ -177,15 +177,14 @@ bool ChunksManager::CheckBlockCollision(WorldPos& worldPos)
 {
 	std::shared_lock<std::shared_mutex> lock(m_mutex);
 	int xPos = MathUtils::RoundDown(static_cast<int>(worldPos.x), Chunk::WIDTH);
-	int zPos = MathUtils::RoundDown(static_cast<int>(worldPos.z), Chunk::DEPTH);
+	int zPos = MathUtils::RoundDown(static_cast<int>(worldPos.z), Chunk::WIDTH);
 	ChunkPos chunkPos = ChunkPos(xPos, zPos);
 	auto it = m_chunks.find(chunkPos);
 	if (it == m_chunks.end())
 	{
 		return false;
 	}
-	WorldPos blockPos = WorldPos(worldPos.x - xPos, worldPos.y, worldPos.z - zPos);
-	return it->second->HasBlockAt(blockPos);
+	return it->second->HasBlockAt(worldPos.x - xPos, worldPos.y, worldPos.z - zPos);
 }
 
 void ChunksManager::AsyncProcessChunks()
@@ -228,7 +227,7 @@ void ChunksManager::UnloadFarChunks()
 void ChunksManager::LoadChunks()
 {
 	int xCenter = static_cast<int>(std::round(m_playerPos.x / Chunk::WIDTH)) * Chunk::WIDTH;
-	int zCenter = static_cast<int>(std::round(m_playerPos.z / Chunk::DEPTH)) * Chunk::DEPTH;
+	int zCenter = static_cast<int>(std::round(m_playerPos.z / Chunk::WIDTH)) * Chunk::WIDTH;
 
 	std::vector<ChunkPos> chunksToLoad;
 
@@ -246,8 +245,8 @@ void ChunksManager::LoadChunks()
 		}
 		int xStart = xCenter - radius * Chunk::WIDTH;
 		int xEnd = xCenter + radius * Chunk::WIDTH;
-		int zStart = zCenter - radius * Chunk::DEPTH;
-		int zEnd = zCenter + radius * Chunk::DEPTH;
+		int zStart = zCenter - radius * Chunk::WIDTH;
+		int zEnd = zCenter + radius * Chunk::WIDTH;
 
 		for (int x = xStart; x <= xEnd; x += Chunk::WIDTH)
 		{
@@ -267,7 +266,7 @@ void ChunksManager::LoadChunks()
 				chunksToLoad.push_back(posBack);
 			}
 		}
-		for (int z = zStart + Chunk::DEPTH; z <= zEnd - Chunk::DEPTH; z += Chunk::DEPTH)
+		for (int z = zStart + Chunk::WIDTH; z <= zEnd - Chunk::WIDTH; z += Chunk::WIDTH)
 		{
 			if (chunksToLoad.size() >= maxAsyncChunksLoading)
 			{

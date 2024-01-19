@@ -15,6 +15,7 @@ public:
 		Down,
 	};
 public:
+	ChunkBlock();
 	ChunkBlock(BlockId id) noexcept;
 	ChunkBlock(BlockId id, BlockDirection dir) noexcept;
 

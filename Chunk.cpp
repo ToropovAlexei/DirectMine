@@ -7,53 +7,67 @@
 Chunk::Chunk(ChunkPos& worldPos) :
     m_worldPos(worldPos)
 {
+    m_blocks.resize(static_cast<size_t>(SQ_WIDTH));
 }
 
-const std::unordered_map<WorldPos, ChunkBlock, WorldPosHash>& Chunk::GetBlocks() const noexcept
+void Chunk::RemoveBlock(int x, int y, int z) noexcept
 {
-	return m_blocks;
-}
-
-void Chunk::RemoveBlock(WorldPos& worldPos) noexcept
-{
-    assert(worldPos.x < Chunk::WIDTH);
-    assert(worldPos.y < Chunk::HEIGHT);
-    assert(worldPos.z < Chunk::DEPTH);
-    auto it = m_blocks.find(worldPos);
-    if (it == m_blocks.end())
+    assert(x < Chunk::WIDTH);
+    assert(y < Chunk::HEIGHT);
+    assert(z < Chunk::WIDTH);
+    const size_t index = GetIdxFromCoords(x, y, z);
+    if (index >= m_blocks.size())
     {
         return;
     }
-    m_blocks.erase(it);
+    m_blocks[index] = ChunkBlock(BlockId::Air);
 }
 
-void Chunk::AddBlock(WorldPos& worldPos, BlockId blockId) noexcept
+void Chunk::AddBlock(int x, int y, int z, BlockId blockId) noexcept
 {
-    assert(worldPos.x < Chunk::WIDTH);
-    assert(worldPos.y < Chunk::HEIGHT);
-    assert(worldPos.z < Chunk::DEPTH);
-    m_blocks.insert({ worldPos, ChunkBlock(blockId) });
+    assert(x < Chunk::WIDTH);
+    assert(y < Chunk::HEIGHT);
+    assert(z < Chunk::WIDTH);
+    const size_t index = GetIdxFromCoords(x, y, z);
+    if (index >= m_blocks.size())
+    {
+        const int prevY = (static_cast<int>(m_blocks.size()) / SQ_WIDTH) - 1;
+        if (prevY < y)
+        {
+            m_blocks.resize(m_blocks.size() + static_cast<size_t>((y - prevY) * SQ_WIDTH));
+        }
+    }
+    m_blocks[index] = ChunkBlock(blockId);
 }
 
-void Chunk::AddBlock(WorldPos& worldPos, ChunkBlock block) noexcept
+void Chunk::AddBlock(int x, int y, int z, ChunkBlock block) noexcept
 {
-    assert(worldPos.x < Chunk::WIDTH);
-    assert(worldPos.y < Chunk::HEIGHT);
-    assert(worldPos.z < Chunk::DEPTH);
-    m_blocks.insert({ worldPos, block });
+    assert(x < Chunk::WIDTH);
+    assert(y < Chunk::HEIGHT);
+    assert(z < Chunk::WIDTH);
+    const size_t index = GetIdxFromCoords(x, y, z);
+    if (index >= m_blocks.size())
+    {
+        const int prevY = static_cast<int>(m_blocks.size()) / SQ_WIDTH;
+        if (prevY < y)
+        {
+            m_blocks.resize(m_blocks.size() + static_cast<size_t>((y - prevY) * SQ_WIDTH));
+        }
+    }
+    m_blocks[index] = block;
 }
 
-std::optional<ChunkBlock> Chunk::GetBlock(WorldPos& worldPos) noexcept
+std::optional<ChunkBlock> Chunk::GetBlock(int x, int y, int z) noexcept
 {
-    assert(worldPos.x < Chunk::WIDTH);
-    assert(worldPos.y < Chunk::HEIGHT);
-    assert(worldPos.z < Chunk::DEPTH);
-    auto it = m_blocks.find(worldPos);
-    if (it == m_blocks.end())
+    assert(x < Chunk::WIDTH);
+    assert(y < Chunk::HEIGHT);
+    assert(z < Chunk::WIDTH);
+    const size_t index = GetIdxFromCoords(x, y, z);
+    if (index >= m_blocks.size())
     {
         return std::nullopt;
     }
-    return it->second;
+    return m_blocks[index];
 }
 
 std::vector<Vertex>& Chunk::GetVertices()
@@ -184,71 +198,95 @@ inline void Chunk::AddRightFace(DirectX::XMFLOAT3& pos, std::string& texture) no
     m_indices.emplace_back(3 + offset);
 }
 
+inline size_t Chunk::GetIdxFromCoords(int x, int y, int z) const noexcept
+{
+    return static_cast<size_t>(x + z * WIDTH + y * SQ_WIDTH);
+}
+
 void Chunk::UpdateMeshWithoutBuffers(BlockManager& blockManager, std::unordered_map<ChunkPos, std::shared_ptr<Chunk>, ChunkPosHash>& chunks)
 {
     m_vertices.clear();
     m_indices.clear();
-    for (auto& blockPair : m_blocks)
+    const int maxY = m_blocks.size() / SQ_WIDTH;
+    for (int y = 0; y < maxY; y++)
     {
-        WorldPos pos = blockPair.first + m_worldPos;
-        WorldPos topPos = blockPair.first + WorldPos(0, 1, 0);
-        WorldPos bottomPos = blockPair.first - WorldPos(0, 1, 0);
-        WorldPos leftPos = pos - WorldPos(1, 0, 0);
-        WorldPos rightPos = pos + WorldPos(1, 0, 0);
-        WorldPos frontPos = pos - WorldPos(0, 0, 1);
-        WorldPos backPos = pos + WorldPos(0, 0, 1);
+        for (int z = 0; z < WIDTH; z++)
+        {
+            for (int x = 0; x < WIDTH; x++)
+            {
+                const size_t idx = GetIdxFromCoords(x, y, z);
+                if (idx >= m_blocks.size())
+                {
+                    return;
+                }
+                BlockId blockId = m_blocks[idx].GetId();
+                if (blockId == BlockId::Air)
+                {
+                    continue;
+                }
+                WorldPos blockChunkPos = WorldPos(x, y, z);
+                WorldPos pos = blockChunkPos + m_worldPos;
+                WorldPos leftPos = pos - WorldPos(1, 0, 0);
+                WorldPos rightPos = pos + WorldPos(1, 0, 0);
+                WorldPos frontPos = pos - WorldPos(0, 0, 1);
+                WorldPos backPos = pos + WorldPos(0, 0, 1);
 
-        BlockId blockId = blockPair.second.GetId();
-        Block& block = blockManager.GetBlockById(blockId);
-        DirectX::XMFLOAT3 blockPos = DirectX::XMFLOAT3(static_cast<float>(pos.x), static_cast<float>(pos.y), static_cast<float>(pos.z));
+                Block& block = blockManager.GetBlockById(blockId);
+                DirectX::XMFLOAT3 blockPos = DirectX::XMFLOAT3(static_cast<float>(pos.x), static_cast<float>(pos.y), static_cast<float>(pos.z));
 
-        if (!HasBlockInWorld(frontPos, chunks))
-        {
-            AddFrontFace(blockPos, block.GetFaceTexture(Block::BlockFaces::Front));
-        }
-        if (!HasBlockInWorld(backPos, chunks))
-        {
-            AddBackFace(blockPos, block.GetFaceTexture(Block::BlockFaces::Back));
-        }
-        if (pos.y == HEIGHT - 1 || !HasBlockAt(topPos))
-        {
-            AddTopFace(blockPos, block.GetFaceTexture(Block::BlockFaces::Top));
-        }
-        if (pos.y == 0 || !HasBlockAt(bottomPos))
-        {
-            AddBottomFace(blockPos, block.GetFaceTexture(Block::BlockFaces::Bottom));
-        }
-        if (!HasBlockInWorld(leftPos, chunks))
-        {
-            AddLeftFace(blockPos, block.GetFaceTexture(Block::BlockFaces::Left));
-        }
-        if (!HasBlockInWorld(rightPos, chunks))
-        {
-            AddRightFace(blockPos, block.GetFaceTexture(Block::BlockFaces::Right));
+                if (!HasBlockInWorld(frontPos, chunks))
+                {
+                    AddFrontFace(blockPos, block.GetFaceTexture(Block::BlockFaces::Front));
+                }
+                if (!HasBlockInWorld(backPos, chunks))
+                {
+                    AddBackFace(blockPos, block.GetFaceTexture(Block::BlockFaces::Back));
+                }
+                if (pos.y == HEIGHT - 1 || !HasBlockAt(x, y + 1, z))
+                {
+                    AddTopFace(blockPos, block.GetFaceTexture(Block::BlockFaces::Top));
+                }
+                if (pos.y == 0 || !HasBlockAt(x, y - 1, z))
+                {
+                    AddBottomFace(blockPos, block.GetFaceTexture(Block::BlockFaces::Bottom));
+                }
+                if (!HasBlockInWorld(leftPos, chunks))
+                {
+                    AddLeftFace(blockPos, block.GetFaceTexture(Block::BlockFaces::Left));
+                }
+                if (!HasBlockInWorld(rightPos, chunks))
+                {
+                    AddRightFace(blockPos, block.GetFaceTexture(Block::BlockFaces::Right));
+                }
+            }
         }
     }
 }
 
 inline bool Chunk::HasBlockInWorld(WorldPos& worldPos, std::unordered_map<ChunkPos, std::shared_ptr<Chunk>, ChunkPosHash>& chunks)
 {
-    int xPos = MathUtils::RoundDown(static_cast<int>(worldPos.x), Chunk::WIDTH);
-    int zPos = MathUtils::RoundDown(static_cast<int>(worldPos.z), Chunk::DEPTH);
+    int xPos = MathUtils::RoundDown(static_cast<int>(worldPos.x), WIDTH);
+    int zPos = MathUtils::RoundDown(static_cast<int>(worldPos.z), WIDTH);
     ChunkPos chunkPos = ChunkPos(xPos, zPos);
     auto it = chunks.find(chunkPos);
     if (it == chunks.end())
     {
         return false;
     }
-    WorldPos blockPos = WorldPos(worldPos.x - xPos, worldPos.y, worldPos.z - zPos);
-    return it->second->HasBlockAt(blockPos);
+    return it->second->HasBlockAt(worldPos.x - xPos, worldPos.y, worldPos.z - zPos);
 }
 
-inline bool Chunk::HasBlockAt(WorldPos& chunkPos)  const noexcept
+inline bool Chunk::HasBlockAt(int x, int y, int z) const noexcept
 {
-    assert(chunkPos.x < Chunk::WIDTH);
+    assert(x < Chunk::WIDTH);
     //assert(chunkPos.y < Chunk::HEIGHT);
-    assert(chunkPos.z < Chunk::DEPTH);
-    return m_blocks.contains(chunkPos);
+    assert(z < Chunk::WIDTH);
+    const size_t idx = GetIdxFromCoords(x, y, z);
+    if (idx >= m_blocks.size())
+    {
+        return false;
+    }
+    return m_blocks[idx].GetId() != BlockId::Air;
 }
 
 bool Chunk::IsModified() const noexcept
