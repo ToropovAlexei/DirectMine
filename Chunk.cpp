@@ -207,7 +207,7 @@ void Chunk::UpdateMeshWithoutBuffers(BlockManager& blockManager, std::unordered_
 {
     m_vertices.clear();
     m_indices.clear();
-    const int maxY = m_blocks.size() / SQ_WIDTH;
+    const int maxY = static_cast<int>(m_blocks.size()) / SQ_WIDTH;
     for (int y = 0; y < maxY; y++)
     {
         for (int z = 0; z < WIDTH; z++)
