@@ -15,7 +15,6 @@ WorldGenerator::WorldGenerator(BlockManager& blockManager) :
 
 Chunk WorldGenerator::GenerateChunk(ChunkPos& chunkPos)
 {
-    auto start = std::chrono::high_resolution_clock::now();
     Chunk chunk = Chunk(chunkPos);
 
     for (int x = 0; x < Chunk::WIDTH; ++x) {
@@ -63,11 +62,6 @@ Chunk WorldGenerator::GenerateChunk(ChunkPos& chunkPos)
             }
         }
     }
-
-    auto end = std::chrono::high_resolution_clock::now();
-    auto duration = std::chrono::duration_cast<std::chrono::microseconds>(end - start);
-    std::string result = "Время выполнения GenerateChunk: " + std::to_string(duration.count()) + " микросекунд\n";
-    OutputDebugStringA(result.c_str());
 
     return chunk;
 }

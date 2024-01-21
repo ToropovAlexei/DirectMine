@@ -203,7 +203,9 @@ inline size_t Chunk::GetIdxFromCoords(int x, int y, int z) const noexcept
     return static_cast<size_t>(x + z * WIDTH + y * SQ_WIDTH);
 }
 
-void Chunk::UpdateMeshWithoutBuffers(BlockManager& blockManager, std::unordered_map<ChunkPos, std::shared_ptr<Chunk>, ChunkPosHash>& chunks)
+void Chunk::UpdateMeshWithoutBuffers(BlockManager& blockManager, 
+    std::shared_ptr<Chunk> leftChunk, std::shared_ptr<Chunk> rightChunk,
+    std::shared_ptr<Chunk> frontChunk, std::shared_ptr<Chunk> backChunk)
 {
     m_vertices.clear();
     m_indices.clear();
@@ -234,11 +236,11 @@ void Chunk::UpdateMeshWithoutBuffers(BlockManager& blockManager, std::unordered_
                 Block& block = blockManager.GetBlockById(blockId);
                 DirectX::XMFLOAT3 blockPos = DirectX::XMFLOAT3(static_cast<float>(pos.x), static_cast<float>(pos.y), static_cast<float>(pos.z));
 
-                if (!HasBlockInWorld(frontPos, chunks))
+                if (!(z == 0 ? frontChunk && frontChunk->HasBlockAt(x, y, WIDTH - 1) : HasBlockAt(x, y, z - 1)))
                 {
                     AddFrontFace(blockPos, block.GetFaceTexture(Block::BlockFaces::Front));
                 }
-                if (!HasBlockInWorld(backPos, chunks))
+                if (!(z == WIDTH - 1 ? backChunk && backChunk->HasBlockAt(x, y, 0) : HasBlockAt(x, y, z + 1)))
                 {
                     AddBackFace(blockPos, block.GetFaceTexture(Block::BlockFaces::Back));
                 }
@@ -250,30 +252,17 @@ void Chunk::UpdateMeshWithoutBuffers(BlockManager& blockManager, std::unordered_
                 {
                     AddBottomFace(blockPos, block.GetFaceTexture(Block::BlockFaces::Bottom));
                 }
-                if (!HasBlockInWorld(leftPos, chunks))
+                if (!(x == 0 ? leftChunk && leftChunk->HasBlockAt(WIDTH - 1, y, z) : HasBlockAt(x - 1, y, z)))
                 {
                     AddLeftFace(blockPos, block.GetFaceTexture(Block::BlockFaces::Left));
                 }
-                if (!HasBlockInWorld(rightPos, chunks))
+                if (!(x == WIDTH - 1 ? rightChunk && rightChunk->HasBlockAt(0, y, z) : HasBlockAt(x + 1, y, z)))
                 {
                     AddRightFace(blockPos, block.GetFaceTexture(Block::BlockFaces::Right));
                 }
             }
         }
     }
-}
-
-inline bool Chunk::HasBlockInWorld(WorldPos& worldPos, std::unordered_map<ChunkPos, std::shared_ptr<Chunk>, ChunkPosHash>& chunks)
-{
-    int xPos = MathUtils::RoundDown(static_cast<int>(worldPos.x), WIDTH);
-    int zPos = MathUtils::RoundDown(static_cast<int>(worldPos.z), WIDTH);
-    ChunkPos chunkPos = ChunkPos(xPos, zPos);
-    auto it = chunks.find(chunkPos);
-    if (it == chunks.end())
-    {
-        return false;
-    }
-    return it->second->HasBlockAt(worldPos.x - xPos, worldPos.y, worldPos.z - zPos);
 }
 
 inline bool Chunk::HasBlockAt(int x, int y, int z) const noexcept

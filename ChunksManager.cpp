@@ -77,8 +77,14 @@ void ChunksManager::RemoveBlockAt(WorldPos& worldPos)
 		return;
 	}
 	WorldPos blockPos = WorldPos(worldPos.x - xPos, worldPos.y, worldPos.z - zPos);
+	auto leftChunk = m_chunks.find(chunkPos + ChunkPos(-1, 0));
+	auto rightChunk = m_chunks.find(chunkPos + ChunkPos(1, 0));
+	auto frontChunk = m_chunks.find(chunkPos + ChunkPos(0, -1));
+	auto backChunk = m_chunks.find(chunkPos + ChunkPos(0, 1));
 	it->second->RemoveBlock(blockPos.x, blockPos.y, blockPos.z);
-	it->second->UpdateMeshWithoutBuffers(m_blockManager, m_chunks);
+	it->second->UpdateMeshWithoutBuffers(m_blockManager, 
+		leftChunk == m_chunks.end() ? nullptr : leftChunk->second, rightChunk == m_chunks.end() ? nullptr : rightChunk->second,
+		frontChunk == m_chunks.end() ? nullptr : frontChunk->second, backChunk == m_chunks.end() ? nullptr : backChunk->second);
 	it->second->UpdateBuffers(m_deviceResources->GetD3DDevice());
 
 	if (blockPos.x == 0)
@@ -131,8 +137,14 @@ void ChunksManager::PlaceBlockAt(WorldPos& worldPos, ChunkBlock block)
 		return;
 	}
 	WorldPos blockPos = WorldPos(worldPos.x - xPos, worldPos.y, worldPos.z - zPos);
+	auto leftChunk = m_chunks.find(chunkPos + ChunkPos(-1, 0));
+	auto rightChunk = m_chunks.find(chunkPos + ChunkPos(1, 0));
+	auto frontChunk = m_chunks.find(chunkPos + ChunkPos(0, -1));
+	auto backChunk = m_chunks.find(chunkPos + ChunkPos(0, 1));
 	it->second->AddBlock(blockPos.x, blockPos.y, blockPos.z, block);
-	it->second->UpdateMeshWithoutBuffers(m_blockManager, m_chunks);
+	it->second->UpdateMeshWithoutBuffers(m_blockManager, 
+		leftChunk == m_chunks.end() ? nullptr : leftChunk->second, rightChunk == m_chunks.end() ? nullptr : rightChunk->second,
+		frontChunk == m_chunks.end() ? nullptr : frontChunk->second, backChunk == m_chunks.end() ? nullptr : backChunk->second);
 	it->second->UpdateBuffers(m_deviceResources->GetD3DDevice());
 
 	if (blockPos.x == 0)
@@ -326,7 +338,14 @@ void ChunksManager::UpdateModifiedChunks()
 	tbb::parallel_for(tbb::blocked_range<size_t>(0, modifiedChunks.size()),
 		[this, &modifiedChunks](const tbb::blocked_range<size_t>& range) {
 			for (size_t i = range.begin(); i != range.end(); ++i) {
-				m_chunks[modifiedChunks[i]]->UpdateMeshWithoutBuffers(m_blockManager, m_chunks);
+				ChunkPos chunkPos = m_chunks[modifiedChunks[i]]->GetPos();
+				auto leftChunk = m_chunks.find(chunkPos + ChunkPos(-Chunk::WIDTH, 0));
+				auto rightChunk = m_chunks.find(chunkPos + ChunkPos(Chunk::WIDTH, 0));
+				auto frontChunk = m_chunks.find(chunkPos + ChunkPos(0, -Chunk::WIDTH));
+				auto backChunk = m_chunks.find(chunkPos + ChunkPos(0, Chunk::WIDTH));
+				m_chunks[modifiedChunks[i]]->UpdateMeshWithoutBuffers(m_blockManager, 
+					leftChunk == m_chunks.end() ? nullptr : leftChunk->second, rightChunk == m_chunks.end() ? nullptr : rightChunk->second,
+					frontChunk == m_chunks.end() ? nullptr : frontChunk->second, backChunk == m_chunks.end() ? nullptr : backChunk->second);
 			}
 		});
 
