@@ -23,6 +23,7 @@ World::World(std::unique_ptr<DX::DeviceResources>& deviceResources,
 
 	TextureAtlas::BuildAtlas(m_deviceResources->GetD3DDevice(), m_deviceResources->GetD3DDeviceContext());
 	m_cam = std::make_unique<Camera>();
+	m_cam->SetPosition({0.0f, 60.0f, 0.0f});
 	m_cam->UpdateViewMatrix();
 	DirectX::XMFLOAT3 playerPos = m_cam->GetPosition3f();
 	m_chunksManager = std::make_unique<ChunksManager>(m_deviceResources, playerPos);
@@ -85,7 +86,7 @@ void World::Update(DX::StepTimer const& timer)
 	{
 		WorldPos offset = WorldUtils::GetOffsetByBlockDirection(rayCastResult.value().second);
 		WorldPos placePos = rayCastResult.value().first + offset;
-		m_chunksManager->PlaceBlockAt(placePos, ChunkBlock(BlockId::Cobblestone));
+		m_chunksManager->PlaceBlockAt(placePos, ChunkBlock(BlockId::Glowstone));
 	}
 
 	std::wstring title = L"DirectX 11 FPS: "
@@ -114,7 +115,7 @@ void World::OnWindowSizeChanged(float aspectRatio)
 	m_proj = DirectX::XMMatrixPerspectiveFovLH(
 		DirectX::XM_PIDIV4,
 		aspectRatio,
-		0.1f, 1000.0f);
+		0.1f, 1500.0f);
 	m_crosshairRenderer->UpdateAspectRatio(aspectRatio);
 }
 
