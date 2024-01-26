@@ -7,11 +7,13 @@ public:
 
 	uint16_t GetLight(int x, int y, int z) noexcept;
 
+	int GetChannel(int x, int y, int z, int channel) noexcept;
 	int GetS(int x, int y, int z) noexcept;
 	int GetR(int x, int y, int z) noexcept;
 	int GetG(int x, int y, int z) noexcept;
 	int GetB(int x, int y, int z) noexcept;
 
+	void SetChannel(int x, int y, int z, int channel, int val) noexcept;
 	void SetS(int x, int y, int z, int val) noexcept;
 	void SetR(int x, int y, int z, int val) noexcept;
 	void SetG(int x, int y, int z, int val) noexcept;

@@ -17,6 +17,16 @@ uint16_t Lightmap::GetLight(int x, int y, int z) noexcept
     return m_lightMap[idx];
 }
 
+int Lightmap::GetChannel(int x, int y, int z, int channel) noexcept
+{
+    const size_t idx = GetIdx(x, y, z);
+    if (idx >= m_lightMap.size())
+    {
+        return 0;
+    }
+    return (m_lightMap[idx] >> (channel * 4)) & 0xF;
+}
+
 int Lightmap::GetS(int x, int y, int z) noexcept
 {
     const size_t idx = GetIdx(x, y, z);
@@ -56,6 +66,16 @@ int Lightmap::GetB(int x, int y, int z) noexcept
         return 0;
     }
     return m_lightMap[idx] & 0xF;
+}
+
+void Lightmap::SetChannel(int x, int y, int z, int channel, int val) noexcept
+{
+    const size_t idx = GetIdx(x, y, z);
+    if (idx >= m_lightMap.size())
+    {
+        ExtendMapTo(y);
+    }
+    m_lightMap[idx] = static_cast<uint16_t>((m_lightMap[idx] & ~(0xF << (channel * 4))) | (val << (channel * 4)));
 }
 
 void Lightmap::SetS(int x, int y, int z, int val) noexcept
