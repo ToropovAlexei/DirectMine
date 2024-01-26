@@ -5,6 +5,7 @@
 #include "BlockManager.h"
 #include "WorldPos.hpp"
 #include "BlockId.h"
+#include "Lightmap.h"
 
 class Chunk
 {
@@ -36,16 +37,7 @@ public:
 	bool ShouldRender() const noexcept;
 	void SetShouldRender(bool shouldRender) noexcept;
 
-	int GetSunlight(int x, int y, int z) const noexcept;
-	void SetSunlight(int x, int y, int z, int val) noexcept;
-	int GetRedLight(int x, int y, int z) const noexcept;
-	int GetRedLight(size_t idx) const noexcept;
-	void SetRedLight(int x, int y, int z, int val) noexcept;
-	int GetGreenLight(int x, int y, int z) const noexcept;
-	void SetGreenLight(int x, int y, int z, int val) noexcept;
-	int GetBlueLight(int x, int y, int z) const noexcept;
-	void SetBlueLight(int x, int y, int z, int val) noexcept;
-	uint16_t GetLightAt(int x, int y, int z) noexcept;
+	Lightmap& GetLightmapRef() noexcept;
 
 	ChunkPos& GetPos() noexcept;
 
@@ -70,7 +62,7 @@ private:
 	bool m_isModified = true;
 	bool m_shouldRender = false;
 	std::vector<ChunkBlock> m_blocks;
-	std::vector<uint16_t> m_lightMap;
+	Lightmap m_lightMap;
 
 	std::vector<Vertex> m_vertices;
 	std::vector<UINT> m_indices;

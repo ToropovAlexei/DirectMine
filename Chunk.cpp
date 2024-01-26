@@ -8,7 +8,6 @@ Chunk::Chunk(ChunkPos& worldPos) :
     m_worldPos(worldPos)
 {
     m_blocks.resize(static_cast<size_t>(SQ_WIDTH));
-    m_lightMap.resize(static_cast<size_t>(SQ_WIDTH));
 }
 
 void Chunk::SetBlock(int x, int y, int z, BlockId blockId) noexcept
@@ -30,7 +29,7 @@ void Chunk::SetBlock(int x, int y, int z, ChunkBlock block) noexcept
             const size_t newSize = m_blocks.size() + static_cast<size_t>((y - prevY) * SQ_WIDTH);
             m_blocks.resize(newSize);
             // Берем максимальный размер, т.к. в lightMap может быть больше элементов
-            m_lightMap.resize(std::max(newSize, m_lightMap.size()));
+            //m_lightMap.resize(std::max(newSize, m_lightMap.size()));
         }
     }
     m_blocks[index] = block;
@@ -205,111 +204,6 @@ inline size_t Chunk::GetIdxFromCoords(int x, int y, int z) const noexcept
     return static_cast<size_t>(x + z * WIDTH + y * SQ_WIDTH);
 }
 
-int Chunk::GetSunlight(int x, int y, int z) const noexcept
-{
-    return (m_lightMap[GetIdxFromCoords(x, y, z)] >> 12) & 0xF;
-}
-
-void Chunk::SetSunlight(int x, int y, int z, int val) noexcept
-{
-    const size_t idx = GetIdxFromCoords(x, y, z);
-    m_lightMap[idx] = static_cast<uint16_t>((m_lightMap[idx] & 0x0FFF) | (val << 12));
-}
-
-int Chunk::GetRedLight(int x, int y, int z) const noexcept
-{
-    const size_t idx = GetIdxFromCoords(x, y, z);
-    if (idx >= m_lightMap.size())
-    {
-        return 0;
-    }
-    return (m_lightMap[idx] >> 8) & 0xF;
-}
-
-int Chunk::GetRedLight(size_t idx) const noexcept
-{
-    if (idx >= m_lightMap.size())
-    {
-        return 0;
-    }
-    return (m_lightMap[idx] >> 8) & 0xF;
-}
-
-void Chunk::SetRedLight(int x, int y, int z, int val) noexcept
-{
-    const size_t idx = GetIdxFromCoords(x, y, z);
-    if (idx >= m_lightMap.size())
-    {
-        const int prevY = (static_cast<int>(m_lightMap.size()) / SQ_WIDTH) - 1;
-        if (prevY < y)
-        {
-            const size_t newSize = m_lightMap.size() + static_cast<size_t>((y - prevY) * SQ_WIDTH);
-            m_lightMap.resize(newSize);
-        }
-    }
-    m_lightMap[idx] = static_cast<uint16_t>((m_lightMap[idx] & 0xF0FF) | (val << 8));
-}
-
-int Chunk::GetGreenLight(int x, int y, int z) const noexcept
-{
-    const size_t idx = GetIdxFromCoords(x, y, z);
-    if (idx >= m_lightMap.size())
-    {
-        return 0;
-    }
-    return (m_lightMap[GetIdxFromCoords(x, y, z)] >> 4) & 0xF;
-}
-
-void Chunk::SetGreenLight(int x, int y, int z, int val) noexcept
-{
-    const size_t idx = GetIdxFromCoords(x, y, z);
-    if (idx >= m_lightMap.size())
-    {
-        const int prevY = (static_cast<int>(m_lightMap.size()) / SQ_WIDTH) - 1;
-        if (prevY < y)
-        {
-            const size_t newSize = m_lightMap.size() + static_cast<size_t>((y - prevY) * SQ_WIDTH);
-            m_lightMap.resize(newSize);
-        }
-    }
-    m_lightMap[idx] = static_cast<uint16_t>((m_lightMap[idx] & 0xFF0F) | (val << 4));
-}
-
-int Chunk::GetBlueLight(int x, int y, int z) const noexcept
-{
-    const size_t idx = GetIdxFromCoords(x, y, z);
-    if (idx >= m_lightMap.size())
-    {
-        return 0;
-    }
-    return m_lightMap[GetIdxFromCoords(x, y, z)] & 0xF;
-}
-
-void Chunk::SetBlueLight(int x, int y, int z, int val) noexcept
-{
-    const size_t idx = GetIdxFromCoords(x, y, z);
-    if (idx >= m_lightMap.size())
-    {
-        const int prevY = (static_cast<int>(m_lightMap.size()) / SQ_WIDTH) - 1;
-        if (prevY < y)
-        {
-            const size_t newSize = m_lightMap.size() + static_cast<size_t>((y - prevY) * SQ_WIDTH);
-            m_lightMap.resize(newSize);
-        }
-    }
-    m_lightMap[idx] = static_cast<uint16_t>((m_lightMap[idx] & 0xFFF0) | val);
-}
-
-uint16_t Chunk::GetLightAt(int x, int y, int z) noexcept
-{
-    const size_t idx = GetIdxFromCoords(x, y, z);
-    if (idx >= m_lightMap.size())
-    {
-        return 0;
-    }
-    return m_lightMap[idx];
-}
-
 void Chunk::UpdateMeshWithoutBuffers(BlockManager& blockManager, 
     std::shared_ptr<Chunk> leftChunk, std::shared_ptr<Chunk> rightChunk,
     std::shared_ptr<Chunk> frontChunk, std::shared_ptr<Chunk> backChunk)
@@ -347,64 +241,64 @@ void Chunk::UpdateMeshWithoutBuffers(BlockManager& blockManager,
                 {
                     if (!(frontChunk && frontChunk->HasBlockAt(x, y, WIDTH - 1)))
                     {
-                        AddFrontFace(blockPos, block.GetFaceTexture(Block::BlockFaces::Front), frontChunk ? frontChunk->GetLightAt(x, y, WIDTH - 1) : 0);
+                        AddFrontFace(blockPos, block.GetFaceTexture(Block::BlockFaces::Front), frontChunk ? frontChunk->GetLightmapRef().GetLight(x, y, WIDTH - 1) : 0);
                     }
                 }
                 else
                 {
                     if (!HasBlockAt(x, y, z - 1))
                     {
-                        AddFrontFace(blockPos, block.GetFaceTexture(Block::BlockFaces::Front), GetLightAt(x, y, z - 1));
+                        AddFrontFace(blockPos, block.GetFaceTexture(Block::BlockFaces::Front), GetLightmapRef().GetLight(x, y, z - 1));
                     }
                 }
                 if (z == WIDTH - 1)
                 {
                     if (!(backChunk && backChunk->HasBlockAt(x, y, 0)))
                     {
-                        AddBackFace(blockPos, block.GetFaceTexture(Block::BlockFaces::Back), backChunk ? backChunk->GetLightAt(x, y, 0) : 0);
+                        AddBackFace(blockPos, block.GetFaceTexture(Block::BlockFaces::Back), backChunk ? backChunk->GetLightmapRef().GetLight(x, y, 0) : 0);
                     }
                 }
                 else
                 {
                     if (!HasBlockAt(x, y, z + 1))
                     {
-                        AddBackFace(blockPos, block.GetFaceTexture(Block::BlockFaces::Back), GetLightAt(x, y, z + 1));
+                        AddBackFace(blockPos, block.GetFaceTexture(Block::BlockFaces::Back), GetLightmapRef().GetLight(x, y, z + 1));
                     }
                 }
                 if (pos.y == HEIGHT - 1 || !HasBlockAt(x, y + 1, z))
                 {
-                    AddTopFace(blockPos, block.GetFaceTexture(Block::BlockFaces::Top), GetLightAt(x, y + 1, z));
+                    AddTopFace(blockPos, block.GetFaceTexture(Block::BlockFaces::Top), GetLightmapRef().GetLight(x, y + 1, z));
                 }
                 if (pos.y == 0 || !HasBlockAt(x, y - 1, z))
                 {
-                    AddBottomFace(blockPos, block.GetFaceTexture(Block::BlockFaces::Bottom), GetLightAt(x, y - 1, z));
+                    AddBottomFace(blockPos, block.GetFaceTexture(Block::BlockFaces::Bottom), GetLightmapRef().GetLight(x, y - 1, z));
                 }
                 if (x == 0)
                 {
                     if (!(leftChunk && leftChunk->HasBlockAt(WIDTH - 1, y, z)))
                     {
-                        AddLeftFace(blockPos, block.GetFaceTexture(Block::BlockFaces::Left), leftChunk ? leftChunk->GetLightAt(WIDTH - 1, y, 0) : 0);
+                        AddLeftFace(blockPos, block.GetFaceTexture(Block::BlockFaces::Left), leftChunk ? leftChunk->GetLightmapRef().GetLight(WIDTH - 1, y, 0) : 0);
                     }
                 }
                 else
                 {
                     if (!HasBlockAt(x - 1, y, z))
                     {
-                        AddLeftFace(blockPos, block.GetFaceTexture(Block::BlockFaces::Left), GetLightAt(x - 1, y, z));
+                        AddLeftFace(blockPos, block.GetFaceTexture(Block::BlockFaces::Left), GetLightmapRef().GetLight(x - 1, y, z));
                     }
                 }
                 if (x == WIDTH - 1)
                 {
                     if (!(rightChunk && rightChunk->HasBlockAt(0, y, z)))
                     {
-                        AddRightFace(blockPos, block.GetFaceTexture(Block::BlockFaces::Right), rightChunk ? rightChunk->GetLightAt(0, y, z) : 0);
+                        AddRightFace(blockPos, block.GetFaceTexture(Block::BlockFaces::Right), rightChunk ? rightChunk->GetLightmapRef().GetLight(0, y, z) : 0);
                     }
                 }
                 else
                 {
                     if (!HasBlockAt(x + 1, y, z))
                     {
-                        AddRightFace(blockPos, block.GetFaceTexture(Block::BlockFaces::Right), GetLightAt(x + 1, y, z));
+                        AddRightFace(blockPos, block.GetFaceTexture(Block::BlockFaces::Right), GetLightmapRef().GetLight(x + 1, y, z));
                     }
                     
                 }
@@ -444,6 +338,11 @@ bool Chunk::ShouldRender() const noexcept
 void Chunk::SetShouldRender(bool shouldRender) noexcept
 {
     m_shouldRender = shouldRender;
+}
+
+Lightmap& Chunk::GetLightmapRef() noexcept
+{
+    return m_lightMap;
 }
 
 ChunkPos& Chunk::GetPos() noexcept
