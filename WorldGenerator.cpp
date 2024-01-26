@@ -27,14 +27,14 @@ Chunk WorldGenerator::GenerateChunk(ChunkPos& chunkPos)
             for (int y = 0; y < height; ++y) {
                 if (y == 0)
                 {
-                    chunk.AddBlock(x, y, z, BlockId::Bedrock);
+                    chunk.SetBlock(x, y, z, BlockId::Bedrock);
                 }
                 else if (y == height - 1)
                 {
-                    chunk.AddBlock(x, y, z, BlockId::Grass);
+                    chunk.SetBlock(x, y, z, BlockId::Grass);
                 }
                 else if (y > height - 4) {
-                    chunk.AddBlock(x, y, z, BlockId::Dirt);
+                    chunk.SetBlock(x, y, z, BlockId::Dirt);
                 }
                 else {
                     float oreNoise = noise.GetNoise(static_cast<float>(chunkPos.x + x), static_cast<float>(chunkPos.z + z), 2.0f);
@@ -43,20 +43,20 @@ Chunk WorldGenerator::GenerateChunk(ChunkPos& chunkPos)
                         continue;
                     }
                     else if (oreNoise > 0.6f) {
-                        chunk.AddBlock(x, y, z, BlockId::Stone);
+                        chunk.SetBlock(x, y, z, BlockId::Stone);
                     }
                     else if (oreNoise > 0.3f) {
-                        chunk.AddBlock(x, y, z, BlockId::IronOre);
+                        chunk.SetBlock(x, y, z, BlockId::IronOre);
                     }
                     else if (oreNoise > 0.1f) {
-                        chunk.AddBlock(x, y, z, BlockId::GoldOre);
+                        chunk.SetBlock(x, y, z, BlockId::GoldOre);
                     }
                     else if (oreNoise > 0.05f) {
-                        chunk.AddBlock(x, y, z, BlockId::DiamondOre);
+                        chunk.SetBlock(x, y, z, BlockId::DiamondOre);
                     }
                     else
                     {
-                        chunk.AddBlock(x, y, z, BlockId::Stone);
+                        chunk.SetBlock(x, y, z, BlockId::Stone);
                     }
                 }
             }

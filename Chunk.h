@@ -14,11 +14,11 @@ public:
 	static const int WIDTH = 16;
 	static const int SQ_WIDTH = WIDTH * WIDTH;
 	static const int HEIGHT = 256;
+	static const int LAST_BLOCK_IDX = WIDTH - 1;
+	static const int HIGHEST_BLOCK_IDX = HEIGHT - 1;
 
-	void RemoveBlock(int x, int y, int z) noexcept;
-
-	void AddBlock(int x, int y, int z, BlockId blockId) noexcept;
-	void AddBlock(int x, int y, int z, ChunkBlock block) noexcept;
+	void SetBlock(int x, int y, int z, BlockId blockId) noexcept;
+	void SetBlock(int x, int y, int z, ChunkBlock block) noexcept;
 
 	ChunkBlock GetBlock(int x, int y, int z) noexcept;
 
@@ -61,6 +61,8 @@ private:
 	inline void AddBottomFace(DirectX::XMFLOAT3& pos, std::string& texture, uint16_t light) noexcept;
 	inline void AddLeftFace(DirectX::XMFLOAT3& pos, std::string& texture, uint16_t light) noexcept;
 	inline void AddRightFace(DirectX::XMFLOAT3& pos, std::string& texture, uint16_t light) noexcept;
+
+	inline void ShrinkAirBlocks() noexcept;
 
 	inline size_t GetIdxFromCoords(int x, int y, int z) const noexcept;
 

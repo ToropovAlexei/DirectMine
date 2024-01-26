@@ -67,62 +67,7 @@ void ChunksManager::RenderChunks()
 
 void ChunksManager::RemoveBlockAt(WorldPos& worldPos)
 {
-	std::shared_lock<std::shared_mutex> lock(m_mutex);
-	int xPos = MathUtils::RoundDown(static_cast<int>(worldPos.x), Chunk::WIDTH);
-	int zPos = MathUtils::RoundDown(static_cast<int>(worldPos.z), Chunk::WIDTH);
-	ChunkPos chunkPos = ChunkPos(xPos, zPos);
-	auto it = m_chunks.find(chunkPos);
-	if (it == m_chunks.end())
-	{
-		return;
-	}
-	WorldPos blockPos = WorldPos(worldPos.x - xPos, worldPos.y, worldPos.z - zPos);
-	auto leftChunk = m_chunks.find(chunkPos + ChunkPos(-1, 0));
-	auto rightChunk = m_chunks.find(chunkPos + ChunkPos(1, 0));
-	auto frontChunk = m_chunks.find(chunkPos + ChunkPos(0, -1));
-	auto backChunk = m_chunks.find(chunkPos + ChunkPos(0, 1));
-	it->second->RemoveBlock(blockPos.x, blockPos.y, blockPos.z);
-	it->second->UpdateMeshWithoutBuffers(m_blockManager, 
-		leftChunk == m_chunks.end() ? nullptr : leftChunk->second, rightChunk == m_chunks.end() ? nullptr : rightChunk->second,
-		frontChunk == m_chunks.end() ? nullptr : frontChunk->second, backChunk == m_chunks.end() ? nullptr : backChunk->second);
-	it->second->UpdateBuffers(m_deviceResources->GetD3DDevice());
-
-	if (blockPos.x == 0)
-	{
-		ChunkPos leftChunk = chunkPos - ChunkPos(Chunk::WIDTH, 0);
-		auto chunk = GetChunkAt(leftChunk);
-		if (chunk != nullptr)
-		{
-			chunk->SetIsModified(true);
-		}
-	}
-	if (blockPos.x == Chunk::WIDTH - 1)
-	{
-		ChunkPos rightChunk = chunkPos + ChunkPos(Chunk::WIDTH, 0);
-		auto chunk = GetChunkAt(rightChunk);
-		if (chunk != nullptr)
-		{
-			chunk->SetIsModified(true);
-		}
-	}
-	if (blockPos.z == 0)
-	{
-		ChunkPos frontChunk = chunkPos - ChunkPos(0, Chunk::WIDTH);
-		auto chunk = GetChunkAt(frontChunk);
-		if (chunk != nullptr)
-		{
-			chunk->SetIsModified(true);
-		}
-	}
-	if (blockPos.z == Chunk::WIDTH - 1)
-	{
-		ChunkPos backChunk = chunkPos + ChunkPos(0, Chunk::WIDTH);
-		auto chunk = GetChunkAt(backChunk);
-		if (chunk != nullptr)
-		{
-			chunk->SetIsModified(true);
-		}
-	}
+	PlaceBlockAt(worldPos, ChunkBlock(BlockId::Air));
 }
 
 void ChunksManager::PlaceBlockAt(WorldPos& worldPos, ChunkBlock block)
@@ -141,7 +86,7 @@ void ChunksManager::PlaceBlockAt(WorldPos& worldPos, ChunkBlock block)
 	auto rightChunk = m_chunks.find(chunkPos + ChunkPos(1, 0));
 	auto frontChunk = m_chunks.find(chunkPos + ChunkPos(0, -1));
 	auto backChunk = m_chunks.find(chunkPos + ChunkPos(0, 1));
-	it->second->AddBlock(blockPos.x, blockPos.y, blockPos.z, block);
+	it->second->SetBlock(blockPos.x, blockPos.y, blockPos.z, block);
 	auto& emission = m_blockManager.GetBlockById(block.GetId()).GetEmission();
 	if (emission[0] || emission[1] || emission[2])
 	{
@@ -150,10 +95,12 @@ void ChunksManager::PlaceBlockAt(WorldPos& worldPos, ChunkBlock block)
 		it->second->SetBlueLight(blockPos.x, blockPos.y, blockPos.z, std::max(it->second->GetBlueLight(blockPos.x, blockPos.y, blockPos.z), static_cast<int>(emission[2])));
 		m_redLightBfsQueue.push({ blockPos.x, blockPos.y, blockPos.z, it->second });
 	}
-	it->second->UpdateMeshWithoutBuffers(m_blockManager, 
-		leftChunk == m_chunks.end() ? nullptr : leftChunk->second, rightChunk == m_chunks.end() ? nullptr : rightChunk->second,
-		frontChunk == m_chunks.end() ? nullptr : frontChunk->second, backChunk == m_chunks.end() ? nullptr : backChunk->second);
-	it->second->UpdateBuffers(m_deviceResources->GetD3DDevice());
+	it->second->SetIsModified(true);
+	// Возникает какой-то глитч с отображением чанка
+	//it->second->UpdateMeshWithoutBuffers(m_blockManager,
+	//	leftChunk == m_chunks.end() ? nullptr : leftChunk->second, rightChunk == m_chunks.end() ? nullptr : rightChunk->second,
+	//	frontChunk == m_chunks.end() ? nullptr : frontChunk->second, backChunk == m_chunks.end() ? nullptr : backChunk->second);
+	//it->second->UpdateBuffers(m_deviceResources->GetD3DDevice());
 
 	if (blockPos.x == 0)
 	{

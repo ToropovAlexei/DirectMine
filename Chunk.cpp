@@ -11,21 +11,12 @@ Chunk::Chunk(ChunkPos& worldPos) :
     m_lightMap.resize(static_cast<size_t>(SQ_WIDTH));
 }
 
-void Chunk::RemoveBlock(int x, int y, int z) noexcept
+void Chunk::SetBlock(int x, int y, int z, BlockId blockId) noexcept
 {
-    assert(x < Chunk::WIDTH);
-    assert(y < Chunk::HEIGHT);
-    assert(z < Chunk::WIDTH);
-    const size_t index = GetIdxFromCoords(x, y, z);
-    if (index >= m_blocks.size())
-    {
-        return;
-    }
-    // TODO по возможности удалять пустой слой чанка
-    m_blocks[index] = ChunkBlock(BlockId::Air);
+    SetBlock(x, y, z, ChunkBlock(blockId));
 }
 
-void Chunk::AddBlock(int x, int y, int z, BlockId blockId) noexcept
+void Chunk::SetBlock(int x, int y, int z, ChunkBlock block) noexcept
 {
     assert(x < Chunk::WIDTH);
     assert(y < Chunk::HEIGHT);
@@ -38,29 +29,15 @@ void Chunk::AddBlock(int x, int y, int z, BlockId blockId) noexcept
         {
             const size_t newSize = m_blocks.size() + static_cast<size_t>((y - prevY) * SQ_WIDTH);
             m_blocks.resize(newSize);
-            m_lightMap.resize(newSize);
-        }
-    }
-    m_blocks[index] = ChunkBlock(blockId);
-}
-
-void Chunk::AddBlock(int x, int y, int z, ChunkBlock block) noexcept
-{
-    assert(x < Chunk::WIDTH);
-    assert(y < Chunk::HEIGHT);
-    assert(z < Chunk::WIDTH);
-    const size_t index = GetIdxFromCoords(x, y, z);
-    if (index >= m_blocks.size())
-    {
-        const int prevY = (static_cast<int>(m_blocks.size()) / SQ_WIDTH) - 1;
-        if (prevY < y)
-        {
-            const size_t newSize = m_blocks.size() + static_cast<size_t>((y - prevY) * SQ_WIDTH);
-            m_blocks.resize(newSize);
-            m_lightMap.resize(newSize);
+            // Берем максимальный размер, т.к. в lightMap может быть больше элементов
+            m_lightMap.resize(std::max(newSize, m_lightMap.size()));
         }
     }
     m_blocks[index] = block;
+    if (block.GetId() == BlockId::Air)
+    {
+        ShrinkAirBlocks();
+    }
 }
 
 ChunkBlock Chunk::GetBlock(int x, int y, int z) noexcept
@@ -202,6 +179,25 @@ inline void Chunk::AddRightFace(DirectX::XMFLOAT3& pos, std::string& texture, ui
     m_indices.emplace_back(0 + offset);
     m_indices.emplace_back(2 + offset);
     m_indices.emplace_back(3 + offset);
+}
+
+inline void Chunk::ShrinkAirBlocks() noexcept
+{
+
+    const size_t prevY = (static_cast<size_t>(m_blocks.size()) / SQ_WIDTH) - 1;
+    bool isAirOnly = true;
+    for (size_t i = prevY * SQ_WIDTH; i < m_blocks.size(); i++)
+    {
+        if (m_blocks[i].GetId() != BlockId::Air)
+        {
+            isAirOnly = false;
+        }
+    }
+    if (isAirOnly)
+    {
+        const size_t newSize = m_blocks.size() - static_cast<size_t>(SQ_WIDTH);
+        m_blocks.resize(newSize);
+    }
 }
 
 inline size_t Chunk::GetIdxFromCoords(int x, int y, int z) const noexcept
