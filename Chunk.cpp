@@ -277,7 +277,7 @@ void Chunk::UpdateMeshWithoutBuffers(BlockManager& blockManager,
                 {
                     if (!(leftChunk && leftChunk->HasBlockAt(WIDTH - 1, y, z)))
                     {
-                        AddLeftFace(blockPos, block.GetFaceTexture(Block::BlockFaces::Left), leftChunk ? leftChunk->GetLightmapRef().GetLight(WIDTH - 1, y, 0) : 0);
+                        AddLeftFace(blockPos, block.GetFaceTexture(Block::BlockFaces::Left), leftChunk ? leftChunk->GetLightmapRef().GetLight(WIDTH - 1, y, z) : 0);
                     }
                 }
                 else
