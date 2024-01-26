@@ -18,6 +18,7 @@ public:
 	Block();
 	Block(BlockId id, std::string name, std::vector<std::string> textures);
 	Block(BlockId id, std::string name, std::vector<std::string> textures, std::array<uint8_t, 3u> emission);
+	Block(BlockId id, std::string name, std::vector<std::string> textures, std::array<uint8_t, 3u> emission, bool isOpaque);
 
 	std::string& GetName();
 	std::string& GetFaceTexture(BlockFaces face);

@@ -1,4 +1,5 @@
 {
   "id": 0,
-  "name": "air"
+  "name": "air",
+  "is_opaque": false
 }

@@ -22,6 +22,15 @@ Block::Block(BlockId id, std::string name, std::vector<std::string> textures, st
 	BuildTextures(textures);
 }
 
+Block::Block(BlockId id, std::string name, std::vector<std::string> textures, std::array<uint8_t, 3u> emission, bool isOpaque) :
+	m_name(name),
+	m_id(id),
+	m_emission(emission),
+	m_isOpaque(isOpaque)
+{
+	BuildTextures(textures);
+}
+
 std::string& Block::GetName()
 {
 	return m_name;

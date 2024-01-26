@@ -45,6 +45,11 @@ void BlockLoader::LoadBlock(std::filesystem::path filePath)
 			emission[i] = static_cast<uint8_t>(emissionVec[i]);
 		}
 	}
+	bool isOpaque = true;
+	if (blockData.contains("is_opaque"))
+	{
+		isOpaque = blockData["is_opaque"];
+	}
 
-	m_blocks.push_back(Block(id, name, textures, emission));
+	m_blocks.push_back(Block(id, name, textures, emission, isOpaque));
 }
