@@ -95,6 +95,8 @@ void ChunksManager::PlaceBlockAt(WorldPos& worldPos, ChunkBlock block)
 		it->second->GetLightmapRef().SetG(blockPos.x, blockPos.y, blockPos.z, std::max(it->second->GetLightmapRef().GetG(blockPos.x, blockPos.y, blockPos.z), static_cast<int>(emission[1])));
 		it->second->GetLightmapRef().SetB(blockPos.x, blockPos.y, blockPos.z, std::max(it->second->GetLightmapRef().GetB(blockPos.x, blockPos.y, blockPos.z), static_cast<int>(emission[2])));
 		m_lighting->solverR->Add({ blockPos.x, blockPos.y, blockPos.z, it->second });
+		m_lighting->solverG->Add({ blockPos.x, blockPos.y, blockPos.z, it->second });
+		m_lighting->solverB->Add({ blockPos.x, blockPos.y, blockPos.z, it->second });
 	}
 	it->second->SetIsModified(true);
 	// Возникает какой-то глитч с отображением чанка
@@ -268,7 +270,10 @@ void ChunksManager::LoadChunks()
 void ChunksManager::CalculateLighting()
 {
 	std::unique_lock<std::shared_mutex> lock(m_mutex);
+	m_lighting->solverS->Solve();
 	m_lighting->solverR->Solve();
+	m_lighting->solverG->Solve();
+	m_lighting->solverB->Solve();
 }
 
 void ChunksManager::UpdateModifiedChunks()
