@@ -8,6 +8,7 @@ Chunk::Chunk(ChunkPos& worldPos) :
     m_worldPos(worldPos)
 {
     m_blocks.resize(static_cast<size_t>(SQ_WIDTH));
+    m_lightMap.resize(static_cast<size_t>(SQ_WIDTH));
 }
 
 void Chunk::RemoveBlock(int x, int y, int z) noexcept
@@ -20,6 +21,7 @@ void Chunk::RemoveBlock(int x, int y, int z) noexcept
     {
         return;
     }
+    // TODO по возможности удалять пустой слой чанка
     m_blocks[index] = ChunkBlock(BlockId::Air);
 }
 
@@ -34,7 +36,9 @@ void Chunk::AddBlock(int x, int y, int z, BlockId blockId) noexcept
         const int prevY = (static_cast<int>(m_blocks.size()) / SQ_WIDTH) - 1;
         if (prevY < y)
         {
-            m_blocks.resize(m_blocks.size() + static_cast<size_t>((y - prevY) * SQ_WIDTH));
+            const size_t newSize = m_blocks.size() + static_cast<size_t>((y - prevY) * SQ_WIDTH);
+            m_blocks.resize(newSize);
+            m_lightMap.resize(newSize);
         }
     }
     m_blocks[index] = ChunkBlock(blockId);
@@ -48,16 +52,18 @@ void Chunk::AddBlock(int x, int y, int z, ChunkBlock block) noexcept
     const size_t index = GetIdxFromCoords(x, y, z);
     if (index >= m_blocks.size())
     {
-        const int prevY = static_cast<int>(m_blocks.size()) / SQ_WIDTH;
+        const int prevY = (static_cast<int>(m_blocks.size()) / SQ_WIDTH) - 1;
         if (prevY < y)
         {
-            m_blocks.resize(m_blocks.size() + static_cast<size_t>((y - prevY) * SQ_WIDTH));
+            const size_t newSize = m_blocks.size() + static_cast<size_t>((y - prevY) * SQ_WIDTH);
+            m_blocks.resize(newSize);
+            m_lightMap.resize(newSize);
         }
     }
     m_blocks[index] = block;
 }
 
-std::optional<ChunkBlock> Chunk::GetBlock(int x, int y, int z) noexcept
+ChunkBlock Chunk::GetBlock(int x, int y, int z) noexcept
 {
     assert(x < Chunk::WIDTH);
     assert(y < Chunk::HEIGHT);
@@ -65,7 +71,7 @@ std::optional<ChunkBlock> Chunk::GetBlock(int x, int y, int z) noexcept
     const size_t index = GetIdxFromCoords(x, y, z);
     if (index >= m_blocks.size())
     {
-        return std::nullopt;
+        return ChunkBlock();
     }
     return m_blocks[index];
 }
@@ -90,15 +96,15 @@ Microsoft::WRL::ComPtr<ID3D11Buffer> Chunk::GetIndexBuffer()
     return m_indexBuffer;
 }
 
-inline void Chunk::AddFrontFace(DirectX::XMFLOAT3& pos, std::string& texture) noexcept
+inline void Chunk::AddFrontFace(DirectX::XMFLOAT3& pos, std::string& texture, uint16_t light) noexcept
 {
     float idx = TextureAtlas::GetTextureIdx(texture);
     UINT offset = static_cast<UINT>(m_vertices.size());
 
-    m_vertices.emplace_back(Vertex({ 0.0f + pos.x, 0.0f + pos.y, 0.0f + pos.z }, { 0.0f, 1.0f, idx }));
-    m_vertices.emplace_back(Vertex({ 1.0f + pos.x, 0.0f + pos.y, 0.0f + pos.z }, { 1.0f, 1.0f, idx }));
-    m_vertices.emplace_back(Vertex({ 1.0f + pos.x, 1.0f + pos.y, 0.0f + pos.z }, { 1.0f, 0.0f, idx }));
-    m_vertices.emplace_back(Vertex({ 0.0f + pos.x, 1.0f + pos.y, 0.0f + pos.z }, { 0.0f, 0.0f, idx }));
+    m_vertices.emplace_back(Vertex({ 0.0f + pos.x, 0.0f + pos.y, 0.0f + pos.z }, { 0.0f, 1.0f, idx }, light));
+    m_vertices.emplace_back(Vertex({ 1.0f + pos.x, 0.0f + pos.y, 0.0f + pos.z }, { 1.0f, 1.0f, idx }, light));
+    m_vertices.emplace_back(Vertex({ 1.0f + pos.x, 1.0f + pos.y, 0.0f + pos.z }, { 1.0f, 0.0f, idx }, light));
+    m_vertices.emplace_back(Vertex({ 0.0f + pos.x, 1.0f + pos.y, 0.0f + pos.z }, { 0.0f, 0.0f, idx }, light));
 
     m_indices.emplace_back(0 + offset);
     m_indices.emplace_back(2 + offset);
@@ -108,15 +114,15 @@ inline void Chunk::AddFrontFace(DirectX::XMFLOAT3& pos, std::string& texture) no
     m_indices.emplace_back(2 + offset);
 }
 
-inline void Chunk::AddBackFace(DirectX::XMFLOAT3& pos, std::string& texture) noexcept
+inline void Chunk::AddBackFace(DirectX::XMFLOAT3& pos, std::string& texture, uint16_t light) noexcept
 {
     float idx = TextureAtlas::GetTextureIdx(texture);
     UINT offset = static_cast<UINT>(m_vertices.size());
 
-    m_vertices.emplace_back(Vertex({ 0.0f + pos.x, 0.0f + pos.y, 1.0f + pos.z }, { 1.0f, 1.0f, idx }));
-    m_vertices.emplace_back(Vertex({ 1.0f + pos.x, 0.0f + pos.y, 1.0f + pos.z }, { 0.0f, 1.0f, idx }));
-    m_vertices.emplace_back(Vertex({ 1.0f + pos.x, 1.0f + pos.y, 1.0f + pos.z }, { 0.0f, 0.0f, idx }));
-    m_vertices.emplace_back(Vertex({ 0.0f + pos.x, 1.0f + pos.y, 1.0f + pos.z }, { 1.0f, 0.0f, idx }));
+    m_vertices.emplace_back(Vertex({ 0.0f + pos.x, 0.0f + pos.y, 1.0f + pos.z }, { 1.0f, 1.0f, idx }, light));
+    m_vertices.emplace_back(Vertex({ 1.0f + pos.x, 0.0f + pos.y, 1.0f + pos.z }, { 0.0f, 1.0f, idx }, light));
+    m_vertices.emplace_back(Vertex({ 1.0f + pos.x, 1.0f + pos.y, 1.0f + pos.z }, { 0.0f, 0.0f, idx }, light));
+    m_vertices.emplace_back(Vertex({ 0.0f + pos.x, 1.0f + pos.y, 1.0f + pos.z }, { 1.0f, 0.0f, idx }, light));
 
     m_indices.emplace_back(0 + offset);
     m_indices.emplace_back(1 + offset);
@@ -126,15 +132,15 @@ inline void Chunk::AddBackFace(DirectX::XMFLOAT3& pos, std::string& texture) noe
     m_indices.emplace_back(3 + offset);
 }
 
-inline void Chunk::AddTopFace(DirectX::XMFLOAT3& pos, std::string& texture) noexcept
+inline void Chunk::AddTopFace(DirectX::XMFLOAT3& pos, std::string& texture, uint16_t light) noexcept
 {
     float idx = TextureAtlas::GetTextureIdx(texture);
     UINT offset = static_cast<UINT>(m_vertices.size());
 
-    m_vertices.emplace_back(Vertex({ 0.0f + pos.x, 1.0f + pos.y, 0.0f + pos.z }, { 0.0f, 1.0f, idx }));
-    m_vertices.emplace_back(Vertex({ 1.0f + pos.x, 1.0f + pos.y, 0.0f + pos.z }, { 1.0f, 1.0f, idx }));
-    m_vertices.emplace_back(Vertex({ 1.0f + pos.x, 1.0f + pos.y, 1.0f + pos.z }, { 1.0f, 0.0f, idx }));
-    m_vertices.emplace_back(Vertex({ 0.0f + pos.x, 1.0f + pos.y, 1.0f + pos.z }, { 0.0f, 0.0f, idx }));
+    m_vertices.emplace_back(Vertex({ 0.0f + pos.x, 1.0f + pos.y, 0.0f + pos.z }, { 0.0f, 1.0f, idx }, light));
+    m_vertices.emplace_back(Vertex({ 1.0f + pos.x, 1.0f + pos.y, 0.0f + pos.z }, { 1.0f, 1.0f, idx }, light));
+    m_vertices.emplace_back(Vertex({ 1.0f + pos.x, 1.0f + pos.y, 1.0f + pos.z }, { 1.0f, 0.0f, idx }, light));
+    m_vertices.emplace_back(Vertex({ 0.0f + pos.x, 1.0f + pos.y, 1.0f + pos.z }, { 0.0f, 0.0f, idx }, light));
 
     m_indices.emplace_back(0 + offset);
     m_indices.emplace_back(2 + offset);
@@ -144,15 +150,15 @@ inline void Chunk::AddTopFace(DirectX::XMFLOAT3& pos, std::string& texture) noex
     m_indices.emplace_back(2 + offset);
 }
 
-inline void Chunk::AddBottomFace(DirectX::XMFLOAT3& pos, std::string& texture) noexcept
+inline void Chunk::AddBottomFace(DirectX::XMFLOAT3& pos, std::string& texture, uint16_t light) noexcept
 {
     float idx = TextureAtlas::GetTextureIdx(texture);
     UINT offset = static_cast<UINT>(m_vertices.size());
 
-    m_vertices.emplace_back(Vertex({ 0.0f + pos.x, 0.0f + pos.y, 0.0f + pos.z }, { 1.0f, 1.0f, idx }));
-    m_vertices.emplace_back(Vertex({ 1.0f + pos.x, 0.0f + pos.y, 0.0f + pos.z }, { 0.0f, 1.0f, idx }));
-    m_vertices.emplace_back(Vertex({ 1.0f + pos.x, 0.0f + pos.y, 1.0f + pos.z }, { 0.0f, 0.0f, idx }));
-    m_vertices.emplace_back(Vertex({ 0.0f + pos.x, 0.0f + pos.y, 1.0f + pos.z }, { 1.0f, 0.0f, idx }));
+    m_vertices.emplace_back(Vertex({ 0.0f + pos.x, 0.0f + pos.y, 0.0f + pos.z }, { 1.0f, 1.0f, idx }, light));
+    m_vertices.emplace_back(Vertex({ 1.0f + pos.x, 0.0f + pos.y, 0.0f + pos.z }, { 0.0f, 1.0f, idx }, light));
+    m_vertices.emplace_back(Vertex({ 1.0f + pos.x, 0.0f + pos.y, 1.0f + pos.z }, { 0.0f, 0.0f, idx }, light));
+    m_vertices.emplace_back(Vertex({ 0.0f + pos.x, 0.0f + pos.y, 1.0f + pos.z }, { 1.0f, 0.0f, idx }, light));
 
     m_indices.emplace_back(0 + offset);
     m_indices.emplace_back(1 + offset);
@@ -162,15 +168,15 @@ inline void Chunk::AddBottomFace(DirectX::XMFLOAT3& pos, std::string& texture) n
     m_indices.emplace_back(3 + offset);
 }
 
-inline void Chunk::AddLeftFace(DirectX::XMFLOAT3& pos, std::string& texture) noexcept
+inline void Chunk::AddLeftFace(DirectX::XMFLOAT3& pos, std::string& texture, uint16_t light) noexcept
 {
     float idx = TextureAtlas::GetTextureIdx(texture);
     UINT offset = static_cast<UINT>(m_vertices.size());
 
-    m_vertices.emplace_back(Vertex({ 0.0f + pos.x, 0.0f + pos.y, 0.0f + pos.z }, { 1.0f, 1.0f, idx }));
-    m_vertices.emplace_back(Vertex({ 0.0f + pos.x, 1.0f + pos.y, 0.0f + pos.z }, { 1.0f, 0.0f, idx }));
-    m_vertices.emplace_back(Vertex({ 0.0f + pos.x, 1.0f + pos.y, 1.0f + pos.z }, { 0.0f, 0.0f, idx }));
-    m_vertices.emplace_back(Vertex({ 0.0f + pos.x, 0.0f + pos.y, 1.0f + pos.z }, { 0.0f, 1.0f, idx }));
+    m_vertices.emplace_back(Vertex({ 0.0f + pos.x, 0.0f + pos.y, 0.0f + pos.z }, { 1.0f, 1.0f, idx }, light));
+    m_vertices.emplace_back(Vertex({ 0.0f + pos.x, 1.0f + pos.y, 0.0f + pos.z }, { 1.0f, 0.0f, idx }, light));
+    m_vertices.emplace_back(Vertex({ 0.0f + pos.x, 1.0f + pos.y, 1.0f + pos.z }, { 0.0f, 0.0f, idx }, light));
+    m_vertices.emplace_back(Vertex({ 0.0f + pos.x, 0.0f + pos.y, 1.0f + pos.z }, { 0.0f, 1.0f, idx }, light));
 
     m_indices.emplace_back(0 + offset);
     m_indices.emplace_back(2 + offset);
@@ -180,15 +186,15 @@ inline void Chunk::AddLeftFace(DirectX::XMFLOAT3& pos, std::string& texture) noe
     m_indices.emplace_back(2 + offset);
 }
 
-inline void Chunk::AddRightFace(DirectX::XMFLOAT3& pos, std::string& texture) noexcept
+inline void Chunk::AddRightFace(DirectX::XMFLOAT3& pos, std::string& texture, uint16_t light) noexcept
 {
     float idx = TextureAtlas::GetTextureIdx(texture);
     UINT offset = static_cast<UINT>(m_vertices.size());
 
-    m_vertices.emplace_back(Vertex({ 1.0f + pos.x, 0.0f + pos.y, 0.0f + pos.z }, { 0.0f, 1.0f, idx }));
-    m_vertices.emplace_back(Vertex({ 1.0f + pos.x, 1.0f + pos.y, 0.0f + pos.z }, { 0.0f, 0.0f, idx }));
-    m_vertices.emplace_back(Vertex({ 1.0f + pos.x, 1.0f + pos.y, 1.0f + pos.z }, { 1.0f, 0.0f, idx }));
-    m_vertices.emplace_back(Vertex({ 1.0f + pos.x, 0.0f + pos.y, 1.0f + pos.z }, { 1.0f, 1.0f, idx }));
+    m_vertices.emplace_back(Vertex({ 1.0f + pos.x, 0.0f + pos.y, 0.0f + pos.z }, { 0.0f, 1.0f, idx }, light));
+    m_vertices.emplace_back(Vertex({ 1.0f + pos.x, 1.0f + pos.y, 0.0f + pos.z }, { 0.0f, 0.0f, idx }, light));
+    m_vertices.emplace_back(Vertex({ 1.0f + pos.x, 1.0f + pos.y, 1.0f + pos.z }, { 1.0f, 0.0f, idx }, light));
+    m_vertices.emplace_back(Vertex({ 1.0f + pos.x, 0.0f + pos.y, 1.0f + pos.z }, { 1.0f, 1.0f, idx }, light));
 
     m_indices.emplace_back(0 + offset);
     m_indices.emplace_back(1 + offset);
@@ -201,6 +207,111 @@ inline void Chunk::AddRightFace(DirectX::XMFLOAT3& pos, std::string& texture) no
 inline size_t Chunk::GetIdxFromCoords(int x, int y, int z) const noexcept
 {
     return static_cast<size_t>(x + z * WIDTH + y * SQ_WIDTH);
+}
+
+int Chunk::GetSunlight(int x, int y, int z) const noexcept
+{
+    return (m_lightMap[GetIdxFromCoords(x, y, z)] >> 12) & 0xF;
+}
+
+void Chunk::SetSunlight(int x, int y, int z, int val) noexcept
+{
+    const size_t idx = GetIdxFromCoords(x, y, z);
+    m_lightMap[idx] = static_cast<uint16_t>((m_lightMap[idx] & 0x0FFF) | (val << 12));
+}
+
+int Chunk::GetRedLight(int x, int y, int z) const noexcept
+{
+    const size_t idx = GetIdxFromCoords(x, y, z);
+    if (idx >= m_lightMap.size())
+    {
+        return 0;
+    }
+    return (m_lightMap[idx] >> 8) & 0xF;
+}
+
+int Chunk::GetRedLight(size_t idx) const noexcept
+{
+    if (idx >= m_lightMap.size())
+    {
+        return 0;
+    }
+    return (m_lightMap[idx] >> 8) & 0xF;
+}
+
+void Chunk::SetRedLight(int x, int y, int z, int val) noexcept
+{
+    const size_t idx = GetIdxFromCoords(x, y, z);
+    if (idx >= m_lightMap.size())
+    {
+        const int prevY = (static_cast<int>(m_lightMap.size()) / SQ_WIDTH) - 1;
+        if (prevY < y)
+        {
+            const size_t newSize = m_lightMap.size() + static_cast<size_t>((y - prevY) * SQ_WIDTH);
+            m_lightMap.resize(newSize);
+        }
+    }
+    m_lightMap[idx] = static_cast<uint16_t>((m_lightMap[idx] & 0xF0FF) | (val << 8));
+}
+
+int Chunk::GetGreenLight(int x, int y, int z) const noexcept
+{
+    const size_t idx = GetIdxFromCoords(x, y, z);
+    if (idx >= m_lightMap.size())
+    {
+        return 0;
+    }
+    return (m_lightMap[GetIdxFromCoords(x, y, z)] >> 4) & 0xF;
+}
+
+void Chunk::SetGreenLight(int x, int y, int z, int val) noexcept
+{
+    const size_t idx = GetIdxFromCoords(x, y, z);
+    if (idx >= m_lightMap.size())
+    {
+        const int prevY = (static_cast<int>(m_lightMap.size()) / SQ_WIDTH) - 1;
+        if (prevY < y)
+        {
+            const size_t newSize = m_lightMap.size() + static_cast<size_t>((y - prevY) * SQ_WIDTH);
+            m_lightMap.resize(newSize);
+        }
+    }
+    m_lightMap[idx] = static_cast<uint16_t>((m_lightMap[idx] & 0xFF0F) | (val << 4));
+}
+
+int Chunk::GetBlueLight(int x, int y, int z) const noexcept
+{
+    const size_t idx = GetIdxFromCoords(x, y, z);
+    if (idx >= m_lightMap.size())
+    {
+        return 0;
+    }
+    return m_lightMap[GetIdxFromCoords(x, y, z)] & 0xF;
+}
+
+void Chunk::SetBlueLight(int x, int y, int z, int val) noexcept
+{
+    const size_t idx = GetIdxFromCoords(x, y, z);
+    if (idx >= m_lightMap.size())
+    {
+        const int prevY = (static_cast<int>(m_lightMap.size()) / SQ_WIDTH) - 1;
+        if (prevY < y)
+        {
+            const size_t newSize = m_lightMap.size() + static_cast<size_t>((y - prevY) * SQ_WIDTH);
+            m_lightMap.resize(newSize);
+        }
+    }
+    m_lightMap[idx] = static_cast<uint16_t>((m_lightMap[idx] & 0xFFF0) | val);
+}
+
+uint16_t Chunk::GetLightAt(int x, int y, int z) noexcept
+{
+    const size_t idx = GetIdxFromCoords(x, y, z);
+    if (idx >= m_lightMap.size())
+    {
+        return 0;
+    }
+    return m_lightMap[idx];
 }
 
 void Chunk::UpdateMeshWithoutBuffers(BlockManager& blockManager, 
@@ -236,29 +347,70 @@ void Chunk::UpdateMeshWithoutBuffers(BlockManager& blockManager,
                 Block& block = blockManager.GetBlockById(blockId);
                 DirectX::XMFLOAT3 blockPos = DirectX::XMFLOAT3(static_cast<float>(pos.x), static_cast<float>(pos.y), static_cast<float>(pos.z));
 
-                if (!(z == 0 ? frontChunk && frontChunk->HasBlockAt(x, y, WIDTH - 1) : HasBlockAt(x, y, z - 1)))
+                if (z == 0)
                 {
-                    AddFrontFace(blockPos, block.GetFaceTexture(Block::BlockFaces::Front));
+                    if (!(frontChunk && frontChunk->HasBlockAt(x, y, WIDTH - 1)))
+                    {
+                        AddFrontFace(blockPos, block.GetFaceTexture(Block::BlockFaces::Front), frontChunk ? frontChunk->GetLightAt(x, y, WIDTH - 1) : 0);
+                    }
                 }
-                if (!(z == WIDTH - 1 ? backChunk && backChunk->HasBlockAt(x, y, 0) : HasBlockAt(x, y, z + 1)))
+                else
                 {
-                    AddBackFace(blockPos, block.GetFaceTexture(Block::BlockFaces::Back));
+                    if (!HasBlockAt(x, y, z - 1))
+                    {
+                        AddFrontFace(blockPos, block.GetFaceTexture(Block::BlockFaces::Front), GetLightAt(x, y, z - 1));
+                    }
+                }
+                if (z == WIDTH - 1)
+                {
+                    if (!(backChunk && backChunk->HasBlockAt(x, y, 0)))
+                    {
+                        AddBackFace(blockPos, block.GetFaceTexture(Block::BlockFaces::Back), backChunk ? backChunk->GetLightAt(x, y, 0) : 0);
+                    }
+                }
+                else
+                {
+                    if (!HasBlockAt(x, y, z + 1))
+                    {
+                        AddBackFace(blockPos, block.GetFaceTexture(Block::BlockFaces::Back), GetLightAt(x, y, z + 1));
+                    }
                 }
                 if (pos.y == HEIGHT - 1 || !HasBlockAt(x, y + 1, z))
                 {
-                    AddTopFace(blockPos, block.GetFaceTexture(Block::BlockFaces::Top));
+                    AddTopFace(blockPos, block.GetFaceTexture(Block::BlockFaces::Top), GetLightAt(x, y + 1, z));
                 }
                 if (pos.y == 0 || !HasBlockAt(x, y - 1, z))
                 {
-                    AddBottomFace(blockPos, block.GetFaceTexture(Block::BlockFaces::Bottom));
+                    AddBottomFace(blockPos, block.GetFaceTexture(Block::BlockFaces::Bottom), GetLightAt(x, y - 1, z));
                 }
-                if (!(x == 0 ? leftChunk && leftChunk->HasBlockAt(WIDTH - 1, y, z) : HasBlockAt(x - 1, y, z)))
+                if (x == 0)
                 {
-                    AddLeftFace(blockPos, block.GetFaceTexture(Block::BlockFaces::Left));
+                    if (!(leftChunk && leftChunk->HasBlockAt(WIDTH - 1, y, z)))
+                    {
+                        AddLeftFace(blockPos, block.GetFaceTexture(Block::BlockFaces::Left), leftChunk ? leftChunk->GetLightAt(WIDTH - 1, y, 0) : 0);
+                    }
                 }
-                if (!(x == WIDTH - 1 ? rightChunk && rightChunk->HasBlockAt(0, y, z) : HasBlockAt(x + 1, y, z)))
+                else
                 {
-                    AddRightFace(blockPos, block.GetFaceTexture(Block::BlockFaces::Right));
+                    if (!HasBlockAt(x - 1, y, z))
+                    {
+                        AddLeftFace(blockPos, block.GetFaceTexture(Block::BlockFaces::Left), GetLightAt(x - 1, y, z));
+                    }
+                }
+                if (x == WIDTH - 1)
+                {
+                    if (!(rightChunk && rightChunk->HasBlockAt(0, y, z)))
+                    {
+                        AddRightFace(blockPos, block.GetFaceTexture(Block::BlockFaces::Right), rightChunk ? rightChunk->GetLightAt(0, y, z) : 0);
+                    }
+                }
+                else
+                {
+                    if (!HasBlockAt(x + 1, y, z))
+                    {
+                        AddRightFace(blockPos, block.GetFaceTexture(Block::BlockFaces::Right), GetLightAt(x + 1, y, z));
+                    }
+                    
                 }
             }
         }

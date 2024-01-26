@@ -6,5 +6,6 @@ struct Vertex
 {
 	DirectX::XMFLOAT3 pos;
 	DirectX::XMFLOAT3 texCoord;
+	uint16_t light;
 };
 

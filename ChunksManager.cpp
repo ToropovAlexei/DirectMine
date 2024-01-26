@@ -142,6 +142,14 @@ void ChunksManager::PlaceBlockAt(WorldPos& worldPos, ChunkBlock block)
 	auto frontChunk = m_chunks.find(chunkPos + ChunkPos(0, -1));
 	auto backChunk = m_chunks.find(chunkPos + ChunkPos(0, 1));
 	it->second->AddBlock(blockPos.x, blockPos.y, blockPos.z, block);
+	auto& emission = m_blockManager.GetBlockById(block.GetId()).GetEmission();
+	if (emission[0] || emission[1] || emission[2])
+	{
+		it->second->SetRedLight(blockPos.x, blockPos.y, blockPos.z, std::max(it->second->GetRedLight(blockPos.x, blockPos.y, blockPos.z), static_cast<int>(emission[0])));
+		it->second->SetGreenLight(blockPos.x, blockPos.y, blockPos.z, std::max(it->second->GetGreenLight(blockPos.x, blockPos.y, blockPos.z), static_cast<int>(emission[1])));
+		it->second->SetBlueLight(blockPos.x, blockPos.y, blockPos.z, std::max(it->second->GetBlueLight(blockPos.x, blockPos.y, blockPos.z), static_cast<int>(emission[2])));
+		m_redLightBfsQueue.push({ blockPos.x, blockPos.y, blockPos.z, it->second });
+	}
 	it->second->UpdateMeshWithoutBuffers(m_blockManager, 
 		leftChunk == m_chunks.end() ? nullptr : leftChunk->second, rightChunk == m_chunks.end() ? nullptr : rightChunk->second,
 		frontChunk == m_chunks.end() ? nullptr : frontChunk->second, backChunk == m_chunks.end() ? nullptr : backChunk->second);
@@ -205,6 +213,7 @@ void ChunksManager::AsyncProcessChunks()
 	{
 		UnloadFarChunks();
 		LoadChunks();
+		CalculateLighting();
 		UpdateModifiedChunks();
 		std::this_thread::sleep_for(std::chrono::milliseconds(10));
 	}
@@ -306,6 +315,149 @@ void ChunksManager::LoadChunks()
 				InsertChunk(chunksToLoad[i], chunk);
 			}
 		});
+}
+
+void ChunksManager::CalculateLighting()
+{
+	std::shared_lock<std::shared_mutex> lock(m_mutex);
+	while (!m_redLightBfsQueue.empty())
+	{
+		LightNode node = m_redLightBfsQueue.front();
+		node.chunk->SetIsModified(true);
+		m_redLightBfsQueue.pop();
+		int lightLevel = node.chunk->GetRedLight(node.x, node.y, node.z);
+		if (lightLevel < 2)
+		{
+			continue;
+		}
+		int nextVoxelLightlevel = lightLevel - 1;
+		// Check left voxel
+		if (node.x > 0)
+		{
+			int leftVoxelLightLevel = node.chunk->GetRedLight(node.x - 1, node.y, node.z);
+			if ((nextVoxelLightlevel > leftVoxelLightLevel) && !(m_blockManager.GetBlockById(node.chunk->GetBlock(node.x - 1, node.y, node.z).GetId()).IsOpaque()))
+			{
+				node.chunk->SetRedLight(node.x - 1, node.y, node.z, nextVoxelLightlevel);
+				m_redLightBfsQueue.push({ node.x - 1, node.y, node.z, node.chunk });
+			}
+		}
+		else
+		{
+			ChunkPos leftChunkPos = node.chunk->GetPos() + ChunkPos(-Chunk::WIDTH, 0);
+			auto chunk = m_chunks.find(leftChunkPos);
+			if (chunk != m_chunks.end())
+			{
+				int leftVoxelLightLevel = chunk->second->GetRedLight(Chunk::WIDTH - 1, node.y, node.z);
+				if ((nextVoxelLightlevel > leftVoxelLightLevel) &&
+					!m_blockManager.GetBlockById(chunk->second->GetBlock(Chunk::WIDTH - 1, node.y, node.z).GetId()).IsOpaque())
+				{
+					chunk->second->SetRedLight(Chunk::WIDTH - 1, node.y, node.z, nextVoxelLightlevel);
+					m_redLightBfsQueue.push({ Chunk::WIDTH - 1, node.y, node.z, chunk->second });
+				}
+			}
+		}
+		// Check right voxel
+		if (node.x < Chunk::WIDTH - 1)
+		{
+			int rightVoxelLightLevel = node.chunk->GetRedLight(node.x + 1, node.y, node.z);
+			bool isOpaque = m_blockManager.GetBlockById(node.chunk->GetBlock(node.x + 1, node.y, node.z).GetId()).IsOpaque();
+			if ((nextVoxelLightlevel > rightVoxelLightLevel) &&
+				!isOpaque)
+			{
+				node.chunk->SetRedLight(node.x + 1, node.y, node.z, nextVoxelLightlevel);
+				m_redLightBfsQueue.push({ node.x + 1, node.y, node.z, node.chunk });
+			}
+		}
+		else
+		{
+			ChunkPos rightChunkPos = node.chunk->GetPos() + ChunkPos(Chunk::WIDTH, 0);
+			auto chunk = m_chunks.find(rightChunkPos);
+			if (chunk != m_chunks.end())
+			{
+				int rightVoxelLightLevel = chunk->second->GetRedLight(0, node.y, node.z);
+				if ((nextVoxelLightlevel > rightVoxelLightLevel) &&
+					!m_blockManager.GetBlockById(chunk->second->GetBlock(0, node.y, node.z).GetId()).IsOpaque())
+				{
+					chunk->second->SetRedLight(0, node.y, node.z, nextVoxelLightlevel);
+					m_redLightBfsQueue.push({ 0, node.y, node.z, chunk->second });
+				}
+			}
+		}
+		// Check front voxel
+		if (node.z > 0)
+		{
+			int frontVoxelLightLevel = node.chunk->GetRedLight(node.x, node.y, node.z - 1);
+			if ((nextVoxelLightlevel > frontVoxelLightLevel) &&
+				!m_blockManager.GetBlockById(node.chunk->GetBlock(node.x, node.y, node.z - 1).GetId()).IsOpaque())
+			{
+				node.chunk->SetRedLight(node.x, node.y, node.z - 1, nextVoxelLightlevel);
+				m_redLightBfsQueue.push({ node.x, node.y, node.z - 1, node.chunk });
+			}
+		}
+		else
+		{
+			ChunkPos frontChunkPos = node.chunk->GetPos() + ChunkPos(0, -Chunk::WIDTH);
+			auto chunk = m_chunks.find(frontChunkPos);
+			if (chunk != m_chunks.end())
+			{
+				int frontVoxelLightLevel = chunk->second->GetRedLight(node.x, node.y, Chunk::WIDTH - 1);
+				if ((nextVoxelLightlevel > frontVoxelLightLevel) &&
+					!m_blockManager.GetBlockById(chunk->second->GetBlock(node.x, node.y, Chunk::WIDTH - 1).GetId()).IsOpaque())
+				{
+					chunk->second->SetRedLight(node.x, node.y, Chunk::WIDTH - 1, nextVoxelLightlevel);
+					m_redLightBfsQueue.push({ node.x, node.y, Chunk::WIDTH - 1, chunk->second });
+				}
+			}
+		}
+		// Check back voxel
+		if (node.z < Chunk::WIDTH - 1)
+		{
+			int backVoxelLightLevel = node.chunk->GetRedLight(node.x, node.y, node.z + 1);
+			if ((nextVoxelLightlevel > backVoxelLightLevel) &&
+				!m_blockManager.GetBlockById(node.chunk->GetBlock(node.x, node.y, node.z + 1).GetId()).IsOpaque())
+			{
+				node.chunk->SetRedLight(node.x, node.y, node.z + 1, nextVoxelLightlevel);
+				m_redLightBfsQueue.push({ node.x, node.y, node.z + 1, node.chunk });
+			}
+		}
+		else
+		{
+			ChunkPos backChunkPos = node.chunk->GetPos() + ChunkPos(0, Chunk::WIDTH);
+			auto chunk = m_chunks.find(backChunkPos);
+			if (chunk != m_chunks.end())
+			{
+				int frontVoxelLightLevel = chunk->second->GetRedLight(node.x, node.y, 0);
+				if ((nextVoxelLightlevel > frontVoxelLightLevel) &&
+					!m_blockManager.GetBlockById(chunk->second->GetBlock(node.x, node.y, 0).GetId()).IsOpaque())
+				{
+					chunk->second->SetRedLight(node.x, node.y, 0, nextVoxelLightlevel);
+					m_redLightBfsQueue.push({ node.x, node.y, 0, chunk->second });
+				}
+			}
+		}
+		// Check top voxel
+		if (node.y < Chunk::HEIGHT)
+		{
+			int topVoxelLightLevel = node.chunk->GetRedLight(node.x, node.y + 1, node.z);
+			if ((nextVoxelLightlevel > topVoxelLightLevel) &&
+				!m_blockManager.GetBlockById(node.chunk->GetBlock(node.x, node.y + 1, node.z).GetId()).IsOpaque())
+			{
+				node.chunk->SetRedLight(node.x, node.y + 1, node.z, nextVoxelLightlevel);
+				m_redLightBfsQueue.push({ node.x, node.y + 1, node.z, node.chunk });
+			}
+		}
+		// Check bottom voxel
+		if (node.y > 0)
+		{
+			int bottomVoxelLightLevel = node.chunk->GetRedLight(node.x, node.y - 1, node.z);
+			if ((nextVoxelLightlevel > bottomVoxelLightLevel) &&
+				!m_blockManager.GetBlockById(node.chunk->GetBlock(node.x, node.y - 1, node.z).GetId()).IsOpaque())
+			{
+				node.chunk->SetRedLight(node.x, node.y - 1, node.z, nextVoxelLightlevel);
+				m_redLightBfsQueue.push({ node.x, node.y - 1, node.z, node.chunk });
+			}
+		}
+	}
 }
 
 void ChunksManager::UpdateModifiedChunks()

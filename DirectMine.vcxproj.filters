@@ -99,6 +99,8 @@
     <ClInclude Include="MSAAHelper.h">
       <Filter>Common</Filter>
     </ClInclude>
+    <ClInclude Include="ChunksManager.h" />
+    <ClInclude Include="WorldUtils.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp" />
@@ -156,6 +158,7 @@
     <ClCompile Include="MSAAHelper.cpp">
       <Filter>Common</Filter>
     </ClCompile>
+    <ClCompile Include="ChunksManager.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="resource.rc" />

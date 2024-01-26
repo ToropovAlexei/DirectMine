@@ -20,7 +20,7 @@ public:
 	void AddBlock(int x, int y, int z, BlockId blockId) noexcept;
 	void AddBlock(int x, int y, int z, ChunkBlock block) noexcept;
 
-	std::optional<ChunkBlock> GetBlock(int x, int y, int z) noexcept;
+	ChunkBlock GetBlock(int x, int y, int z) noexcept;
 
 	void UpdateMeshWithoutBuffers(BlockManager& blockManager, 
 		std::shared_ptr<Chunk> leftChunk, std::shared_ptr<Chunk> rightChunk, 
@@ -36,6 +36,17 @@ public:
 	bool ShouldRender() const noexcept;
 	void SetShouldRender(bool shouldRender) noexcept;
 
+	int GetSunlight(int x, int y, int z) const noexcept;
+	void SetSunlight(int x, int y, int z, int val) noexcept;
+	int GetRedLight(int x, int y, int z) const noexcept;
+	int GetRedLight(size_t idx) const noexcept;
+	void SetRedLight(int x, int y, int z, int val) noexcept;
+	int GetGreenLight(int x, int y, int z) const noexcept;
+	void SetGreenLight(int x, int y, int z, int val) noexcept;
+	int GetBlueLight(int x, int y, int z) const noexcept;
+	void SetBlueLight(int x, int y, int z, int val) noexcept;
+	uint16_t GetLightAt(int x, int y, int z) noexcept;
+
 	ChunkPos& GetPos() noexcept;
 
 	std::vector<Vertex>& GetVertices();
@@ -44,12 +55,12 @@ public:
 	Microsoft::WRL::ComPtr<ID3D11Buffer> GetIndexBuffer();
 
 private:
-	inline void AddFrontFace(DirectX::XMFLOAT3& pos, std::string& texture) noexcept;
-	inline void AddBackFace(DirectX::XMFLOAT3& pos, std::string& texture) noexcept;
-	inline void AddTopFace(DirectX::XMFLOAT3& pos, std::string& texture) noexcept;
-	inline void AddBottomFace(DirectX::XMFLOAT3& pos, std::string& texture) noexcept;
-	inline void AddLeftFace(DirectX::XMFLOAT3& pos, std::string& texture) noexcept;
-	inline void AddRightFace(DirectX::XMFLOAT3& pos, std::string& texture) noexcept;
+	inline void AddFrontFace(DirectX::XMFLOAT3& pos, std::string& texture, uint16_t light) noexcept;
+	inline void AddBackFace(DirectX::XMFLOAT3& pos, std::string& texture, uint16_t light) noexcept;
+	inline void AddTopFace(DirectX::XMFLOAT3& pos, std::string& texture, uint16_t light) noexcept;
+	inline void AddBottomFace(DirectX::XMFLOAT3& pos, std::string& texture, uint16_t light) noexcept;
+	inline void AddLeftFace(DirectX::XMFLOAT3& pos, std::string& texture, uint16_t light) noexcept;
+	inline void AddRightFace(DirectX::XMFLOAT3& pos, std::string& texture, uint16_t light) noexcept;
 
 	inline size_t GetIdxFromCoords(int x, int y, int z) const noexcept;
 
@@ -57,6 +68,7 @@ private:
 	bool m_isModified = true;
 	bool m_shouldRender = false;
 	std::vector<ChunkBlock> m_blocks;
+	std::vector<uint16_t> m_lightMap;
 
 	std::vector<Vertex> m_vertices;
 	std::vector<UINT> m_indices;
