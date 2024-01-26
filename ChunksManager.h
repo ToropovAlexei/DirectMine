@@ -4,18 +4,7 @@
 #include "Chunk.h"
 #include "WorldGenerator.h"
 #include "ChunkRenderer.h"
-
-struct LightNode
-{
-	LightNode(int x, int y, int z, std::shared_ptr<Chunk> chunk)
-		: x(x), y(y), z(z), chunk(chunk)
-	{}
-
-	int x;
-	int y;
-	int z;
-	std::shared_ptr<Chunk> chunk;
-};
+#include "Lighting.h"
 
 class ChunksManager
 {
@@ -55,14 +44,7 @@ private:
 	std::unique_ptr<DX::DeviceResources>& m_deviceResources;
 	std::unique_ptr<WorldGenerator> m_worldGenerator;
 	std::unique_ptr<ChunkRenderer> m_chunkRenderer;
-	std::queue<LightNode> m_redLightBfsQueue;
-	std::queue<LightNode> m_greenLightBfsQueue;
-	std::queue<LightNode> m_blueLightBfsQueue;
-	std::queue<LightNode> m_sunlightBfsQueue;
-	std::queue<LightNode> m_redLightRemovalBfsQueue;
-	std::queue<LightNode> m_greenLightRemovalBfsQueue;
-	std::queue<LightNode> m_blueLightRemovalBfsQueue;
-	std::queue<LightNode> m_sunlightRemovalBfsQueue;
+	std::unique_ptr<Lighting> m_lighting;
 	BlockManager m_blockManager;
 
 	std::shared_mutex m_mutex;

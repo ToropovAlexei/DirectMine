@@ -205,7 +205,9 @@
     <ClInclude Include="DeviceResources.h" />
     <ClInclude Include="FastNoiseLite.h" />
     <ClInclude Include="Game.h" />
+    <ClInclude Include="Lighting.h" />
     <ClInclude Include="Lightmap.h" />
+    <ClInclude Include="LightSolver.h" />
     <ClInclude Include="MathUtils.h" />
     <ClInclude Include="MSAAHelper.h" />
     <ClInclude Include="pch.h" />
@@ -233,7 +235,9 @@
     <ClCompile Include="ChunkRenderer.cpp" />
     <ClCompile Include="DeviceResources.cpp" />
     <ClCompile Include="Game.cpp" />
+    <ClCompile Include="Lighting.cpp" />
     <ClCompile Include="Lightmap.cpp" />
+    <ClCompile Include="LightSolver.cpp" />
     <ClCompile Include="Main.cpp" />
     <ClCompile Include="MathUtils.cpp" />
     <ClCompile Include="MSAAHelper.cpp" />

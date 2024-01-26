@@ -107,6 +107,12 @@
     <ClInclude Include="Lightmap.h">
       <Filter>Lighting</Filter>
     </ClInclude>
+    <ClInclude Include="Lighting.h">
+      <Filter>Lighting</Filter>
+    </ClInclude>
+    <ClInclude Include="LightSolver.h">
+      <Filter>Lighting</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp" />
@@ -166,6 +172,12 @@
     </ClCompile>
     <ClCompile Include="ChunksManager.cpp" />
     <ClCompile Include="Lightmap.cpp">
+      <Filter>Lighting</Filter>
+    </ClCompile>
+    <ClCompile Include="Lighting.cpp">
+      <Filter>Lighting</Filter>
+    </ClCompile>
+    <ClCompile Include="LightSolver.cpp">
       <Filter>Lighting</Filter>
     </ClCompile>
   </ItemGroup>
