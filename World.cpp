@@ -46,7 +46,7 @@ void World::Update(DX::StepTimer const& timer)
 	m_chunksManager->UpdatePlayerPos(playerPos);
 	auto kb = m_keyboard->GetState();
 	m_keysTracker->Update(kb);
-	const float speed = 50.0f;
+	const float speed = 25.0f;
 	if (kb.A)
 	{
 		m_cam->Strafe(-speed * elapsedTime);

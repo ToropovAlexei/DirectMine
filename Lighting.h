@@ -3,13 +3,14 @@
 #include "WorldPos.hpp"
 #include "BlockManager.h"
 #include "LightSolver.h"
-
-class Chunk;
+#include "Chunk.h"
 
 class Lighting
 {
 public:
 	Lighting(std::unordered_map<ChunkPos, std::shared_ptr<Chunk>, ChunkPosHash>& chunks, BlockManager& blockManager);
+
+	void HandleBlockSet(int x, int y, int z, std::shared_ptr<Chunk> chunk, ChunkBlock block);
 
 public:
 	std::unique_ptr<LightSolver> solverS;

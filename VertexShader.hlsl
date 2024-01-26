@@ -21,10 +21,10 @@ struct VertexOut
 float4 lightToChannels(min16uint light)
 {
     float4 result;
-    result.a = ((light >> 12) & 0xF) / 16.0f;
-    result.r = ((light >> 8) & 0xF) / 16.0f;
-    result.g = ((light >> 4) & 0xF) / 16.0f;
-    result.b = (light & 0xF) / 16.0f;
+    result.a = ((light >> 12) & 0xF) / 15.0f;
+    result.r = ((light >> 8) & 0xF) / 15.0f;
+    result.g = ((light >> 4) & 0xF) / 15.0f;
+    result.b = (light & 0xF) / 15.0f;
     return result;
 }
 

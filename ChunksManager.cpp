@@ -83,21 +83,8 @@ void ChunksManager::PlaceBlockAt(WorldPos& worldPos, ChunkBlock block)
 		return;
 	}
 	WorldPos blockPos = WorldPos(worldPos.x - xPos, worldPos.y, worldPos.z - zPos);
-	auto leftChunk = m_chunks.find(chunkPos + ChunkPos(-1, 0));
-	auto rightChunk = m_chunks.find(chunkPos + ChunkPos(1, 0));
-	auto frontChunk = m_chunks.find(chunkPos + ChunkPos(0, -1));
-	auto backChunk = m_chunks.find(chunkPos + ChunkPos(0, 1));
 	it->second->SetBlock(blockPos.x, blockPos.y, blockPos.z, block);
-	auto& emission = m_blockManager.GetBlockById(block.GetId()).GetEmission();
-	if (emission[0] || emission[1] || emission[2])
-	{
-		it->second->GetLightmapRef().SetR(blockPos.x, blockPos.y, blockPos.z, std::max(it->second->GetLightmapRef().GetR(blockPos.x, blockPos.y, blockPos.z), static_cast<int>(emission[0])));
-		it->second->GetLightmapRef().SetG(blockPos.x, blockPos.y, blockPos.z, std::max(it->second->GetLightmapRef().GetG(blockPos.x, blockPos.y, blockPos.z), static_cast<int>(emission[1])));
-		it->second->GetLightmapRef().SetB(blockPos.x, blockPos.y, blockPos.z, std::max(it->second->GetLightmapRef().GetB(blockPos.x, blockPos.y, blockPos.z), static_cast<int>(emission[2])));
-		m_lighting->solverR->Add({ blockPos.x, blockPos.y, blockPos.z, it->second });
-		m_lighting->solverG->Add({ blockPos.x, blockPos.y, blockPos.z, it->second });
-		m_lighting->solverB->Add({ blockPos.x, blockPos.y, blockPos.z, it->second });
-	}
+	m_lighting->HandleBlockSet(blockPos.x, blockPos.y, blockPos.z, it->second, block);
 	it->second->SetIsModified(true);
 	// Возникает какой-то глитч с отображением чанка
 	//it->second->UpdateMeshWithoutBuffers(m_blockManager,

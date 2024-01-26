@@ -14,17 +14,21 @@ void LightSolver::Add(LightNode node)
 	m_addQueue.push(node);
 }
 
-void LightSolver::Remove(LightNode node)
+void LightSolver::Remove(LightRemovalNode node)
 {
 	m_removeQueue.push(node);
 }
 
 void LightSolver::Solve()
 {
-	//while (!m_removeQueue.empty())
-	//{
-	//	// TODO
-	//}
+	while (!m_removeQueue.empty())
+	{
+		//LightRemovalNode node = m_removeQueue.front();
+		//node.chunk->SetIsModified(true);
+		//m_removeQueue.pop();
+		//int lightLevel = node.chunk->GetLightmapRef().GetChannel(node.x, node.y, node.z, m_channel);
+	}
+
 	while (!m_addQueue.empty())
 	{
 		LightNode node = m_addQueue.front();
