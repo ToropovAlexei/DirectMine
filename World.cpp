@@ -5,6 +5,9 @@
 #include <tbb/blocked_range.h>
 #include "MathUtils.h"
 #include "WorldUtils.h"
+#include "imgui.h"
+#include "imgui_impl_win32.h"
+#include "imgui_impl_dx11.h"
 
 World::World(std::unique_ptr<DX::DeviceResources>& deviceResources, 
 	std::unique_ptr<DirectX::Keyboard>& keyboard, 
@@ -89,13 +92,6 @@ void World::Update(DX::StepTimer const& timer)
 		m_chunksManager->PlaceBlockAt(placePos, ChunkBlock(BlockId::Glowstone));
 	}
 
-	std::wstring title = L"DirectX 11 FPS: "
-	+ std::to_wstring(timer.GetFramesPerSecond())
-	+ L" x:" + std::to_wstring(static_cast<int>(m_cam->GetPosition3f().x))
-	+ L" y:" + std::to_wstring(static_cast<int>(m_cam->GetPosition3f().y))
-	+ L" z:" + std::to_wstring(static_cast<int>(m_cam->GetPosition3f().z));
-	SetWindowText(GetActiveWindow(), title.c_str());
-
 	m_cam->UpdateViewMatrix();
 	m_view = m_cam->GetView();
 	UpdateMainCB();
@@ -108,6 +104,16 @@ void World::Render()
 	m_chunksManager->RenderChunks();
 	m_blockOutlineRenderer->RenderCubeOutline();
 	m_crosshairRenderer->Render();
+
+	ImGui::Begin("Debug info");
+	std::string pos = "Pos: x: " + std::format("{:.2f}", m_cam->GetPosition3f().x)
+		+ " y: " + std::format("{:.2f}", m_cam->GetPosition3f().y)
+		+ " z: " + std::format("{:.2f}", m_cam->GetPosition3f().z)
+		+ "\nLook: x: " + std::format("{:.2f}", m_cam->GetLook3f().x)
+		+ " y: " + std::format("{:.2f}", m_cam->GetLook3f().y)
+		+ " z: " + std::format("{:.2f}", m_cam->GetLook3f().z);
+	ImGui::Text(pos.c_str());
+	ImGui::End();
 }
 
 void World::OnWindowSizeChanged(float aspectRatio)
