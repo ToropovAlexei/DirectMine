@@ -40,6 +40,8 @@ public:
 
 private:
 	inline void TryAddLightNode(int x, int y, int z, int lightLevel, std::shared_ptr<Chunk> chunk);
+	inline void TryAddLightRemovalNode(int x, int y, int z, int lightLevel, std::shared_ptr<Chunk> chunk);
+	inline std::shared_ptr<Chunk> GetChunkAt(ChunkPos pos);
 
 private:
 	std::unordered_map<ChunkPos, std::shared_ptr<Chunk>, ChunkPosHash>& m_chunks;

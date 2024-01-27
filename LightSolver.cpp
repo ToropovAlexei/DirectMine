@@ -30,16 +30,7 @@ void LightSolver::Solve()
 		// Check left voxel
 		if (node.x > 0)
 		{
-			int leftVoxelLightLevel = node.chunk->GetLightmapRef().GetChannel(node.x - 1, node.y, node.z, m_channel);
-			if (leftVoxelLightLevel != 0 && leftVoxelLightLevel < lightLevel)
-			{
-				node.chunk->GetLightmapRef().SetChannel(node.x - 1, node.y, node.z, m_channel, 0);
-				m_removeQueue.push({ node.x - 1, node.y, node.z, leftVoxelLightLevel, node.chunk });
-			}
-			else if (leftVoxelLightLevel >= lightLevel)
-			{
-				m_addQueue.push({ node.x - 1, node.y, node.z, node.chunk });
-			}
+			TryAddLightRemovalNode(node.x - 1, node.y, node.z, lightLevel, node.chunk);
 		}
 		else
 		{
@@ -47,16 +38,60 @@ void LightSolver::Solve()
 			auto chunk = m_chunks.find(leftChunkPos);
 			if (chunk != m_chunks.end())
 			{
-				int leftVoxelLightLevel = chunk->second->GetLightmapRef().GetChannel(Chunk::WIDTH - 1, node.y, node.z, m_channel);
-				if (leftVoxelLightLevel != 0 && leftVoxelLightLevel < lightLevel)
-				{
-					m_removeQueue.push({ Chunk::LAST_BLOCK_IDX, node.y, node.z, leftVoxelLightLevel, chunk->second });
-				}
-				else if (leftVoxelLightLevel >= lightLevel)
-				{
-					m_addQueue.push({ Chunk::LAST_BLOCK_IDX, node.y, node.z, chunk->second });
-				}
+				TryAddLightRemovalNode(Chunk::LAST_BLOCK_IDX, node.y, node.z, lightLevel, chunk->second);
 			}
+		}
+		// Check right voxel
+		if (node.x < Chunk::LAST_BLOCK_IDX)
+		{
+			TryAddLightRemovalNode(node.x + 1, node.y, node.z, lightLevel, node.chunk);
+		}
+		else
+		{
+			ChunkPos rightChunkPos = node.chunk->GetPos() + ChunkPos(Chunk::WIDTH, 0);
+			auto chunk = m_chunks.find(rightChunkPos);
+			if (chunk != m_chunks.end())
+			{
+				TryAddLightRemovalNode(0, node.y, node.z, lightLevel, chunk->second);
+			}
+		}
+		// Check front voxel
+		if (node.z > 0)
+		{
+			TryAddLightRemovalNode(node.x, node.y, node.z - 1, lightLevel, node.chunk);
+		}
+		else
+		{
+			ChunkPos frontChunkPos = node.chunk->GetPos() + ChunkPos(0, -Chunk::WIDTH);
+			auto chunk = m_chunks.find(frontChunkPos);
+			if (chunk != m_chunks.end())
+			{
+				TryAddLightRemovalNode(node.x, node.y, Chunk::LAST_BLOCK_IDX, lightLevel, chunk->second);
+			}
+		}
+		// Check back voxel
+		if (node.z < Chunk::LAST_BLOCK_IDX)
+		{
+			TryAddLightRemovalNode(node.x, node.y, node.z + 1, lightLevel, node.chunk);
+		}
+		else
+		{
+			ChunkPos backChunkPos = node.chunk->GetPos() + ChunkPos(0, Chunk::WIDTH);
+			auto chunk = m_chunks.find(backChunkPos);
+			if (chunk != m_chunks.end())
+			{
+				TryAddLightRemovalNode(node.x, node.y, 0, lightLevel, chunk->second);
+			}
+		}
+		// Check top voxel
+		if (node.y < Chunk::HEIGHT) // TODO Check < Height
+		{
+			TryAddLightRemovalNode(node.x, node.y + 1, node.z, lightLevel, node.chunk);
+		}
+		// Check bottom voxel
+		if (node.y > 0)
+		{
+			TryAddLightRemovalNode(node.x, node.y - 1, node.z, lightLevel, node.chunk);
 		}
 	}
 
@@ -142,8 +177,8 @@ void LightSolver::Solve()
 
 inline void LightSolver::TryAddLightNode(int x, int y, int z, int lightLevel, std::shared_ptr<Chunk> chunk)
 {
-	int leftVoxelLightLevel = chunk->GetLightmapRef().GetChannel(x, y, z, m_channel);
-	if (lightLevel <= leftVoxelLightLevel)
+	int neighbourVoxelLightLevel = chunk->GetLightmapRef().GetChannel(x, y, z, m_channel);
+	if (lightLevel <= neighbourVoxelLightLevel)
 	{
 		return;
 	}
@@ -153,4 +188,28 @@ inline void LightSolver::TryAddLightNode(int x, int y, int z, int lightLevel, st
 	}
 	chunk->GetLightmapRef().SetChannel(x, y, z, m_channel, lightLevel);
 	m_addQueue.push({ x, y, z, chunk });
+}
+
+inline void LightSolver::TryAddLightRemovalNode(int x, int y, int z, int lightLevel, std::shared_ptr<Chunk> chunk)
+{
+	int neighbourVoxelLightLevel = chunk->GetLightmapRef().GetChannel(x, y, z, m_channel);
+	if (neighbourVoxelLightLevel != 0 && neighbourVoxelLightLevel < lightLevel)
+	{
+		chunk->GetLightmapRef().SetChannel(x, y, z, m_channel, 0);
+		m_removeQueue.push({ x, y, z, neighbourVoxelLightLevel, chunk });
+	}
+	else if (neighbourVoxelLightLevel >= lightLevel)
+	{
+		m_addQueue.push({ x, y, z, chunk });
+	}
+}
+
+inline std::shared_ptr<Chunk> LightSolver::GetChunkAt(ChunkPos pos)
+{
+	auto chunk = m_chunks.find(pos);
+	if (chunk != m_chunks.end())
+	{
+		return chunk->second;
+	}
+	return nullptr;
 }
