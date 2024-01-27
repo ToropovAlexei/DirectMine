@@ -18,14 +18,14 @@ struct LightNode
 };
 
 struct LightRemovalNode {
-	LightRemovalNode(int x, int y, int z, short v, Chunk* ch) : 
-		x(x), y(y), z(z), val(v), chunk(ch) 
+	LightRemovalNode(int x, int y, int z, int val, std::shared_ptr<Chunk> chunk) :
+		x(x), y(y), z(z), val(val), chunk(chunk)
 	{}
 
 	int x;
 	int y;
 	int z;
-	short val;
+	int val;
 	std::shared_ptr<Chunk> chunk;
 };
 
@@ -37,6 +37,9 @@ public:
 	void Add(LightNode node);
 	void Remove(LightRemovalNode node);
 	void Solve();
+
+private:
+	inline void TryAddLightNode(int x, int y, int z, int lightLevel, std::shared_ptr<Chunk> chunk);
 
 private:
 	std::unordered_map<ChunkPos, std::shared_ptr<Chunk>, ChunkPosHash>& m_chunks;
