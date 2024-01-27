@@ -35,6 +35,9 @@
     <Filter Include="Lighting">
       <UniqueIdentifier>{477630cb-3f7c-4be6-9a87-41c9394f0972}</UniqueIdentifier>
     </Filter>
+    <Filter Include="libs">
+      <UniqueIdentifier>{65f36582-ab44-45fa-8eb7-5aebb005780c}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="pch.h" />
@@ -113,6 +116,30 @@
     <ClInclude Include="LightSolver.h">
       <Filter>Lighting</Filter>
     </ClInclude>
+    <ClInclude Include="imconfig.h">
+      <Filter>libs</Filter>
+    </ClInclude>
+    <ClInclude Include="imgui.h">
+      <Filter>libs</Filter>
+    </ClInclude>
+    <ClInclude Include="imgui_impl_dx11.h">
+      <Filter>libs</Filter>
+    </ClInclude>
+    <ClInclude Include="imgui_impl_win32.h">
+      <Filter>libs</Filter>
+    </ClInclude>
+    <ClInclude Include="imgui_internal.h">
+      <Filter>libs</Filter>
+    </ClInclude>
+    <ClInclude Include="imstb_rectpack.h">
+      <Filter>libs</Filter>
+    </ClInclude>
+    <ClInclude Include="imstb_textedit.h">
+      <Filter>libs</Filter>
+    </ClInclude>
+    <ClInclude Include="imstb_truetype.h">
+      <Filter>libs</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp" />
@@ -179,6 +206,27 @@
     </ClCompile>
     <ClCompile Include="LightSolver.cpp">
       <Filter>Lighting</Filter>
+    </ClCompile>
+    <ClCompile Include="imgui.cpp">
+      <Filter>libs</Filter>
+    </ClCompile>
+    <ClCompile Include="imgui_demo.cpp">
+      <Filter>libs</Filter>
+    </ClCompile>
+    <ClCompile Include="imgui_draw.cpp">
+      <Filter>libs</Filter>
+    </ClCompile>
+    <ClCompile Include="imgui_impl_dx11.cpp">
+      <Filter>libs</Filter>
+    </ClCompile>
+    <ClCompile Include="imgui_impl_win32.cpp">
+      <Filter>libs</Filter>
+    </ClCompile>
+    <ClCompile Include="imgui_tables.cpp">
+      <Filter>libs</Filter>
+    </ClCompile>
+    <ClCompile Include="imgui_widgets.cpp">
+      <Filter>libs</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

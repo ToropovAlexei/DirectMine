@@ -5,6 +5,9 @@
 #include "pch.h"
 #include "Game.h"
 #include "ShadersLoader.h"
+#include "imgui.h"
+#include "imgui_impl_win32.h"
+#include "imgui_impl_dx11.h"
 
 namespace
 {
@@ -34,6 +37,10 @@ Game::Game() noexcept(false)
 	m_mouse = std::make_unique<Mouse>();
     m_tracker = std::make_unique<DirectX::Mouse::ButtonStateTracker>();
     m_keysTracker = std::make_unique<DirectX::Keyboard::KeyboardStateTracker>();
+    IMGUI_CHECKVERSION();
+    ImGui::CreateContext();
+    ImGuiIO& io = ImGui::GetIO();
+    io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;     // Enable Keyboard Controls
 }
 
 // Initialize the Direct3D resources required to run.
@@ -41,6 +48,7 @@ void Game::Initialize(HWND window, int width, int height)
 {
     m_deviceResources->SetWindow(window, width, height);
     m_mouse->SetWindow(window);
+    ImGui_ImplWin32_Init(window);
 
     m_deviceResources->CreateDeviceResources();
     CreateDeviceDependentResources();
@@ -107,11 +115,19 @@ void Game::Render()
         return;
     }
 
+    ImGui_ImplDX11_NewFrame();
+    ImGui_ImplWin32_NewFrame();
+    ImGui::NewFrame();
+    ImGui::ShowDemoWindow(); // Show demo window! :)
+
     Clear();
 
     m_deviceResources->PIXBeginEvent(L"Render");
 
     m_world->Render();
+
+    ImGui::Render();
+    ImGui_ImplDX11_RenderDrawData(ImGui::GetDrawData());
 
     m_deviceResources->PIXEndEvent();
 
@@ -203,6 +219,7 @@ void Game::CreateDeviceDependentResources()
     // TODO: Initialize device dependent objects here (independent of window size).
     m_msaaHelper->SetDevice(m_deviceResources->GetD3DDevice());
     m_world = std::make_unique<World>(m_deviceResources, m_keyboard, m_mouse, m_tracker, m_keysTracker);
+    ImGui_ImplDX11_Init(m_deviceResources->GetD3DDevice(), m_deviceResources->GetD3DDeviceContext());
 }
 
 // Allocate all memory resources that change on a window SizeChanged event.
@@ -219,6 +236,9 @@ void Game::OnDeviceLost()
 {
     // TODO: Add Direct3D resource cleanup here.
     m_msaaHelper->ReleaseDevice();
+    ImGui_ImplDX11_Shutdown();
+    ImGui_ImplWin32_Shutdown();
+    ImGui::DestroyContext();
 }
 
 void Game::OnDeviceRestored()
