@@ -73,7 +73,7 @@ void ChunksManager::RemoveBlockAt(WorldPos& worldPos)
 
 void ChunksManager::PlaceBlockAt(WorldPos& worldPos, ChunkBlock block)
 {
-	std::shared_lock<std::shared_mutex> lock(m_mutex);
+	std::unique_lock<std::shared_mutex> lock(m_mutex);
 	int xPos = MathUtils::RoundDown(static_cast<int>(worldPos.x), Chunk::WIDTH);
 	int zPos = MathUtils::RoundDown(static_cast<int>(worldPos.z), Chunk::WIDTH);
 	ChunkPos chunkPos = ChunkPos(xPos, zPos);
@@ -314,7 +314,6 @@ void ChunksManager::UpdateModifiedChunks()
 
 std::shared_ptr<Chunk> ChunksManager::GetChunkAt(ChunkPos& chunkPos)
 {
-	std::shared_lock<std::shared_mutex> lock(m_mutex);
 	auto it = m_chunks.find(chunkPos);
 	if (it == m_chunks.end())
 	{
