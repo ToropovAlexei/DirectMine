@@ -10,7 +10,7 @@ public:
 
 	void LoadBlocks();
 
-	Block& GetBlockById(BlockId id);
+	inline Block& GetBlockById(BlockId id) noexcept { return m_blocksById[id]; };
 
 private:
 	void BuildBlocksMap(std::vector<Block>& blocks);

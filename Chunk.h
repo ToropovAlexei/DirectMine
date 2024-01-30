@@ -35,26 +35,20 @@ public:
 	inline bool HasBlockAt(int x, int y, int z) const noexcept;
 	inline bool HasBlockAt(size_t idx) const noexcept;
 
-	bool IsModified() const noexcept;
-	void SetIsModified(bool isModified) noexcept;
+	inline bool IsModified() const noexcept { return m_isModified; };
+	inline void SetIsModified(bool isModified) noexcept { m_isModified = isModified; };
 
-	bool ShouldRender() const noexcept;
-	void SetShouldRender(bool shouldRender) noexcept;
+	inline bool ShouldRender() const noexcept { return m_shouldRender; };
+	inline void SetShouldRender(bool shouldRender) noexcept { m_shouldRender = shouldRender; };
 
-	inline Lightmap& GetLightmapRef() noexcept
-	{
-		return m_lightMap;
-	}
+	inline Lightmap& GetLightmapRef() noexcept { return m_lightMap; };
 
-	inline ChunkPos& GetPos() noexcept
-	{
-		return m_worldPos;
-	}
+	inline ChunkPos& GetPos() noexcept { return m_worldPos; };
 
-	std::vector<Vertex>& GetVertices();
-	std::vector<UINT>& GetIndices();
-	Microsoft::WRL::ComPtr<ID3D11Buffer> GetVertexBuffer();
-	Microsoft::WRL::ComPtr<ID3D11Buffer> GetIndexBuffer();
+	inline std::vector<Vertex>& GetVertices() noexcept { return m_vertices; };
+	inline std::vector<UINT>& GetIndices() noexcept { return m_indices; };
+	inline Microsoft::WRL::ComPtr<ID3D11Buffer> GetVertexBuffer() noexcept { return m_vertexBuffer; };
+	inline Microsoft::WRL::ComPtr<ID3D11Buffer> GetIndexBuffer() noexcept { return m_indexBuffer; };
 
 private:
 	inline void AddFrontFace(DirectX::XMFLOAT3& pos, std::string& texture, uint16_t light) noexcept;

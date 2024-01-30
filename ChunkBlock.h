@@ -19,8 +19,8 @@ public:
 	ChunkBlock(BlockId id) noexcept;
 	ChunkBlock(BlockId id, BlockDirection dir) noexcept;
 
-	BlockId GetId() const noexcept;
-	BlockDirection GetDirection() const noexcept;
+	inline BlockId GetId() const noexcept { return m_id; };
+	inline BlockDirection GetDirection() const noexcept { return m_dir; };
 
 private:
 	BlockId m_id;

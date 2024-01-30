@@ -48,26 +48,6 @@ ChunkBlock Chunk::GetBlock(int x, int y, int z) noexcept
     return m_blocks[index];
 }
 
-std::vector<Vertex>& Chunk::GetVertices()
-{
-    return m_vertices;
-}
-
-std::vector<UINT>& Chunk::GetIndices()
-{
-    return m_indices;
-}
-
-Microsoft::WRL::ComPtr<ID3D11Buffer> Chunk::GetVertexBuffer()
-{
-    return m_vertexBuffer;
-}
-
-Microsoft::WRL::ComPtr<ID3D11Buffer> Chunk::GetIndexBuffer()
-{
-    return m_indexBuffer;
-}
-
 inline void Chunk::AddFrontFace(DirectX::XMFLOAT3& pos, std::string& texture, uint16_t light) noexcept
 {
     float idx = TextureAtlas::GetTextureIdx(texture);
@@ -315,26 +295,6 @@ inline bool Chunk::HasBlockAt(size_t idx) const noexcept
         return false;
     }
     return m_blocks[idx].GetId() != BlockId::Air;
-}
-
-bool Chunk::IsModified() const noexcept
-{
-    return m_isModified;
-}
-
-void Chunk::SetIsModified(bool isModified) noexcept
-{
-    m_isModified = isModified;
-}
-
-bool Chunk::ShouldRender() const noexcept
-{
-    return m_shouldRender;
-}
-
-void Chunk::SetShouldRender(bool shouldRender) noexcept
-{
-    m_shouldRender = shouldRender;
 }
 
 void Chunk::UpdateBuffers(ID3D11Device* device)

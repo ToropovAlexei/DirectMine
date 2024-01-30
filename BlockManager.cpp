@@ -10,15 +10,6 @@ void BlockManager::LoadBlocks()
 	BuildBlocksMap(blocks);
 }
 
-Block& BlockManager::GetBlockById(BlockId id)
-{
-	if (!m_blocksById.contains(id))
-	{
-		throw std::runtime_error("Block with id " + std::to_string(static_cast<uint16_t>(id)) + " not found");
-	}
-	return m_blocksById[id];
-}
-
 void BlockManager::BuildBlocksMap(std::vector<Block>& blocks)
 {
 	for (size_t i = 0; i < blocks.size(); i++)
