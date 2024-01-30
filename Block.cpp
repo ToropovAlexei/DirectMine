@@ -31,31 +31,6 @@ Block::Block(BlockId id, std::string name, std::vector<std::string> textures, st
 	BuildTextures(textures);
 }
 
-std::string& Block::GetName()
-{
-	return m_name;
-}
-
-std::string& Block::GetFaceTexture(BlockFaces face)
-{
-	return m_textures[static_cast<size_t>(face)];
-}
-
-BlockId Block::GetId() const noexcept
-{
-	return m_id;
-}
-
-bool Block::IsOpaque() const noexcept
-{
-	return m_isOpaque;
-}
-
-const std::array<uint8_t, 3u>& Block::GetEmission() const noexcept
-{
-	return m_emission;
-}
-
 void Block::BuildTextures(std::vector<std::string> textures)
 {
 	if (textures.empty())

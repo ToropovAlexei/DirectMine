@@ -20,11 +20,26 @@ public:
 	Block(BlockId id, std::string name, std::vector<std::string> textures, std::array<uint8_t, 3u> emission);
 	Block(BlockId id, std::string name, std::vector<std::string> textures, std::array<uint8_t, 3u> emission, bool isOpaque);
 
-	std::string& GetName();
-	std::string& GetFaceTexture(BlockFaces face);
-	BlockId GetId() const noexcept;
-	bool IsOpaque() const noexcept;
-	const std::array<uint8_t, 3u>& GetEmission() const noexcept;
+	inline std::string& GetName() noexcept
+	{
+		return m_name;
+	};
+	inline std::string& GetFaceTexture(BlockFaces face) noexcept
+	{
+		return m_textures[static_cast<size_t>(face)];
+	};
+	inline BlockId GetId() const noexcept
+	{
+		return m_id;
+	};
+	inline bool IsOpaque() const noexcept
+	{
+		return m_isOpaque;
+	};
+	inline const std::array<uint8_t, 3u>& GetEmission() const noexcept
+	{
+		return m_emission;
+	};
 
 private:
 	void BuildTextures(std::vector<std::string>);

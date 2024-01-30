@@ -59,6 +59,7 @@
 #include <unordered_set>
 #include <shared_mutex>
 #include <queue>
+#include <execution>
 
 #ifdef _DEBUG
 #include <dxgidebug.h>

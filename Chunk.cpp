@@ -11,11 +11,6 @@ Chunk::Chunk(ChunkPos& worldPos) :
     m_blocks.resize(static_cast<size_t>(SQ_WIDTH));
 }
 
-void Chunk::SetBlock(int x, int y, int z, BlockId blockId) noexcept
-{
-    SetBlock(x, y, z, ChunkBlock(blockId));
-}
-
 void Chunk::SetBlock(int x, int y, int z, ChunkBlock block) noexcept
 {
     assert(x < Chunk::WIDTH);

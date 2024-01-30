@@ -13,21 +13,6 @@ ChunkRenderer::ChunkRenderer(std::unique_ptr<DX::DeviceResources>& deviceResourc
     m_pixelShader = ShadersLoader::LoadPixelShader(deviceResources->GetD3DDevice(), L"PixelShader.cso");
 }
 
-void ChunkRenderer::DrawChunk(Chunk* chunk)
-{
-    auto context = m_deviceResources->GetD3DDeviceContext();
-    context->IASetVertexBuffers(0u, 1u, chunk->GetVertexBuffer().GetAddressOf(), &m_stride, &m_offset);
-    context->IASetIndexBuffer(chunk->GetIndexBuffer().Get(), DXGI_FORMAT_R32_UINT, 0u);
-    context->PSSetShader(m_pixelShader.Get(), nullptr, 0u);
-    context->VSSetShader(m_vertexShader.Get(), nullptr, 0u);
-    context->IASetInputLayout(m_inputLayout.Get());
-    context->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-    context->PSSetSamplers(0u, 1u, m_sampler.GetAddressOf());
-    context->OMSetBlendState(m_blendState.Get(), nullptr, 0xFFFFFFFF);
-    context->PSSetShaderResources(0u, 1u, TextureAtlas::GetAtlasSRV().GetAddressOf());
-    context->DrawIndexed(static_cast<UINT>(chunk->GetIndices().size()), 0u, 0u);
-}
-
 void ChunkRenderer::RenderChunks(std::unordered_map<ChunkPos, std::shared_ptr<Chunk>, ChunkPosHash>& chunks)
 {
     auto context = m_deviceResources->GetD3DDeviceContext();

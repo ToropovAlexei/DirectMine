@@ -31,13 +31,13 @@ private:
 
 private:
 #ifdef NDEBUG
-	static const int loadDistance = 32;
-	static const int maxAsyncChunksLoading = 16;
-	static const int maxAsyncChunksToUpdate = 8;
+	static const int loadDistance = 50;
+	static const int maxAsyncChunksLoading = 64;
+	static const int maxAsyncChunksToUpdate = 32;
 #else
-	static const int loadDistance = 16;
-	static const int maxAsyncChunksLoading = 16;
-	static const int maxAsyncChunksToUpdate = 8;
+	static const int loadDistance = 50;
+	static const int maxAsyncChunksLoading = 64;
+	static const int maxAsyncChunksToUpdate = 32;
 #endif
 	DirectX::XMFLOAT3 m_playerPos;
 	std::unordered_map<ChunkPos, std::shared_ptr<Chunk>, ChunkPosHash> m_chunks;

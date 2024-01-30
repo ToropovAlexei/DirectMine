@@ -11,8 +11,6 @@ public:
 	void LoadBlocks();
 
 	Block& GetBlockById(BlockId id);
-	Block& GetBlockByName(std::string& name);
-	BlockId GetBlockIdByName(std::string& name);
 
 private:
 	void BuildBlocksMap(std::vector<Block>& blocks);

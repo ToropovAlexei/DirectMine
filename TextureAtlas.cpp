@@ -2,11 +2,8 @@
 #include "TextureAtlas.h"
 #include "MathUtils.h"
 
-Microsoft::WRL::ComPtr<ID3D11Texture2D> TextureAtlas::atlasTexture;
 Microsoft::WRL::ComPtr<ID3D11Texture3D> TextureAtlas::atlas3d;
-Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> TextureAtlas::atlasSRV;
 Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> TextureAtlas::texture3dSRV;
-std::unordered_map<std::string, UVCoords> TextureAtlas::texturesCoords;
 std::unordered_map<std::string, float> TextureAtlas::texturesIndices;
 
 void TextureAtlas::BuildAtlas(ID3D11Device* device, ID3D11DeviceContext* context)
@@ -31,29 +28,4 @@ void TextureAtlas::BuildAtlas(ID3D11Device* device, ID3D11DeviceContext* context
     srvDesc.Texture3D.MostDetailedMip = 0;
 
     DX::ThrowIfFailed(device->CreateShaderResourceView(texture3D.Get(), &srvDesc, &texture3dSRV));
-}
-
-Microsoft::WRL::ComPtr<ID3D11Texture2D> TextureAtlas::GetAtlas() noexcept
-{
-    return atlasTexture;
-}
-
-Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> TextureAtlas::GetAtlasSRV() noexcept
-{
-    return atlasSRV;
-}
-
-Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> TextureAtlas::Get3dTextureSRV() noexcept
-{
-    return texture3dSRV;
-}
-
-UVCoords TextureAtlas::GetTextureCoords(std::string& texName) noexcept
-{
-    return texturesCoords[texName];
-}
-
-float TextureAtlas::GetTextureIdx(std::string& texName) noexcept
-{
-    return texturesIndices[texName];
 }

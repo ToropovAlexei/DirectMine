@@ -18,7 +18,10 @@ public:
 	static const int LAST_BLOCK_IDX = WIDTH - 1;
 	static const int HIGHEST_BLOCK_IDX = HEIGHT - 1;
 
-	void SetBlock(int x, int y, int z, BlockId blockId) noexcept;
+	inline void SetBlock(int x, int y, int z, BlockId blockId) noexcept
+	{
+		SetBlock(x, y, z, ChunkBlock(blockId));
+	}
 	void SetBlock(int x, int y, int z, ChunkBlock block) noexcept;
 
 	ChunkBlock GetBlock(int x, int y, int z) noexcept;
