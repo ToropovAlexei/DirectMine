@@ -30,6 +30,7 @@ public:
 	void UpdateBuffers(ID3D11Device* device);
 
 	inline bool HasBlockAt(int x, int y, int z) const noexcept;
+	inline bool HasBlockAt(size_t idx) const noexcept;
 
 	bool IsModified() const noexcept;
 	void SetIsModified(bool isModified) noexcept;
@@ -37,9 +38,15 @@ public:
 	bool ShouldRender() const noexcept;
 	void SetShouldRender(bool shouldRender) noexcept;
 
-	Lightmap& GetLightmapRef() noexcept;
+	inline Lightmap& GetLightmapRef() noexcept
+	{
+		return m_lightMap;
+	}
 
-	ChunkPos& GetPos() noexcept;
+	inline ChunkPos& GetPos() noexcept
+	{
+		return m_worldPos;
+	}
 
 	std::vector<Vertex>& GetVertices();
 	std::vector<UINT>& GetIndices();

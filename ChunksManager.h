@@ -35,9 +35,9 @@ private:
 	static const int maxAsyncChunksLoading = 16;
 	static const int maxAsyncChunksToUpdate = 8;
 #else
-	static const int loadDistance = 1;
-	static const int maxAsyncChunksLoading = 4;
-	static const int maxAsyncChunksToUpdate = 2;
+	static const int loadDistance = 16;
+	static const int maxAsyncChunksLoading = 16;
+	static const int maxAsyncChunksToUpdate = 8;
 #endif
 	DirectX::XMFLOAT3 m_playerPos;
 	std::unordered_map<ChunkPos, std::shared_ptr<Chunk>, ChunkPosHash> m_chunks;

@@ -11,6 +11,7 @@ public:
 	Lighting(std::unordered_map<ChunkPos, std::shared_ptr<Chunk>, ChunkPosHash>& chunks, BlockManager& blockManager);
 
 	void HandleBlockSet(int x, int y, int z, std::shared_ptr<Chunk> chunk, ChunkBlock block);
+	void BuildSunlight(std::shared_ptr<Chunk> chunk);
 
 public:
 	std::unique_ptr<LightSolver> solverS;

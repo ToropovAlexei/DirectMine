@@ -3,6 +3,7 @@
 #include "UVCoords.h"
 #include "TextureAtlas.h"
 #include "MathUtils.h"
+#include "Lightmap.h"
 
 Chunk::Chunk(ChunkPos& worldPos) :
     m_worldPos(worldPos)
@@ -218,10 +219,6 @@ void Chunk::UpdateMeshWithoutBuffers(BlockManager& blockManager,
             for (int x = 0; x < WIDTH; x++)
             {
                 const size_t idx = GetIdxFromCoords(x, y, z);
-                if (idx >= m_blocks.size())
-                {
-                    return;
-                }
                 BlockId blockId = m_blocks[idx].GetId();
                 if (blockId == BlockId::Air)
                 {
@@ -229,29 +226,25 @@ void Chunk::UpdateMeshWithoutBuffers(BlockManager& blockManager,
                 }
                 WorldPos blockChunkPos = WorldPos(x, y, z);
                 WorldPos pos = blockChunkPos + m_worldPos;
-                WorldPos leftPos = pos - WorldPos(1, 0, 0);
-                WorldPos rightPos = pos + WorldPos(1, 0, 0);
-                WorldPos frontPos = pos - WorldPos(0, 0, 1);
-                WorldPos backPos = pos + WorldPos(0, 0, 1);
 
                 Block& block = blockManager.GetBlockById(blockId);
                 DirectX::XMFLOAT3 blockPos = DirectX::XMFLOAT3(static_cast<float>(pos.x), static_cast<float>(pos.y), static_cast<float>(pos.z));
 
                 if (z == 0)
                 {
-                    if (!(frontChunk && frontChunk->HasBlockAt(x, y, WIDTH - 1)))
+                    if (!(frontChunk && frontChunk->HasBlockAt(x, y, LAST_BLOCK_IDX)))
                     {
-                        AddFrontFace(blockPos, block.GetFaceTexture(Block::BlockFaces::Front), frontChunk ? frontChunk->GetLightmapRef().GetLight(x, y, WIDTH - 1) : 0);
+                        AddFrontFace(blockPos, block.GetFaceTexture(Block::BlockFaces::Front), frontChunk ? frontChunk->GetLightmapRef().GetLight(x, y, LAST_BLOCK_IDX) : 0);
                     }
                 }
                 else
                 {
-                    if (!HasBlockAt(x, y, z - 1))
+                    if (!HasBlockAt(idx - WIDTH))
                     {
-                        AddFrontFace(blockPos, block.GetFaceTexture(Block::BlockFaces::Front), GetLightmapRef().GetLight(x, y, z - 1));
+                        AddFrontFace(blockPos, block.GetFaceTexture(Block::BlockFaces::Front), GetLightmapRef().GetLight(idx - WIDTH));
                     }
                 }
-                if (z == WIDTH - 1)
+                if (z == LAST_BLOCK_IDX)
                 {
                     if (!(backChunk && backChunk->HasBlockAt(x, y, 0)))
                     {
@@ -260,34 +253,34 @@ void Chunk::UpdateMeshWithoutBuffers(BlockManager& blockManager,
                 }
                 else
                 {
-                    if (!HasBlockAt(x, y, z + 1))
+                    if (!HasBlockAt(idx + WIDTH))
                     {
-                        AddBackFace(blockPos, block.GetFaceTexture(Block::BlockFaces::Back), GetLightmapRef().GetLight(x, y, z + 1));
+                        AddBackFace(blockPos, block.GetFaceTexture(Block::BlockFaces::Back), GetLightmapRef().GetLight(idx + WIDTH));
                     }
                 }
-                if (pos.y == HEIGHT - 1 || !HasBlockAt(x, y + 1, z))
+                if (pos.y == HIGHEST_BLOCK_IDX || !HasBlockAt(idx + SQ_WIDTH))
                 {
-                    AddTopFace(blockPos, block.GetFaceTexture(Block::BlockFaces::Top), GetLightmapRef().GetLight(x, y + 1, z));
+                    AddTopFace(blockPos, block.GetFaceTexture(Block::BlockFaces::Top), GetLightmapRef().GetLight(idx + SQ_WIDTH));
                 }
-                if (pos.y == 0 || !HasBlockAt(x, y - 1, z))
+                if (pos.y == 0 || !HasBlockAt(idx - SQ_WIDTH))
                 {
-                    AddBottomFace(blockPos, block.GetFaceTexture(Block::BlockFaces::Bottom), GetLightmapRef().GetLight(x, y - 1, z));
+                    AddBottomFace(blockPos, block.GetFaceTexture(Block::BlockFaces::Bottom), GetLightmapRef().GetLight(idx - SQ_WIDTH));
                 }
                 if (x == 0)
                 {
-                    if (!(leftChunk && leftChunk->HasBlockAt(WIDTH - 1, y, z)))
+                    if (!(leftChunk && leftChunk->HasBlockAt(LAST_BLOCK_IDX, y, z)))
                     {
-                        AddLeftFace(blockPos, block.GetFaceTexture(Block::BlockFaces::Left), leftChunk ? leftChunk->GetLightmapRef().GetLight(WIDTH - 1, y, z) : 0);
+                        AddLeftFace(blockPos, block.GetFaceTexture(Block::BlockFaces::Left), leftChunk ? leftChunk->GetLightmapRef().GetLight(LAST_BLOCK_IDX, y, z) : 0);
                     }
                 }
                 else
                 {
-                    if (!HasBlockAt(x - 1, y, z))
+                    if (!HasBlockAt(idx - 1))
                     {
-                        AddLeftFace(blockPos, block.GetFaceTexture(Block::BlockFaces::Left), GetLightmapRef().GetLight(x - 1, y, z));
+                        AddLeftFace(blockPos, block.GetFaceTexture(Block::BlockFaces::Left), GetLightmapRef().GetLight(idx - 1));
                     }
                 }
-                if (x == WIDTH - 1)
+                if (x == LAST_BLOCK_IDX)
                 {
                     if (!(rightChunk && rightChunk->HasBlockAt(0, y, z)))
                     {
@@ -296,9 +289,9 @@ void Chunk::UpdateMeshWithoutBuffers(BlockManager& blockManager,
                 }
                 else
                 {
-                    if (!HasBlockAt(x + 1, y, z))
+                    if (!HasBlockAt(idx + 1))
                     {
-                        AddRightFace(blockPos, block.GetFaceTexture(Block::BlockFaces::Right), GetLightmapRef().GetLight(x + 1, y, z));
+                        AddRightFace(blockPos, block.GetFaceTexture(Block::BlockFaces::Right), GetLightmapRef().GetLight(idx + 1));
                     }
                     
                 }
@@ -313,6 +306,15 @@ inline bool Chunk::HasBlockAt(int x, int y, int z) const noexcept
     //assert(chunkPos.y < Chunk::HEIGHT);
     assert(z < Chunk::WIDTH);
     const size_t idx = GetIdxFromCoords(x, y, z);
+    if (idx >= m_blocks.size())
+    {
+        return false;
+    }
+    return m_blocks[idx].GetId() != BlockId::Air;
+}
+
+inline bool Chunk::HasBlockAt(size_t idx) const noexcept
+{
     if (idx >= m_blocks.size())
     {
         return false;
@@ -338,16 +340,6 @@ bool Chunk::ShouldRender() const noexcept
 void Chunk::SetShouldRender(bool shouldRender) noexcept
 {
     m_shouldRender = shouldRender;
-}
-
-Lightmap& Chunk::GetLightmapRef() noexcept
-{
-    return m_lightMap;
-}
-
-ChunkPos& Chunk::GetPos() noexcept
-{
-    return m_worldPos;
 }
 
 void Chunk::UpdateBuffers(ID3D11Device* device)

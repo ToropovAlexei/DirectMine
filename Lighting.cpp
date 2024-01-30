@@ -48,3 +48,13 @@ void Lighting::HandleBlockSet(int x, int y, int z, std::shared_ptr<Chunk> chunk,
 		}
 	}
 }
+
+void Lighting::BuildSunlight(std::shared_ptr<Chunk> chunk)
+{
+	for (int x = 0; x < Chunk::WIDTH; x++)
+	{
+		for (int z = 0; z < Chunk::WIDTH; z++)
+		{
+		}
+	}
+}
