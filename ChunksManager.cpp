@@ -249,7 +249,7 @@ void ChunksManager::LoadChunks()
 	tbb::parallel_for(tbb::blocked_range<size_t>(0, chunksToLoad.size()),
 		[this, &chunksToLoad](const tbb::blocked_range<size_t>& range) {
 			for (size_t i = range.begin(); i != range.end(); ++i) {
-				auto chunk = m_worldGenerator->GenerateChunk(chunksToLoad[i]);
+				auto chunk = m_worldGenerator->GenerateChunk(chunksToLoad[i].x, chunksToLoad[i].z);
 				InsertChunk(chunksToLoad[i], chunk);
 			}
 		});
@@ -257,11 +257,11 @@ void ChunksManager::LoadChunks()
 
 void ChunksManager::CalculateLighting()
 {
-	//std::unique_lock<std::shared_mutex> lock(m_mutex);
-	//m_lighting->solverS->Solve();
-	//m_lighting->solverR->Solve();
-	//m_lighting->solverG->Solve();
-	//m_lighting->solverB->Solve();
+	std::unique_lock<std::shared_mutex> lock(m_mutex);
+	m_lighting->solverS->Solve();
+	m_lighting->solverR->Solve();
+	m_lighting->solverG->Solve();
+	m_lighting->solverB->Solve();
 }
 
 void ChunksManager::UpdateModifiedChunks()

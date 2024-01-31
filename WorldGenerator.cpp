@@ -13,14 +13,14 @@ WorldGenerator::WorldGenerator(BlockManager& blockManager) :
     caveNoiseGen.SetFractalOctaves(2);
 }
 
-Chunk WorldGenerator::GenerateChunk(ChunkPos& chunkPos)
+Chunk WorldGenerator::GenerateChunk(int cx, int cz)
 {
-    Chunk chunk = Chunk(chunkPos);
+    Chunk chunk = Chunk(cx, cz);
 
     for (int x = 0; x < Chunk::WIDTH; ++x) {
         for (int z = 0; z < Chunk::WIDTH; ++z) {
-            float heightNoise = noise.GetNoise(static_cast<float>(chunkPos.x * Chunk::WIDTH + x) / Chunk::WIDTH, static_cast<float>(chunkPos.z * Chunk::WIDTH + z) / Chunk::WIDTH);
-            float caveNoise = caveNoiseGen.GetNoise(static_cast<float>(chunkPos.x * Chunk::WIDTH + x) / Chunk::WIDTH, static_cast<float>(chunkPos.z * Chunk::WIDTH + z) / Chunk::WIDTH);
+            float heightNoise = noise.GetNoise(static_cast<float>(cx * Chunk::WIDTH + x) / Chunk::WIDTH, static_cast<float>(cz * Chunk::WIDTH + z) / Chunk::WIDTH);
+            float caveNoise = caveNoiseGen.GetNoise(static_cast<float>(cx * Chunk::WIDTH + x) / Chunk::WIDTH, static_cast<float>(cz * Chunk::WIDTH + z) / Chunk::WIDTH);
 
             int height = static_cast<int>((heightNoise + 1.0f) * (maxHeight - minHeight) / 2.0f) + minHeight;
 
@@ -37,7 +37,7 @@ Chunk WorldGenerator::GenerateChunk(ChunkPos& chunkPos)
                     chunk.SetBlock(x, y, z, BlockId::Dirt);
                 }
                 else {
-                    float oreNoise = noise.GetNoise(static_cast<float>(chunkPos.x * Chunk::WIDTH + x), static_cast<float>(chunkPos.z * Chunk::WIDTH + z), 2.0f);
+                    float oreNoise = noise.GetNoise(static_cast<float>(cx * Chunk::WIDTH + x), static_cast<float>(cz * Chunk::WIDTH + z), 2.0f);
 
                     if (caveNoise > 0.7f && y < height - 10) { // Проверка наличия пещеры
                         continue;

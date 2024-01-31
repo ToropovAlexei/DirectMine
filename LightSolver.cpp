@@ -34,8 +34,7 @@ void LightSolver::Solve()
 		}
 		else
 		{
-			ChunkPos leftChunkPos = node.chunk->GetPos() + ChunkPos(-1, 0);
-			auto chunk = m_chunks.find(leftChunkPos);
+			auto chunk = m_chunks.find({node.chunk->GetX() - 1, node.chunk->GetZ()});
 			if (chunk != m_chunks.end())
 			{
 				TryAddLightRemovalNode(Chunk::LAST_BLOCK_IDX, node.y, node.z, lightLevel, chunk->second);
@@ -48,8 +47,7 @@ void LightSolver::Solve()
 		}
 		else
 		{
-			ChunkPos rightChunkPos = node.chunk->GetPos() + ChunkPos(1, 0);
-			auto chunk = m_chunks.find(rightChunkPos);
+			auto chunk = m_chunks.find({ node.chunk->GetX() + 1, node.chunk->GetZ() });
 			if (chunk != m_chunks.end())
 			{
 				TryAddLightRemovalNode(0, node.y, node.z, lightLevel, chunk->second);
@@ -62,8 +60,7 @@ void LightSolver::Solve()
 		}
 		else
 		{
-			ChunkPos frontChunkPos = node.chunk->GetPos() + ChunkPos(0, -1);
-			auto chunk = m_chunks.find(frontChunkPos);
+			auto chunk = m_chunks.find({ node.chunk->GetX(), node.chunk->GetZ() - 1 });
 			if (chunk != m_chunks.end())
 			{
 				TryAddLightRemovalNode(node.x, node.y, Chunk::LAST_BLOCK_IDX, lightLevel, chunk->second);
@@ -76,8 +73,7 @@ void LightSolver::Solve()
 		}
 		else
 		{
-			ChunkPos backChunkPos = node.chunk->GetPos() + ChunkPos(0, 1);
-			auto chunk = m_chunks.find(backChunkPos);
+			auto chunk = m_chunks.find({ node.chunk->GetX(), node.chunk->GetZ() + 1 });
 			if (chunk != m_chunks.end())
 			{
 				TryAddLightRemovalNode(node.x, node.y, 0, lightLevel, chunk->second);
@@ -113,8 +109,7 @@ void LightSolver::Solve()
 		}
 		else
 		{
-			ChunkPos leftChunkPos = node.chunk->GetPos() + ChunkPos(-1, 0);
-			auto chunk = m_chunks.find(leftChunkPos);
+			auto chunk = m_chunks.find({ node.chunk->GetX() - 1, node.chunk->GetZ() });
 			if (chunk != m_chunks.end())
 			{
 				TryAddLightNode(Chunk::LAST_BLOCK_IDX, node.y, node.z, nextVoxelLightlevel, chunk->second);
@@ -127,8 +122,7 @@ void LightSolver::Solve()
 		}
 		else
 		{
-			ChunkPos rightChunkPos = node.chunk->GetPos() + ChunkPos(1, 0);
-			auto chunk = m_chunks.find(rightChunkPos);
+			auto chunk = m_chunks.find({ node.chunk->GetX() + 1, node.chunk->GetZ() });
 			if (chunk != m_chunks.end())
 			{
 				TryAddLightNode(0, node.y, node.z, nextVoxelLightlevel, chunk->second);
@@ -141,8 +135,7 @@ void LightSolver::Solve()
 		}
 		else
 		{
-			ChunkPos frontChunkPos = node.chunk->GetPos() + ChunkPos(0, -1);
-			auto chunk = m_chunks.find(frontChunkPos);
+			auto chunk = m_chunks.find({ node.chunk->GetX(), node.chunk->GetZ() - 1 });
 			if (chunk != m_chunks.end())
 			{
 				TryAddLightNode(node.x, node.y, Chunk::LAST_BLOCK_IDX, nextVoxelLightlevel, chunk->second);
@@ -155,8 +148,7 @@ void LightSolver::Solve()
 		}
 		else
 		{
-			ChunkPos backChunkPos = node.chunk->GetPos() + ChunkPos(0, 1);
-			auto chunk = m_chunks.find(backChunkPos);
+			auto chunk = m_chunks.find({ node.chunk->GetX(), node.chunk->GetZ() + 1 });
 			if (chunk != m_chunks.end())
 			{
 				TryAddLightNode(node.x, node.y, 0, nextVoxelLightlevel, chunk->second);

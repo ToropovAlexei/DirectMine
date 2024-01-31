@@ -10,7 +10,7 @@
 class Chunk
 {
 public:
-	Chunk(ChunkPos& chunkPos);
+	Chunk(int x, int z);
 
 	static const int WIDTH = 16;
 	static const int SQ_WIDTH = WIDTH * WIDTH;
@@ -43,7 +43,8 @@ public:
 
 	inline Lightmap& GetLightmapRef() noexcept { return m_lightMap; };
 
-	inline ChunkPos& GetPos() noexcept { return m_worldPos; };
+	inline int GetX() const noexcept { return m_x; };
+	inline int GetZ() const noexcept { return m_z; };
 
 	inline std::vector<Vertex>& GetVertices() noexcept { return m_vertices; };
 	inline std::vector<UINT>& GetIndices() noexcept { return m_indices; };
@@ -63,6 +64,8 @@ private:
 	inline size_t GetIdxFromCoords(int x, int y, int z) const noexcept;
 
 private:
+	int m_x;
+	int m_z;
 	bool m_isModified = true;
 	bool m_shouldRender = false;
 	std::vector<ChunkBlock> m_blocks;
@@ -70,8 +73,6 @@ private:
 
 	std::vector<Vertex> m_vertices;
 	std::vector<UINT> m_indices;
-
-	ChunkPos m_worldPos;
 
 	Microsoft::WRL::ComPtr<ID3D11Buffer> m_vertexBuffer;
 	Microsoft::WRL::ComPtr<ID3D11Buffer> m_indexBuffer;

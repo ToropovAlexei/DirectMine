@@ -8,7 +8,7 @@ class WorldGenerator
 public:
 	WorldGenerator(BlockManager& m_blockManager);
 
-	Chunk GenerateChunk(ChunkPos& chunkPos);
+	Chunk GenerateChunk(int cx, int cz);
 
 private:
 	FastNoiseLite noise;

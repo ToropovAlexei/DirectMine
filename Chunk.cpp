@@ -5,8 +5,8 @@
 #include "MathUtils.h"
 #include "Lightmap.h"
 
-Chunk::Chunk(ChunkPos& worldPos) :
-    m_worldPos(worldPos)
+Chunk::Chunk(int x, int z) :
+    m_x(x), m_z(z)
 {
     m_blocks.resize(static_cast<size_t>(SQ_WIDTH));
 }
@@ -200,7 +200,7 @@ void Chunk::UpdateMeshWithoutBuffers(BlockManager& blockManager,
                     continue;
                 }
                 WorldPos blockChunkPos = WorldPos(x, y, z);
-                WorldPos pos = WorldPos(x + m_worldPos.x * Chunk::WIDTH, y, z + m_worldPos.z * Chunk::WIDTH);
+                WorldPos pos = WorldPos(x + m_x * Chunk::WIDTH, y, z + m_z * Chunk::WIDTH);
 
                 Block& block = blockManager.GetBlockById(blockId);
                 DirectX::XMFLOAT3 blockPos = DirectX::XMFLOAT3(static_cast<float>(pos.x), static_cast<float>(pos.y), static_cast<float>(pos.z));
