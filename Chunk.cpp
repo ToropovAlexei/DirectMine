@@ -200,7 +200,7 @@ void Chunk::UpdateMeshWithoutBuffers(BlockManager& blockManager,
                     continue;
                 }
                 WorldPos blockChunkPos = WorldPos(x, y, z);
-                WorldPos pos = blockChunkPos + m_worldPos;
+                WorldPos pos = WorldPos(x + m_worldPos.x * Chunk::WIDTH, y, z + m_worldPos.z * Chunk::WIDTH);
 
                 Block& block = blockManager.GetBlockById(blockId);
                 DirectX::XMFLOAT3 blockPos = DirectX::XMFLOAT3(static_cast<float>(pos.x), static_cast<float>(pos.y), static_cast<float>(pos.z));

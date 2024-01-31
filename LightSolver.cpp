@@ -34,7 +34,7 @@ void LightSolver::Solve()
 		}
 		else
 		{
-			ChunkPos leftChunkPos = node.chunk->GetPos() + ChunkPos(-Chunk::WIDTH, 0);
+			ChunkPos leftChunkPos = node.chunk->GetPos() + ChunkPos(-1, 0);
 			auto chunk = m_chunks.find(leftChunkPos);
 			if (chunk != m_chunks.end())
 			{
@@ -48,7 +48,7 @@ void LightSolver::Solve()
 		}
 		else
 		{
-			ChunkPos rightChunkPos = node.chunk->GetPos() + ChunkPos(Chunk::WIDTH, 0);
+			ChunkPos rightChunkPos = node.chunk->GetPos() + ChunkPos(1, 0);
 			auto chunk = m_chunks.find(rightChunkPos);
 			if (chunk != m_chunks.end())
 			{
@@ -62,7 +62,7 @@ void LightSolver::Solve()
 		}
 		else
 		{
-			ChunkPos frontChunkPos = node.chunk->GetPos() + ChunkPos(0, -Chunk::WIDTH);
+			ChunkPos frontChunkPos = node.chunk->GetPos() + ChunkPos(0, -1);
 			auto chunk = m_chunks.find(frontChunkPos);
 			if (chunk != m_chunks.end())
 			{
@@ -76,7 +76,7 @@ void LightSolver::Solve()
 		}
 		else
 		{
-			ChunkPos backChunkPos = node.chunk->GetPos() + ChunkPos(0, Chunk::WIDTH);
+			ChunkPos backChunkPos = node.chunk->GetPos() + ChunkPos(0, 1);
 			auto chunk = m_chunks.find(backChunkPos);
 			if (chunk != m_chunks.end())
 			{
@@ -113,7 +113,7 @@ void LightSolver::Solve()
 		}
 		else
 		{
-			ChunkPos leftChunkPos = node.chunk->GetPos() + ChunkPos(-Chunk::WIDTH, 0);
+			ChunkPos leftChunkPos = node.chunk->GetPos() + ChunkPos(-1, 0);
 			auto chunk = m_chunks.find(leftChunkPos);
 			if (chunk != m_chunks.end())
 			{
@@ -127,7 +127,7 @@ void LightSolver::Solve()
 		}
 		else
 		{
-			ChunkPos rightChunkPos = node.chunk->GetPos() + ChunkPos(Chunk::WIDTH, 0);
+			ChunkPos rightChunkPos = node.chunk->GetPos() + ChunkPos(1, 0);
 			auto chunk = m_chunks.find(rightChunkPos);
 			if (chunk != m_chunks.end())
 			{
@@ -141,7 +141,7 @@ void LightSolver::Solve()
 		}
 		else
 		{
-			ChunkPos frontChunkPos = node.chunk->GetPos() + ChunkPos(0, -Chunk::WIDTH);
+			ChunkPos frontChunkPos = node.chunk->GetPos() + ChunkPos(0, -1);
 			auto chunk = m_chunks.find(frontChunkPos);
 			if (chunk != m_chunks.end())
 			{
@@ -155,7 +155,7 @@ void LightSolver::Solve()
 		}
 		else
 		{
-			ChunkPos backChunkPos = node.chunk->GetPos() + ChunkPos(0, Chunk::WIDTH);
+			ChunkPos backChunkPos = node.chunk->GetPos() + ChunkPos(0, 1);
 			auto chunk = m_chunks.find(backChunkPos);
 			if (chunk != m_chunks.end())
 			{
