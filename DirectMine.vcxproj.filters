@@ -268,4 +268,12 @@
   <ItemGroup>
     <None Include="packages.config" />
   </ItemGroup>
+  <ItemGroup>
+    <CopyFileToFolders Include="libs\FastNoise2\bin\FastNoise.dll">
+      <Filter>libs</Filter>
+    </CopyFileToFolders>
+    <CopyFileToFolders Include="libs\FastNoise2\bin\FastNoiseD.dll">
+      <Filter>libs</Filter>
+    </CopyFileToFolders>
+  </ItemGroup>
 </Project>
