@@ -10,7 +10,7 @@ class ChunkRenderer
 public:
 	ChunkRenderer(std::unique_ptr<DX::DeviceResources>& deviceResources);
 
-    void RenderChunks(std::unordered_map<ChunkPos, std::shared_ptr<Chunk>, ChunkPosHash>& chunks);
+    void RenderChunks(std::vector<std::shared_ptr<Chunk>>& chunks);
 
 private:
 	void BuildInputLayout();

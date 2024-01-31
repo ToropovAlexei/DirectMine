@@ -1,14 +1,15 @@
 #include "pch.h"
 #include "Lighting.h"
+#include "ChunksManager.h"
 
-Lighting::Lighting(std::unordered_map<ChunkPos, std::shared_ptr<Chunk>, ChunkPosHash>& chunks, BlockManager& blockManager) :
-	m_chunks(chunks),
+Lighting::Lighting(ChunksManager* chunksManager, BlockManager& blockManager) :
+	m_chunksManager(chunksManager),
 	m_blockManager(blockManager)
 {
-	solverS = std::make_unique<LightSolver>(m_chunks, m_blockManager, 3);
-	solverR = std::make_unique<LightSolver>(m_chunks, m_blockManager, 2);
-	solverG = std::make_unique<LightSolver>(m_chunks, m_blockManager, 1);
-	solverB = std::make_unique<LightSolver>(m_chunks, m_blockManager, 0);
+	solverS = std::make_unique<LightSolver>(chunksManager, m_blockManager, 3);
+	solverR = std::make_unique<LightSolver>(chunksManager, m_blockManager, 2);
+	solverG = std::make_unique<LightSolver>(chunksManager, m_blockManager, 1);
+	solverB = std::make_unique<LightSolver>(chunksManager, m_blockManager, 0);
 }
 
 void Lighting::HandleBlockSet(int x, int y, int z, std::shared_ptr<Chunk> chunk, ChunkBlock block)

@@ -8,13 +8,13 @@
 
 class ChunksManager
 {
+friend LightSolver;
 public:
 	ChunksManager(std::unique_ptr<DX::DeviceResources>& deviceResources, DirectX::XMFLOAT3& playerPos);
 	~ChunksManager();
 
-	void ForEach(const std::function<void(std::pair<ChunkPos, std::shared_ptr<Chunk>>)> cb);
-	void RemoveChunk(const ChunkPos& chunkPos);
-	void InsertChunk(const ChunkPos& chunkPos, Chunk& chunk);
+	void RemoveChunk(int x, int z);
+	void InsertChunk(Chunk& chunk);
 	void UpdatePlayerPos(DirectX::XMFLOAT3& playerPos) noexcept;
 	void RenderChunks();
 	void RemoveBlockAt(WorldPos& worldPos);
@@ -27,7 +27,8 @@ private:
 	void LoadChunks();
 	void CalculateLighting();
 	void UpdateModifiedChunks();
-	std::shared_ptr<Chunk> GetChunkAt(ChunkPos& chunkPos);
+	std::shared_ptr<Chunk> GetChunkAt(int x, int z);
+	inline size_t GetChunkIdx(int x, int z);
 
 private:
 #ifdef NDEBUG
@@ -39,8 +40,11 @@ private:
 	static const int maxAsyncChunksLoading = 64;
 	static const int maxAsyncChunksToUpdate = 32;
 #endif
+	static const int chunksArrSideSize = loadDistance * 2 + 1;
+	int m_centerX;
+	int m_centerZ;
 	DirectX::XMFLOAT3 m_playerPos;
-	std::unordered_map<ChunkPos, std::shared_ptr<Chunk>, ChunkPosHash> m_chunks;
+	std::vector<std::shared_ptr<Chunk>> m_chunks;
 	std::unique_ptr<DX::DeviceResources>& m_deviceResources;
 	std::unique_ptr<WorldGenerator> m_worldGenerator;
 	std::unique_ptr<ChunkRenderer> m_chunkRenderer;

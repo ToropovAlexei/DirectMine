@@ -5,10 +5,12 @@
 #include "LightSolver.h"
 #include "Chunk.h"
 
+class ChunksManager;
+
 class Lighting
 {
 public:
-	Lighting(std::unordered_map<ChunkPos, std::shared_ptr<Chunk>, ChunkPosHash>& chunks, BlockManager& blockManager);
+	Lighting(ChunksManager* chunksManager, BlockManager& blockManager);
 
 	void HandleBlockSet(int x, int y, int z, std::shared_ptr<Chunk> chunk, ChunkBlock block);
 	void BuildSunlight(std::shared_ptr<Chunk> chunk);
@@ -20,6 +22,6 @@ public:
 	std::unique_ptr<LightSolver> solverB;
 
 private:
-	std::unordered_map<ChunkPos, std::shared_ptr<Chunk>, ChunkPosHash>& m_chunks;
+	ChunksManager* m_chunksManager;
 	BlockManager& m_blockManager;
 };
