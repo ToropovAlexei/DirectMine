@@ -1,6 +1,5 @@
 #include "pch.h"
 #include "ChunksManager.h"
-#include <tbb/parallel_for.h>
 #include "MathUtils.h"
 
 ChunksManager::ChunksManager(std::unique_ptr<DX::DeviceResources>& deviceResources, DirectX::XMFLOAT3& playerPos) :
@@ -132,11 +131,6 @@ void ChunksManager::PlaceBlockAt(WorldPos& worldPos, ChunkBlock block)
 	chunk->SetBlock(blockX, worldPos.y, blockZ, block);
 	m_lighting->HandleBlockSet(blockX, worldPos.y, blockZ, chunk, block);
 	chunk->SetIsModified(true);
-	// Возникает какой-то глитч с отображением чанка
-	//it->second->UpdateMeshWithoutBuffers(m_blockManager,
-	//	leftChunk == m_chunks.end() ? nullptr : leftChunk->second, rightChunk == m_chunks.end() ? nullptr : rightChunk->second,
-	//	frontChunk == m_chunks.end() ? nullptr : frontChunk->second, backChunk == m_chunks.end() ? nullptr : backChunk->second);
-	//it->second->UpdateBuffers(m_deviceResources->GetD3DDevice());
 
 	if (blockX == 0)
 	{
@@ -249,12 +243,9 @@ void ChunksManager::LoadChunks()
 	}
 	lock.unlock();
 
-	tbb::parallel_for(tbb::blocked_range<size_t>(0, chunksToLoad.size()),
-		[this, &chunksToLoad](const tbb::blocked_range<size_t>& range) {
-			for (size_t i = range.begin(); i != range.end(); ++i) {
-				auto chunk = m_worldGenerator->GenerateChunk(chunksToLoad[i].first, chunksToLoad[i].second);
-				InsertChunk(chunk);
-			}
+	std::for_each(std::execution::par, chunksToLoad.begin(), chunksToLoad.end(), [this](std::pair<int, int>& coords) {
+		auto chunk = m_worldGenerator->GenerateChunk(coords.first, coords.second);
+		InsertChunk(chunk);
 		});
 }
 
@@ -334,20 +325,6 @@ void ChunksManager::UpdateModifiedChunks()
 			leftChunk, rightChunk,
 			frontChunk, backChunk);
 		});
-
-	//tbb::parallel_for(tbb::blocked_range<size_t>(0, modifiedChunks.size()),
-	//	[this, &modifiedChunks](const tbb::blocked_range<size_t>& range) {
-	//		for (size_t i = range.begin(); i != range.end(); ++i) {
-	//			ChunkPos chunkPos = m_chunks[modifiedChunks[i]]->GetPos();
-	//			auto leftChunk = m_chunks.find(chunkPos + ChunkPos(-Chunk::WIDTH, 0));
-	//			auto rightChunk = m_chunks.find(chunkPos + ChunkPos(Chunk::WIDTH, 0));
-	//			auto frontChunk = m_chunks.find(chunkPos + ChunkPos(0, -Chunk::WIDTH));
-	//			auto backChunk = m_chunks.find(chunkPos + ChunkPos(0, Chunk::WIDTH));
-	//			m_chunks[modifiedChunks[i]]->UpdateMeshWithoutBuffers(m_blockManager, 
-	//				leftChunk == m_chunks.end() ? nullptr : leftChunk->second, rightChunk == m_chunks.end() ? nullptr : rightChunk->second,
-	//				frontChunk == m_chunks.end() ? nullptr : frontChunk->second, backChunk == m_chunks.end() ? nullptr : backChunk->second);
-	//		}
-	//	});
 
 	for (auto& chunk : chunksToUpdate)
 	{
