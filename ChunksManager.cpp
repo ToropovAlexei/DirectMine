@@ -11,8 +11,8 @@ ChunksManager::ChunksManager(std::unique_ptr<DX::DeviceResources>& deviceResourc
 	m_blockManager.LoadBlocks();
 	m_worldGenerator = std::make_unique<WorldGenerator>(m_blockManager);
 	m_chunkRenderer = std::make_unique<ChunkRenderer>(m_deviceResources);
-	m_centerX = static_cast<int>(playerPos.x) / Chunk::WIDTH;
-	m_centerZ = static_cast<int>(playerPos.z) / Chunk::WIDTH;
+	m_centerX = ToChunkPos(static_cast<int>(playerPos.x));
+	m_centerZ = ToChunkPos(static_cast<int>(playerPos.z));
 	m_chunks.resize(static_cast<size_t>(chunksArrSideSize * chunksArrSideSize));
 
 	m_thread = std::thread([this]() {
@@ -68,8 +68,8 @@ void ChunksManager::UpdatePlayerPos(DirectX::XMFLOAT3& playerPos) noexcept
 {
 	std::unique_lock<std::shared_mutex> lock(m_mutex);
 	m_playerPos = playerPos;
-	int newX = static_cast<int>(playerPos.x) / Chunk::WIDTH;
-	int newZ = static_cast<int>(playerPos.z) / Chunk::WIDTH;
+	int newX = ToChunkPos(static_cast<int>(playerPos.x));
+	int newZ = ToChunkPos(static_cast<int>(playerPos.z));
 	int dX = m_centerX - newX;
 	int dZ = m_centerZ - newZ;
 	m_centerX = newX;
@@ -115,8 +115,8 @@ void ChunksManager::RemoveBlockAt(WorldPos& worldPos)
 void ChunksManager::PlaceBlockAt(WorldPos& worldPos, ChunkBlock block)
 {
 	std::unique_lock<std::shared_mutex> lock(m_mutex);
-	int xPos = worldPos.x / Chunk::WIDTH;
-	int zPos = worldPos.z / Chunk::WIDTH;
+	int xPos = ToChunkPos(worldPos.x);
+	int zPos = ToChunkPos(worldPos.z);
 	size_t chunkIdx = GetChunkIdx(xPos, zPos);
 	if (chunkIdx >= m_chunks.size())
 	{
@@ -175,8 +175,8 @@ void ChunksManager::PlaceBlockAt(WorldPos& worldPos, ChunkBlock block)
 bool ChunksManager::CheckBlockCollision(WorldPos& worldPos)
 {
 	std::shared_lock<std::shared_mutex> lock(m_mutex);
-	int xPos = worldPos.x / Chunk::WIDTH;
-	int zPos = worldPos.z / Chunk::WIDTH;
+	int xPos = ToChunkPos(worldPos.x);
+	int zPos = ToChunkPos(worldPos.z);
 	auto chunk = GetChunkAt(xPos, zPos);
 	if (!chunk)
 	{

@@ -20,6 +20,14 @@ public:
 	void RemoveBlockAt(WorldPos& worldPos);
 	void PlaceBlockAt(WorldPos& worldPos, ChunkBlock block);
 	bool CheckBlockCollision(WorldPos& worldPos);
+	inline int ToChunkPos(int x) const noexcept
+	{
+		if (x >= 0)
+		{
+			return x / Chunk::WIDTH;
+		}
+		return (x - Chunk::WIDTH + 1) / Chunk::WIDTH;
+	};
 
 private:
 	void AsyncProcessChunks();

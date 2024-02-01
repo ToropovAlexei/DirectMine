@@ -171,10 +171,17 @@ std::optional<std::pair<WorldPos, ChunkBlock::BlockDirection>> World::Raycast()
 	const float distanceStep = DirectX::XMVectorGetX(DirectX::XMVector3Length(step));
 	float maxDistance = 10.0f;
 
+	WorldPos prevPos = {INT_MIN, INT_MIN, INT_MIN};
 	for (float distance = 0.0f; distance < maxDistance; distance += distanceStep) {
 		WorldPos blockPos = WorldPos(static_cast<int>(std::floor(DirectX::XMVectorGetX(currentPosition))),
 			static_cast<int>(std::floor(DirectX::XMVectorGetY(currentPosition))),
 				static_cast<int>(std::floor(DirectX::XMVectorGetZ(currentPosition))));
+		if (prevPos == blockPos)
+		{
+			currentPosition = DirectX::XMVectorAdd(currentPosition, step);
+			continue;
+		}
+		prevPos = blockPos;
 		if (m_chunksManager->CheckBlockCollision(blockPos)) {
 			DirectX::XMFLOAT3 collisionPoint;
 			DirectX::XMStoreFloat3(&collisionPoint, currentPosition);

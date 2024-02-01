@@ -9,6 +9,8 @@ Chunk::Chunk(int x, int z) :
     m_x(x), m_z(z)
 {
     m_blocks.resize(static_cast<size_t>(SQ_WIDTH));
+    // Среднее значение генератора мира = 64
+    m_blocks.reserve(SQ_WIDTH * 64);
 }
 
 void Chunk::SetBlock(int x, int y, int z, ChunkBlock block) noexcept
@@ -186,6 +188,9 @@ void Chunk::UpdateMeshWithoutBuffers(BlockManager& blockManager,
 {
     m_vertices.clear();
     m_indices.clear();
+    // Эти числа взяты из среднего значения в чанках
+    m_vertices.reserve(20000);
+    m_indices.reserve(20000);
     const int maxY = static_cast<int>(m_blocks.size()) / SQ_WIDTH;
     for (int y = 0; y < maxY; y++)
     {
@@ -273,6 +278,8 @@ void Chunk::UpdateMeshWithoutBuffers(BlockManager& blockManager,
             }
         }
     }
+    m_vertices.shrink_to_fit();
+    m_indices.shrink_to_fit();
 }
 
 inline bool Chunk::HasBlockAt(int x, int y, int z) const noexcept
