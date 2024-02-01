@@ -31,11 +31,11 @@ private:
 
 private:
 #ifdef NDEBUG
-	static const int loadDistance = 50;
+	static const int loadDistance = 51;
 	static const int maxAsyncChunksLoading = 64;
 	static const int maxAsyncChunksToUpdate = 32;
 #else
-	static const int loadDistance = 50;
+	static const int loadDistance = 51;
 	static const int maxAsyncChunksLoading = 64;
 	static const int maxAsyncChunksToUpdate = 32;
 #endif
