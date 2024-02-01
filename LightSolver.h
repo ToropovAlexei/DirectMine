@@ -4,6 +4,7 @@
 #include "WorldPos.hpp"
 
 class Chunk;
+class ChunksManager;
 
 struct LightNode
 {
@@ -32,7 +33,7 @@ struct LightRemovalNode {
 class LightSolver
 {
 public:
-	LightSolver(std::unordered_map<ChunkPos, std::shared_ptr<Chunk>, ChunkPosHash>& m_chunks, BlockManager& blockManager, int channel);
+	LightSolver(ChunksManager* chunksManager, BlockManager& blockManager, int channel);
 
 	void Add(LightNode node);
 	void Remove(LightRemovalNode node);
@@ -41,10 +42,9 @@ public:
 private:
 	inline void TryAddLightNode(int x, int y, int z, int lightLevel, std::shared_ptr<Chunk> chunk);
 	inline void TryAddLightRemovalNode(int x, int y, int z, int lightLevel, std::shared_ptr<Chunk> chunk);
-	inline std::shared_ptr<Chunk> GetChunkAt(ChunkPos pos);
 
 private:
-	std::unordered_map<ChunkPos, std::shared_ptr<Chunk>, ChunkPosHash>& m_chunks;
+	ChunksManager* m_chunksManager;
 	BlockManager& m_blockManager;
 	int m_channel;
 	std::queue<LightNode> m_addQueue;

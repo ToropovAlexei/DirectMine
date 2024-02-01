@@ -1,10 +1,11 @@
 #include "pch.h"
 #include "LightSolver.h"
 #include "Chunk.h"
+#include "ChunksManager.h"
 
-LightSolver::LightSolver(std::unordered_map<ChunkPos, std::shared_ptr<Chunk>, ChunkPosHash>& chunks, BlockManager& blockManager, int channel):
+LightSolver::LightSolver(ChunksManager* chunksManager, BlockManager& blockManager, int channel):
 	m_blockManager(blockManager),
-	m_chunks(chunks),
+	m_chunksManager(chunksManager),
 	m_channel(channel)
 {
 }
@@ -34,10 +35,10 @@ void LightSolver::Solve()
 		}
 		else
 		{
-			auto chunk = m_chunks.find({node.chunk->GetX() - 1, node.chunk->GetZ()});
-			if (chunk != m_chunks.end())
+			auto chunk = m_chunksManager->GetChunkAt(node.chunk->GetX() - 1, node.chunk->GetZ());
+			if (chunk)
 			{
-				TryAddLightRemovalNode(Chunk::LAST_BLOCK_IDX, node.y, node.z, lightLevel, chunk->second);
+				TryAddLightRemovalNode(Chunk::LAST_BLOCK_IDX, node.y, node.z, lightLevel, chunk);
 			}
 		}
 		// Check right voxel
@@ -47,10 +48,10 @@ void LightSolver::Solve()
 		}
 		else
 		{
-			auto chunk = m_chunks.find({ node.chunk->GetX() + 1, node.chunk->GetZ() });
-			if (chunk != m_chunks.end())
+			auto chunk = m_chunksManager->GetChunkAt(node.chunk->GetX() + 1, node.chunk->GetZ());
+			if (chunk)
 			{
-				TryAddLightRemovalNode(0, node.y, node.z, lightLevel, chunk->second);
+				TryAddLightRemovalNode(0, node.y, node.z, lightLevel, chunk);
 			}
 		}
 		// Check front voxel
@@ -60,10 +61,10 @@ void LightSolver::Solve()
 		}
 		else
 		{
-			auto chunk = m_chunks.find({ node.chunk->GetX(), node.chunk->GetZ() - 1 });
-			if (chunk != m_chunks.end())
+			auto chunk = m_chunksManager->GetChunkAt(node.chunk->GetX(), node.chunk->GetZ() - 1);
+			if (chunk)
 			{
-				TryAddLightRemovalNode(node.x, node.y, Chunk::LAST_BLOCK_IDX, lightLevel, chunk->second);
+				TryAddLightRemovalNode(node.x, node.y, Chunk::LAST_BLOCK_IDX, lightLevel, chunk);
 			}
 		}
 		// Check back voxel
@@ -73,10 +74,10 @@ void LightSolver::Solve()
 		}
 		else
 		{
-			auto chunk = m_chunks.find({ node.chunk->GetX(), node.chunk->GetZ() + 1 });
-			if (chunk != m_chunks.end())
+			auto chunk = m_chunksManager->GetChunkAt(node.chunk->GetX(), node.chunk->GetZ() + 1);
+			if (chunk)
 			{
-				TryAddLightRemovalNode(node.x, node.y, 0, lightLevel, chunk->second);
+				TryAddLightRemovalNode(node.x, node.y, 0, lightLevel, chunk);
 			}
 		}
 		// Check top voxel
@@ -109,10 +110,10 @@ void LightSolver::Solve()
 		}
 		else
 		{
-			auto chunk = m_chunks.find({ node.chunk->GetX() - 1, node.chunk->GetZ() });
-			if (chunk != m_chunks.end())
+			auto chunk = m_chunksManager->GetChunkAt(node.chunk->GetX() - 1, node.chunk->GetZ());
+			if (chunk)
 			{
-				TryAddLightNode(Chunk::LAST_BLOCK_IDX, node.y, node.z, nextVoxelLightlevel, chunk->second);
+				TryAddLightNode(Chunk::LAST_BLOCK_IDX, node.y, node.z, nextVoxelLightlevel, chunk);
 			}
 		}
 		// Check right voxel
@@ -122,10 +123,10 @@ void LightSolver::Solve()
 		}
 		else
 		{
-			auto chunk = m_chunks.find({ node.chunk->GetX() + 1, node.chunk->GetZ() });
-			if (chunk != m_chunks.end())
+			auto chunk = m_chunksManager->GetChunkAt(node.chunk->GetX() + 1, node.chunk->GetZ());
+			if (chunk)
 			{
-				TryAddLightNode(0, node.y, node.z, nextVoxelLightlevel, chunk->second);
+				TryAddLightNode(0, node.y, node.z, nextVoxelLightlevel, chunk);
 			}
 		}
 		// Check front voxel
@@ -135,10 +136,10 @@ void LightSolver::Solve()
 		}
 		else
 		{
-			auto chunk = m_chunks.find({ node.chunk->GetX(), node.chunk->GetZ() - 1 });
-			if (chunk != m_chunks.end())
+			auto chunk = m_chunksManager->GetChunkAt(node.chunk->GetX(), node.chunk->GetZ() - 1);
+			if (chunk)
 			{
-				TryAddLightNode(node.x, node.y, Chunk::LAST_BLOCK_IDX, nextVoxelLightlevel, chunk->second);
+				TryAddLightNode(node.x, node.y, Chunk::LAST_BLOCK_IDX, nextVoxelLightlevel, chunk);
 			}
 		}
 		// Check back voxel
@@ -148,10 +149,10 @@ void LightSolver::Solve()
 		}
 		else
 		{
-			auto chunk = m_chunks.find({ node.chunk->GetX(), node.chunk->GetZ() + 1 });
-			if (chunk != m_chunks.end())
+			auto chunk = m_chunksManager->GetChunkAt(node.chunk->GetX(), node.chunk->GetZ() + 1);
+			if (chunk)
 			{
-				TryAddLightNode(node.x, node.y, 0, nextVoxelLightlevel, chunk->second);
+				TryAddLightNode(node.x, node.y, 0, nextVoxelLightlevel, chunk);
 			}
 		}
 		// Check top voxel
@@ -194,14 +195,4 @@ inline void LightSolver::TryAddLightRemovalNode(int x, int y, int z, int lightLe
 	{
 		m_addQueue.push({ x, y, z, chunk });
 	}
-}
-
-inline std::shared_ptr<Chunk> LightSolver::GetChunkAt(ChunkPos pos)
-{
-	auto chunk = m_chunks.find(pos);
-	if (chunk != m_chunks.end())
-	{
-		return chunk->second;
-	}
-	return nullptr;
 }

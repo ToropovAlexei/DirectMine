@@ -1,6 +1,5 @@
 #include "pch.h"
 #include "ChunksManager.h"
-#include <tbb/parallel_for.h>
 #include "MathUtils.h"
 
 ChunksManager::ChunksManager(std::unique_ptr<DX::DeviceResources>& deviceResources, DirectX::XMFLOAT3& playerPos) :
@@ -11,10 +10,15 @@ ChunksManager::ChunksManager(std::unique_ptr<DX::DeviceResources>& deviceResourc
 	m_blockManager.LoadBlocks();
 	m_worldGenerator = std::make_unique<WorldGenerator>(m_blockManager);
 	m_chunkRenderer = std::make_unique<ChunkRenderer>(m_deviceResources);
+	m_centerX = ToChunkPos(static_cast<int>(playerPos.x));
+	m_centerZ = ToChunkPos(static_cast<int>(playerPos.z));
+	m_chunks.resize(static_cast<size_t>(chunksArrSideSize * chunksArrSideSize));
+
 	m_thread = std::thread([this]() {
 		AsyncProcessChunks(); 
 		});
-	m_lighting = std::make_unique<Lighting>(m_chunks, m_blockManager);
+
+	m_lighting = std::make_unique<Lighting>(this, m_blockManager);
 }
 
 ChunksManager::~ChunksManager()
@@ -23,41 +27,77 @@ ChunksManager::~ChunksManager()
 	m_thread.join();
 }
 
-void ChunksManager::ForEach(const std::function<void(std::pair<ChunkPos, std::shared_ptr<Chunk>>)> cb)
+void ChunksManager::RemoveChunk(int x, int z)
 {
 	std::unique_lock<std::shared_mutex> lock(m_mutex);
-	std::for_each(m_chunks.begin(), m_chunks.end(), cb);
-}
-
-void ChunksManager::RemoveChunk(const ChunkPos& chunkPos)
-{
-	std::unique_lock<std::shared_mutex> lock(m_mutex);
-	m_chunks.erase(chunkPos);
-}
-
-void ChunksManager::InsertChunk(const ChunkPos& chunkPos, Chunk& chunk)
-{
-	std::unique_lock<std::shared_mutex> lock(m_mutex);
-	m_chunks.insert({ chunkPos, std::make_shared<Chunk>(chunk) });
-	ChunkPos leftChunk = chunkPos - ChunkPos(1, 0);
-	ChunkPos rightChunk = chunkPos + ChunkPos(1, 0);
-	ChunkPos frontChunk = chunkPos - ChunkPos(0, 1);
-	ChunkPos backChunk = chunkPos + ChunkPos(0, 1);
-	std::array<ChunkPos, 4> chunks = {leftChunk, rightChunk, frontChunk, backChunk};
-	for (auto& nextChunkPos : chunks)
+	size_t chunkIdx = GetChunkIdx(x, z);
+	m_chunks[chunkIdx] = nullptr;
+	std::array<size_t, 4> nextChunks = { chunkIdx - 1, chunkIdx + 1, chunkIdx + chunksArrSideSize, chunkIdx - chunksArrSideSize };
+	const size_t chunksCount = m_chunks.size();
+	for (size_t nextChunkIdx : nextChunks)
 	{
-		auto it = m_chunks.find(nextChunkPos);
-		if (it == m_chunks.end())
+		if (nextChunkIdx < chunksCount && m_chunks[nextChunkIdx])
 		{
-			continue;
+			m_chunks[nextChunkIdx]->SetIsModified(true);
 		}
-		it->second->SetIsModified(true);
+	}
+}
+
+void ChunksManager::InsertChunk(Chunk& chunk)
+{
+	std::unique_lock<std::shared_mutex> lock(m_mutex);
+	size_t chunkIdx = GetChunkIdx(chunk.GetX(), chunk.GetZ());
+	if (chunkIdx >= m_chunks.size())
+	{
+		return;
+	}
+	m_chunks[chunkIdx] = std::make_shared<Chunk>(chunk);
+	std::array<size_t, 4> nextChunks = { chunkIdx - 1, chunkIdx + 1, chunkIdx + chunksArrSideSize, chunkIdx - chunksArrSideSize };
+	const size_t chunksCount = m_chunks.size();
+	for (size_t nextChunkIdx : nextChunks)
+	{
+		if (nextChunkIdx < chunksCount && m_chunks[nextChunkIdx])
+		{
+			m_chunks[nextChunkIdx]->SetIsModified(true);
+		}
 	}
 }
 
 void ChunksManager::UpdatePlayerPos(DirectX::XMFLOAT3& playerPos) noexcept
 {
+	std::unique_lock<std::shared_mutex> lock(m_mutex);
 	m_playerPos = playerPos;
+	int newX = ToChunkPos(static_cast<int>(playerPos.x));
+	int newZ = ToChunkPos(static_cast<int>(playerPos.z));
+	int dX = m_centerX - newX;
+	int dZ = m_centerZ - newZ;
+	m_centerX = newX;
+	m_centerZ = newZ;
+	if (dX || dZ)
+	{
+		std::vector<std::shared_ptr<Chunk>> newChunks(m_chunks.size());
+		int minX = std::max(0, -dX);
+		int maxX = std::min(chunksArrSideSize, chunksArrSideSize - dX);
+		size_t zIdx = std::max(0, -dZ) * chunksArrSideSize;
+		for (int z = std::max(0, -dZ); z < std::min(chunksArrSideSize, chunksArrSideSize - dZ); z++)
+		{
+			size_t zOffset = (z + dZ) * chunksArrSideSize;
+			for (int x = minX; x < maxX; x++)
+			{
+				size_t newIdx = static_cast<size_t>(x + dX + zOffset);
+				if (newIdx < m_chunks.size())
+				{
+					newChunks[newIdx] = m_chunks[zIdx + static_cast<size_t>(x)];
+					//if (newChunks[newIdx] && ((z + dZ) == 0 || (z + dZ) == chunksArrSideSize - 1 || (x + dX) == 0 || (x + dX) == chunksArrSideSize - 1))
+					//{
+					//	newChunks[newIdx]->SetIsModified(true);
+					//}
+				}
+			}
+			zIdx += static_cast<size_t>(chunksArrSideSize);
+		}
+		std::swap(newChunks, m_chunks);
+	}
 }
 
 void ChunksManager::RenderChunks()
@@ -74,59 +114,54 @@ void ChunksManager::RemoveBlockAt(WorldPos& worldPos)
 void ChunksManager::PlaceBlockAt(WorldPos& worldPos, ChunkBlock block)
 {
 	std::unique_lock<std::shared_mutex> lock(m_mutex);
-	int xPos = worldPos.x / Chunk::WIDTH;
-	int zPos = worldPos.z / Chunk::WIDTH;
-	ChunkPos chunkPos = ChunkPos(xPos, zPos);
-	auto it = m_chunks.find(chunkPos);
-	if (it == m_chunks.end())
+	int xPos = ToChunkPos(worldPos.x);
+	int zPos = ToChunkPos(worldPos.z);
+	size_t chunkIdx = GetChunkIdx(xPos, zPos);
+	if (chunkIdx >= m_chunks.size())
+	{
+		return;
+	}
+	auto& chunk = m_chunks[chunkIdx];
+	if (!chunk)
 	{
 		return;
 	}
 	int blockX = worldPos.x - xPos * Chunk::WIDTH;
 	int blockZ = worldPos.z - zPos * Chunk::WIDTH;
-	it->second->SetBlock(blockX, worldPos.y, blockZ, block);
-	m_lighting->HandleBlockSet(blockX, worldPos.y, blockZ, it->second, block);
-	it->second->SetIsModified(true);
-	// Возникает какой-то глитч с отображением чанка
-	//it->second->UpdateMeshWithoutBuffers(m_blockManager,
-	//	leftChunk == m_chunks.end() ? nullptr : leftChunk->second, rightChunk == m_chunks.end() ? nullptr : rightChunk->second,
-	//	frontChunk == m_chunks.end() ? nullptr : frontChunk->second, backChunk == m_chunks.end() ? nullptr : backChunk->second);
-	//it->second->UpdateBuffers(m_deviceResources->GetD3DDevice());
+	chunk->SetBlock(blockX, worldPos.y, blockZ, block);
+	m_lighting->HandleBlockSet(blockX, worldPos.y, blockZ, chunk, block);
+	chunk->SetIsModified(true);
 
 	if (blockX == 0)
 	{
-		ChunkPos leftChunk = chunkPos - ChunkPos(1, 0);
-		auto chunk = GetChunkAt(leftChunk);
-		if (chunk != nullptr)
+		size_t idx = chunkIdx - 1;
+		if (idx < m_chunks.size() && m_chunks[idx])
 		{
-			chunk->SetIsModified(true);
+			m_chunks[idx]->SetIsModified(true);
 		}
 	}
 	if (blockX == Chunk::LAST_BLOCK_IDX)
 	{
-		ChunkPos rightChunk = chunkPos + ChunkPos(1, 0);
-		auto chunk = GetChunkAt(rightChunk);
-		if (chunk != nullptr)
+		size_t idx = chunkIdx + 1;
+		if (idx < m_chunks.size() && m_chunks[idx])
 		{
-			chunk->SetIsModified(true);
+			m_chunks[idx]->SetIsModified(true);
 		}
 	}
 	if (blockZ == 0)
 	{
-		ChunkPos frontChunk = chunkPos - ChunkPos(0, 1);
-		auto chunk = GetChunkAt(frontChunk);
-		if (chunk != nullptr)
+		size_t idx = chunkIdx - chunksArrSideSize;
+		if (idx < m_chunks.size() && m_chunks[idx])
 		{
-			chunk->SetIsModified(true);
+			m_chunks[idx]->SetIsModified(true);
 		}
 	}
 	if (blockZ == Chunk::LAST_BLOCK_IDX)
 	{
-		ChunkPos backChunk = chunkPos + ChunkPos(0, 1);
-		auto chunk = GetChunkAt(backChunk);
-		if (chunk != nullptr)
+		size_t idx = chunkIdx + chunksArrSideSize;
+		if (idx < m_chunks.size() && m_chunks[idx])
 		{
-			chunk->SetIsModified(true);
+			m_chunks[idx]->SetIsModified(true);
 		}
 	}
 }
@@ -134,22 +169,20 @@ void ChunksManager::PlaceBlockAt(WorldPos& worldPos, ChunkBlock block)
 bool ChunksManager::CheckBlockCollision(WorldPos& worldPos)
 {
 	std::shared_lock<std::shared_mutex> lock(m_mutex);
-	int xPos = worldPos.x / Chunk::WIDTH;
-	int zPos = worldPos.z / Chunk::WIDTH;
-	ChunkPos chunkPos = ChunkPos(xPos, zPos);
-	auto it = m_chunks.find(chunkPos);
-	if (it == m_chunks.end())
+	int xPos = ToChunkPos(worldPos.x);
+	int zPos = ToChunkPos(worldPos.z);
+	auto chunk = GetChunkAt(xPos, zPos);
+	if (!chunk)
 	{
 		return false;
 	}
-	return it->second->HasBlockAt(worldPos.x - xPos * Chunk::WIDTH, worldPos.y, worldPos.z - zPos * Chunk::WIDTH);
+	return chunk->HasBlockAt(worldPos.x - xPos * Chunk::WIDTH, worldPos.y, worldPos.z - zPos * Chunk::WIDTH);
 }
 
 void ChunksManager::AsyncProcessChunks()
 {
 	while (m_isRunning)
 	{
-		UnloadFarChunks();
 		LoadChunks();
 		CalculateLighting();
 		UpdateModifiedChunks();
@@ -157,55 +190,24 @@ void ChunksManager::AsyncProcessChunks()
 	}
 }
 
-void ChunksManager::UnloadFarChunks()
-{
-	int playerX = static_cast<int>(m_playerPos.x) / Chunk::WIDTH;
-	int playerZ = static_cast<int>(m_playerPos.z) / Chunk::WIDTH;
-	int offset = loadDistance + 2;
-
-	std::vector<ChunkPos> chunksToUnload;
-
-	std::shared_lock<std::shared_mutex> lock(m_mutex);
-	for (auto& chunk : m_chunks)
-	{
-		int dx = abs(playerX - chunk.first.x);
-		int dz = abs(playerZ - chunk.first.z);
-		if (dx > offset || dz > offset)
-		{
-			chunksToUnload.push_back(chunk.first);
-		}
-	}
-	lock.unlock();
-
-	for (auto& chunkPos : chunksToUnload)
-	{
-		RemoveChunk(chunkPos);
-	}
-}
-
 void ChunksManager::LoadChunks()
 {
-	int xCenter = static_cast<int>(std::round(m_playerPos.x / Chunk::WIDTH));
-	int zCenter = static_cast<int>(std::round(m_playerPos.z / Chunk::WIDTH));
+	std::shared_lock<std::shared_mutex> lock(m_mutex);
+	std::vector<std::pair<int, int>> chunksToLoad;
+	const size_t centerIdx = GetChunkIdx(m_centerX, m_centerZ);
 
-	std::vector<ChunkPos> chunksToLoad;
-
-	int radius = 0;
-	while (radius < loadDistance && chunksToLoad.size() < maxAsyncChunksLoading)
+	if (m_chunks[centerIdx] == nullptr)
 	{
-		if (radius == 0)
-		{
-			ChunkPos pos(xCenter, zCenter);
-			if (!m_chunks.contains(pos))
-			{
-				chunksToLoad.push_back(pos);
-			}
-			radius++;
-		}
-		int xStart = xCenter - radius;
-		int xEnd = xCenter + radius;
-		int zStart = zCenter - radius;
-		int zEnd = zCenter + radius;
+		chunksToLoad.push_back({m_centerX, m_centerZ});
+	}
+
+	int radius = 1;
+	while (radius <= loadDistance && chunksToLoad.size() < maxAsyncChunksLoading)
+	{
+		int xStart = m_centerX - radius;
+		int xEnd = m_centerX + radius;
+		int zStart = m_centerZ - radius;
+		int zEnd = m_centerZ + radius;
 
 		for (int x = xStart; x <= xEnd; x++)
 		{
@@ -213,16 +215,13 @@ void ChunksManager::LoadChunks()
 			{
 				break;
 			}
-			ChunkPos posFront(x, zStart);
-			std::shared_lock<std::shared_mutex> lock(m_mutex);
-			if (!m_chunks.contains(posFront))
+			if (!GetChunkAt(x, zStart))
 			{
-				chunksToLoad.push_back(posFront);
+				chunksToLoad.push_back({x, zStart});
 			}
-			ChunkPos posBack(x, zEnd);
-			if (!m_chunks.contains(posBack))
+			if (!GetChunkAt(x, zEnd))
 			{
-				chunksToLoad.push_back(posBack);
+				chunksToLoad.push_back({x, zEnd});
 			}
 		}
 		for (int z = zStart + 1; z <= zEnd - 1; z++)
@@ -231,27 +230,22 @@ void ChunksManager::LoadChunks()
 			{
 				break;
 			}
-			ChunkPos posLeft(xStart, z);
-			std::shared_lock<std::shared_mutex> lock(m_mutex);
-			if (!m_chunks.contains(posLeft))
+			if (!GetChunkAt(xStart, z))
 			{
-				chunksToLoad.push_back(posLeft);
+				chunksToLoad.push_back({xStart, z});
 			}
-			ChunkPos posRight(xEnd, z);
-			if (!m_chunks.contains(posRight))
+			if (!GetChunkAt(xEnd, z))
 			{
-				chunksToLoad.push_back(posRight);
+				chunksToLoad.push_back({xEnd, z});
 			}
 		}
 		radius++;
 	}
+	lock.unlock();
 
-	tbb::parallel_for(tbb::blocked_range<size_t>(0, chunksToLoad.size()),
-		[this, &chunksToLoad](const tbb::blocked_range<size_t>& range) {
-			for (size_t i = range.begin(); i != range.end(); ++i) {
-				auto chunk = m_worldGenerator->GenerateChunk(chunksToLoad[i].x, chunksToLoad[i].z);
-				InsertChunk(chunksToLoad[i], chunk);
-			}
+	std::for_each(std::execution::par, chunksToLoad.begin(), chunksToLoad.end(), [this](std::pair<int, int>& coords) {
+		auto chunk = m_worldGenerator->GenerateChunk(coords.first, coords.second);
+		InsertChunk(chunk);
 		});
 }
 
@@ -266,69 +260,76 @@ void ChunksManager::CalculateLighting()
 
 void ChunksManager::UpdateModifiedChunks()
 {
-	int playerX = static_cast<int>(m_playerPos.x / Chunk::WIDTH);
-	int playerZ = static_cast<int>(m_playerPos.z / Chunk::WIDTH);
-
-	auto comp = [&playerX, &playerZ](ChunkPos left, ChunkPos right) {
-		double dist1 = std::pow(playerX - left.x, 2) + std::pow(playerZ - left.z, 2);
-		double dist2 = std::pow(playerX - right.x, 2) + std::pow(playerZ - right.z, 2);
-
-		return dist1 > dist2;
-		};
-	std::priority_queue<ChunkPos, std::vector<ChunkPos>, decltype(comp)> prior(comp);
+	std::vector<std::shared_ptr<Chunk>> chunksToUpdate;
 	std::shared_lock<std::shared_mutex> lock(m_mutex);
-	for (auto& chunkPair : m_chunks)
+	const size_t centerIdx = GetChunkIdx(m_centerX, m_centerZ);
+
+	if (m_chunks[centerIdx] && m_chunks[centerIdx]->IsModified())
 	{
-		if (chunkPair.second->IsModified())
-		{
-			prior.push(chunkPair.first);
-		}
-	}
-	std::vector<ChunkPos> modifiedChunks;
-	while (!prior.empty() && modifiedChunks.size() < maxAsyncChunksToUpdate)
-	{
-		modifiedChunks.push_back(prior.top());
-		prior.pop();
+		chunksToUpdate.push_back(m_chunks[centerIdx]);
 	}
 
-	std::for_each(std::execution::par, modifiedChunks.begin(), modifiedChunks.end(), [this](ChunkPos chunkPos) {
-		auto leftChunk = m_chunks.find(chunkPos + ChunkPos(-1, 0));
-		auto rightChunk = m_chunks.find(chunkPos + ChunkPos(1, 0));
-		auto frontChunk = m_chunks.find(chunkPos + ChunkPos(0, -1));
-		auto backChunk = m_chunks.find(chunkPos + ChunkPos(0, 1));
-		m_chunks[chunkPos]->UpdateMeshWithoutBuffers(m_blockManager,
-			leftChunk == m_chunks.end() ? nullptr : leftChunk->second, rightChunk == m_chunks.end() ? nullptr : rightChunk->second,
-			frontChunk == m_chunks.end() ? nullptr : frontChunk->second, backChunk == m_chunks.end() ? nullptr : backChunk->second);
+	int radius = 1;
+	while (radius <= loadDistance && chunksToUpdate.size() < maxAsyncChunksToUpdate)
+	{
+		int xStart = m_centerX - radius;
+		int xEnd = m_centerX + radius;
+		int zStart = m_centerZ - radius;
+		int zEnd = m_centerZ + radius;
+
+		for (int x = xStart; x <= xEnd; x++)
+		{
+			if (chunksToUpdate.size() >= maxAsyncChunksToUpdate)
+			{
+				break;
+			}
+			auto frontChunk = GetChunkAt(x, zStart);
+			auto backChunk = GetChunkAt(x, zEnd);
+			if (frontChunk && frontChunk->IsModified())
+			{
+				chunksToUpdate.push_back(frontChunk);
+			}
+			if (backChunk && backChunk->IsModified())
+			{
+				chunksToUpdate.push_back(backChunk);
+			}
+		}
+		for (int z = zStart + 1; z <= zEnd - 1; z++)
+		{
+			if (chunksToUpdate.size() >= maxAsyncChunksToUpdate)
+			{
+				break;
+			}
+			auto leftChunk = GetChunkAt(xStart, z);
+			auto rightChunk = GetChunkAt(xEnd, z);
+			if (leftChunk && leftChunk->IsModified())
+			{
+				chunksToUpdate.push_back(leftChunk);
+			}
+			if (rightChunk && rightChunk->IsModified())
+			{
+				chunksToUpdate.push_back(rightChunk);
+			}
+		}
+		radius++;
+	}
+
+	std::for_each(std::execution::par, chunksToUpdate.begin(), chunksToUpdate.end(), [this](std::shared_ptr<Chunk> chunk) {
+		int cx = chunk->GetX();
+		int cz = chunk->GetZ();
+		auto leftChunk = GetChunkAt(cx - 1, cz);
+		auto rightChunk = GetChunkAt(cx + 1, cz);
+		auto frontChunk = GetChunkAt(cx, cz - 1);
+		auto backChunk = GetChunkAt(cx, cz + 1);
+		chunk->UpdateMeshWithoutBuffers(m_blockManager,
+			leftChunk, rightChunk,
+			frontChunk, backChunk);
 		});
 
-	//tbb::parallel_for(tbb::blocked_range<size_t>(0, modifiedChunks.size()),
-	//	[this, &modifiedChunks](const tbb::blocked_range<size_t>& range) {
-	//		for (size_t i = range.begin(); i != range.end(); ++i) {
-	//			ChunkPos chunkPos = m_chunks[modifiedChunks[i]]->GetPos();
-	//			auto leftChunk = m_chunks.find(chunkPos + ChunkPos(-Chunk::WIDTH, 0));
-	//			auto rightChunk = m_chunks.find(chunkPos + ChunkPos(Chunk::WIDTH, 0));
-	//			auto frontChunk = m_chunks.find(chunkPos + ChunkPos(0, -Chunk::WIDTH));
-	//			auto backChunk = m_chunks.find(chunkPos + ChunkPos(0, Chunk::WIDTH));
-	//			m_chunks[modifiedChunks[i]]->UpdateMeshWithoutBuffers(m_blockManager, 
-	//				leftChunk == m_chunks.end() ? nullptr : leftChunk->second, rightChunk == m_chunks.end() ? nullptr : rightChunk->second,
-	//				frontChunk == m_chunks.end() ? nullptr : frontChunk->second, backChunk == m_chunks.end() ? nullptr : backChunk->second);
-	//		}
-	//	});
-
-	for (auto& pos : modifiedChunks)
+	for (auto& chunk : chunksToUpdate)
 	{
-		m_chunks[pos]->UpdateBuffers(m_deviceResources->GetD3DDevice());
-		m_chunks[pos]->SetShouldRender(true);
-		m_chunks[pos]->SetIsModified(false);
+		chunk->UpdateBuffers(m_deviceResources->GetD3DDevice());
+		chunk->SetShouldRender(true);
+		chunk->SetIsModified(false);
 	}
-}
-
-std::shared_ptr<Chunk> ChunksManager::GetChunkAt(ChunkPos& chunkPos)
-{
-	auto it = m_chunks.find(chunkPos);
-	if (it == m_chunks.end())
-	{
-		return nullptr;
-	}
-	return it->second;
 }

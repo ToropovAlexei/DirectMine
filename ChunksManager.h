@@ -8,26 +8,45 @@
 
 class ChunksManager
 {
+friend LightSolver;
 public:
 	ChunksManager(std::unique_ptr<DX::DeviceResources>& deviceResources, DirectX::XMFLOAT3& playerPos);
 	~ChunksManager();
 
-	void ForEach(const std::function<void(std::pair<ChunkPos, std::shared_ptr<Chunk>>)> cb);
-	void RemoveChunk(const ChunkPos& chunkPos);
-	void InsertChunk(const ChunkPos& chunkPos, Chunk& chunk);
+	void RemoveChunk(int x, int z);
+	void InsertChunk(Chunk& chunk);
 	void UpdatePlayerPos(DirectX::XMFLOAT3& playerPos) noexcept;
 	void RenderChunks();
 	void RemoveBlockAt(WorldPos& worldPos);
 	void PlaceBlockAt(WorldPos& worldPos, ChunkBlock block);
 	bool CheckBlockCollision(WorldPos& worldPos);
+	inline int ToChunkPos(int x) const noexcept
+	{
+		if (x >= 0)
+		{
+			return x / Chunk::WIDTH;
+		}
+		return (x - Chunk::WIDTH + 1) / Chunk::WIDTH;
+	};
 
 private:
 	void AsyncProcessChunks();
-	void UnloadFarChunks();
 	void LoadChunks();
 	void CalculateLighting();
 	void UpdateModifiedChunks();
-	std::shared_ptr<Chunk> GetChunkAt(ChunkPos& chunkPos);
+	inline std::shared_ptr<Chunk> GetChunkAt(int x, int z) noexcept
+	{
+		const size_t idx = GetChunkIdx(x, z);
+		if (idx >= m_chunks.size())
+		{
+			return nullptr;
+		}
+		return m_chunks[idx];
+	}
+	inline size_t GetChunkIdx(int x, int z) const noexcept
+	{
+		return (x - m_centerX + loadDistance) + (z - m_centerZ + loadDistance) * chunksArrSideSize;
+	}
 
 private:
 #ifdef NDEBUG
@@ -39,8 +58,11 @@ private:
 	static const int maxAsyncChunksLoading = 64;
 	static const int maxAsyncChunksToUpdate = 32;
 #endif
+	static const int chunksArrSideSize = loadDistance * 2 + 1;
+	int m_centerX;
+	int m_centerZ;
 	DirectX::XMFLOAT3 m_playerPos;
-	std::unordered_map<ChunkPos, std::shared_ptr<Chunk>, ChunkPosHash> m_chunks;
+	std::vector<std::shared_ptr<Chunk>> m_chunks;
 	std::unique_ptr<DX::DeviceResources>& m_deviceResources;
 	std::unique_ptr<WorldGenerator> m_worldGenerator;
 	std::unique_ptr<ChunkRenderer> m_chunkRenderer;
