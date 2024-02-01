@@ -34,9 +34,10 @@ void ChunksManager::RemoveChunk(int x, int z)
 	size_t chunkIdx = GetChunkIdx(x, z);
 	m_chunks[chunkIdx] = nullptr;
 	std::array<size_t, 4> nextChunks = { chunkIdx - 1, chunkIdx + 1, chunkIdx + chunksArrSideSize, chunkIdx - chunksArrSideSize };
+	const size_t chunksCount = m_chunks.size();
 	for (size_t nextChunkIdx : nextChunks)
 	{
-		if (nextChunkIdx < m_chunks.size() && m_chunks[nextChunkIdx])
+		if (nextChunkIdx < chunksCount && m_chunks[nextChunkIdx])
 		{
 			m_chunks[nextChunkIdx]->SetIsModified(true);
 		}
@@ -53,9 +54,10 @@ void ChunksManager::InsertChunk(Chunk& chunk)
 	}
 	m_chunks[chunkIdx] = std::make_shared<Chunk>(chunk);
 	std::array<size_t, 4> nextChunks = { chunkIdx - 1, chunkIdx + 1, chunkIdx + chunksArrSideSize, chunkIdx - chunksArrSideSize };
+	const size_t chunksCount = m_chunks.size();
 	for (size_t nextChunkIdx : nextChunks)
 	{
-		if (nextChunkIdx < m_chunks.size() && m_chunks[nextChunkIdx])
+		if (nextChunkIdx < chunksCount && m_chunks[nextChunkIdx])
 		{
 			m_chunks[nextChunkIdx]->SetIsModified(true);
 		}
@@ -112,62 +114,62 @@ void ChunksManager::RemoveBlockAt(WorldPos& worldPos)
 
 void ChunksManager::PlaceBlockAt(WorldPos& worldPos, ChunkBlock block)
 {
-	//std::unique_lock<std::shared_mutex> lock(m_mutex);
-	//int xPos = worldPos.x / Chunk::WIDTH;
-	//int zPos = worldPos.z / Chunk::WIDTH;
-	//ChunkPos chunkPos = ChunkPos(xPos, zPos);
-	//auto it = m_chunks.find(chunkPos);
-	//if (it == m_chunks.end())
-	//{
-	//	return;
-	//}
-	//int blockX = worldPos.x - xPos * Chunk::WIDTH;
-	//int blockZ = worldPos.z - zPos * Chunk::WIDTH;
-	//it->second->SetBlock(blockX, worldPos.y, blockZ, block);
-	////m_lighting->HandleBlockSet(blockX, worldPos.y, blockZ, it->second, block);
-	//it->second->SetIsModified(true);
-	//// Возникает какой-то глитч с отображением чанка
-	////it->second->UpdateMeshWithoutBuffers(m_blockManager,
-	////	leftChunk == m_chunks.end() ? nullptr : leftChunk->second, rightChunk == m_chunks.end() ? nullptr : rightChunk->second,
-	////	frontChunk == m_chunks.end() ? nullptr : frontChunk->second, backChunk == m_chunks.end() ? nullptr : backChunk->second);
-	////it->second->UpdateBuffers(m_deviceResources->GetD3DDevice());
+	std::unique_lock<std::shared_mutex> lock(m_mutex);
+	int xPos = worldPos.x / Chunk::WIDTH;
+	int zPos = worldPos.z / Chunk::WIDTH;
+	size_t chunkIdx = GetChunkIdx(xPos, zPos);
+	if (chunkIdx >= m_chunks.size())
+	{
+		return;
+	}
+	auto& chunk = m_chunks[chunkIdx];
+	if (!chunk)
+	{
+		return;
+	}
+	int blockX = worldPos.x - xPos * Chunk::WIDTH;
+	int blockZ = worldPos.z - zPos * Chunk::WIDTH;
+	chunk->SetBlock(blockX, worldPos.y, blockZ, block);
+	m_lighting->HandleBlockSet(blockX, worldPos.y, blockZ, chunk, block);
+	chunk->SetIsModified(true);
+	// Возникает какой-то глитч с отображением чанка
+	//it->second->UpdateMeshWithoutBuffers(m_blockManager,
+	//	leftChunk == m_chunks.end() ? nullptr : leftChunk->second, rightChunk == m_chunks.end() ? nullptr : rightChunk->second,
+	//	frontChunk == m_chunks.end() ? nullptr : frontChunk->second, backChunk == m_chunks.end() ? nullptr : backChunk->second);
+	//it->second->UpdateBuffers(m_deviceResources->GetD3DDevice());
 
-	//if (blockX == 0)
-	//{
-	//	ChunkPos leftChunk = chunkPos - ChunkPos(1, 0);
-	//	auto chunk = GetChunkAt(leftChunk);
-	//	if (chunk != nullptr)
-	//	{
-	//		chunk->SetIsModified(true);
-	//	}
-	//}
-	//if (blockX == Chunk::LAST_BLOCK_IDX)
-	//{
-	//	ChunkPos rightChunk = chunkPos + ChunkPos(1, 0);
-	//	auto chunk = GetChunkAt(rightChunk);
-	//	if (chunk != nullptr)
-	//	{
-	//		chunk->SetIsModified(true);
-	//	}
-	//}
-	//if (blockZ == 0)
-	//{
-	//	ChunkPos frontChunk = chunkPos - ChunkPos(0, 1);
-	//	auto chunk = GetChunkAt(frontChunk);
-	//	if (chunk != nullptr)
-	//	{
-	//		chunk->SetIsModified(true);
-	//	}
-	//}
-	//if (blockZ == Chunk::LAST_BLOCK_IDX)
-	//{
-	//	ChunkPos backChunk = chunkPos + ChunkPos(0, 1);
-	//	auto chunk = GetChunkAt(backChunk);
-	//	if (chunk != nullptr)
-	//	{
-	//		chunk->SetIsModified(true);
-	//	}
-	//}
+	if (blockX == 0)
+	{
+		size_t idx = chunkIdx - 1;
+		if (idx < m_chunks.size() && m_chunks[idx])
+		{
+			m_chunks[idx]->SetIsModified(true);
+		}
+	}
+	if (blockX == Chunk::LAST_BLOCK_IDX)
+	{
+		size_t idx = chunkIdx + 1;
+		if (idx < m_chunks.size() && m_chunks[idx])
+		{
+			m_chunks[idx]->SetIsModified(true);
+		}
+	}
+	if (blockZ == 0)
+	{
+		size_t idx = chunkIdx - chunksArrSideSize;
+		if (idx < m_chunks.size() && m_chunks[idx])
+		{
+			m_chunks[idx]->SetIsModified(true);
+		}
+	}
+	if (blockZ == Chunk::LAST_BLOCK_IDX)
+	{
+		size_t idx = chunkIdx + chunksArrSideSize;
+		if (idx < m_chunks.size() && m_chunks[idx])
+		{
+			m_chunks[idx]->SetIsModified(true);
+		}
+	}
 }
 
 bool ChunksManager::CheckBlockCollision(WorldPos& worldPos)
@@ -187,38 +189,11 @@ void ChunksManager::AsyncProcessChunks()
 {
 	while (m_isRunning)
 	{
-		UnloadFarChunks();
 		LoadChunks();
 		CalculateLighting();
 		UpdateModifiedChunks();
-		std::this_thread::sleep_for(std::chrono::milliseconds(10));
+		std::this_thread::sleep_for(std::chrono::milliseconds(2));
 	}
-}
-
-void ChunksManager::UnloadFarChunks()
-{
-	//int playerX = static_cast<int>(m_playerPos.x) / Chunk::WIDTH;
-	//int playerZ = static_cast<int>(m_playerPos.z) / Chunk::WIDTH;
-	//int offset = loadDistance + 2;
-
-	//std::vector<ChunkPos> chunksToUnload;
-
-	//std::shared_lock<std::shared_mutex> lock(m_mutex);
-	//for (auto& chunk : m_chunks)
-	//{
-	//	int dx = abs(playerX - chunk.first.x);
-	//	int dz = abs(playerZ - chunk.first.z);
-	//	if (dx > offset || dz > offset)
-	//	{
-	//		chunksToUnload.push_back(chunk.first);
-	//	}
-	//}
-	//lock.unlock();
-
-	//for (auto& chunkPos : chunksToUnload)
-	//{
-	//	RemoveChunk(chunkPos);
-	//}
 }
 
 void ChunksManager::LoadChunks()
@@ -380,19 +355,4 @@ void ChunksManager::UpdateModifiedChunks()
 		chunk->SetShouldRender(true);
 		chunk->SetIsModified(false);
 	}
-}
-
-std::shared_ptr<Chunk> ChunksManager::GetChunkAt(int x, int z)
-{
-	const size_t idx = GetChunkIdx(x, z);
-	if (idx >= m_chunks.size())
-	{
-		return nullptr;
-	}
-	return m_chunks[idx];
-}
-
-inline size_t ChunksManager::GetChunkIdx(int x, int z)
-{
-	return (x - m_centerX + loadDistance) + (z - m_centerZ + loadDistance) * chunksArrSideSize;
 }

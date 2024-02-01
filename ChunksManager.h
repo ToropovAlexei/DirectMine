@@ -23,12 +23,22 @@ public:
 
 private:
 	void AsyncProcessChunks();
-	void UnloadFarChunks();
 	void LoadChunks();
 	void CalculateLighting();
 	void UpdateModifiedChunks();
-	std::shared_ptr<Chunk> GetChunkAt(int x, int z);
-	inline size_t GetChunkIdx(int x, int z);
+	inline std::shared_ptr<Chunk> GetChunkAt(int x, int z) noexcept
+	{
+		const size_t idx = GetChunkIdx(x, z);
+		if (idx >= m_chunks.size())
+		{
+			return nullptr;
+		}
+		return m_chunks[idx];
+	}
+	inline size_t GetChunkIdx(int x, int z) const noexcept
+	{
+		return (x - m_centerX + loadDistance) + (z - m_centerZ + loadDistance) * chunksArrSideSize;
+	}
 
 private:
 #ifdef NDEBUG
