@@ -131,6 +131,7 @@ void ChunksManager::PlaceBlockAt(WorldPos& worldPos, ChunkBlock block)
 	chunk->SetBlock(blockX, worldPos.y, blockZ, block);
 	m_lighting->HandleBlockSet(blockX, worldPos.y, blockZ, chunk, block);
 	chunk->SetIsModified(true);
+	m_lighting->BuildSunlight(chunk);
 
 	if (blockX == 0)
 	{
@@ -245,6 +246,7 @@ void ChunksManager::LoadChunks()
 
 	std::for_each(std::execution::par, chunksToLoad.begin(), chunksToLoad.end(), [this](std::pair<int, int>& coords) {
 		auto chunk = m_worldGenerator->GenerateChunk(coords.first, coords.second);
+		chunk.UpdateSunlight(m_blockManager);
 		InsertChunk(chunk);
 		});
 }
@@ -252,10 +254,7 @@ void ChunksManager::LoadChunks()
 void ChunksManager::CalculateLighting()
 {
 	std::unique_lock<std::shared_mutex> lock(m_mutex);
-	m_lighting->solverS->Solve();
-	m_lighting->solverR->Solve();
-	m_lighting->solverG->Solve();
-	m_lighting->solverB->Solve();
+	m_lighting->Solve();
 }
 
 void ChunksManager::UpdateModifiedChunks()

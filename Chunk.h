@@ -32,6 +32,8 @@ public:
 
 	void UpdateBuffers(ID3D11Device* device);
 
+	void UpdateSunlight(BlockManager& blockManager) noexcept;
+
 	inline bool HasBlockAt(int x, int y, int z) const noexcept;
 	inline bool HasBlockAt(size_t idx) const noexcept;
 
@@ -42,6 +44,29 @@ public:
 	inline void SetShouldRender(bool shouldRender) noexcept { m_shouldRender = shouldRender; };
 
 	inline Lightmap& GetLightmapRef() noexcept { return m_lightMap; };
+
+	inline uint16_t GetLightAt(int x, int y, int z) const noexcept
+	{
+		size_t idx = GetIdxFromCoords(x, y, z);
+		
+		return GetLightAt(idx);
+	};
+
+	inline uint16_t GetLightAt(size_t idx) const noexcept
+	{
+		// Если индекс выходит за рамки всех блоков, значит там есть солнечный свет,
+		// указываем его как 0xF000, а остальные каналы берем из карты
+		if (idx > m_blocks.size())
+		{
+			return m_lightMap.GetLight(idx) | 0xF000;
+		}
+		return m_lightMap.GetLight(idx);
+	};
+
+	inline int GetMaxY() const noexcept
+	{
+		return (static_cast<int>(m_blocks.size()) / SQ_WIDTH) - 1;
+	};
 
 	inline int GetX() const noexcept { return m_x; };
 	inline int GetZ() const noexcept { return m_z; };

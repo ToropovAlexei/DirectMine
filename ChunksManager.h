@@ -9,6 +9,7 @@
 class ChunksManager
 {
 friend LightSolver;
+friend Lighting;
 public:
 	ChunksManager(std::unique_ptr<DX::DeviceResources>& deviceResources, DirectX::XMFLOAT3& playerPos);
 	~ChunksManager();
@@ -50,11 +51,11 @@ private:
 
 private:
 #ifdef NDEBUG
-	static const int loadDistance = 51;
+	static const int loadDistance = 32;
 	static const int maxAsyncChunksLoading = 64;
 	static const int maxAsyncChunksToUpdate = 32;
 #else
-	static const int loadDistance = 51;
+	static const int loadDistance = 32;
 	static const int maxAsyncChunksLoading = 64;
 	static const int maxAsyncChunksToUpdate = 32;
 #endif

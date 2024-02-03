@@ -214,64 +214,64 @@ void Chunk::UpdateMeshWithoutBuffers(BlockManager& blockManager,
                 {
                     if (!(frontChunk && frontChunk->HasBlockAt(x, y, LAST_BLOCK_IDX)))
                     {
-                        AddFrontFace(blockPos, block.GetFaceTexture(Block::BlockFaces::Front), frontChunk ? frontChunk->GetLightmapRef().GetLight(x, y, LAST_BLOCK_IDX) : 0);
+                        AddFrontFace(blockPos, block.GetFaceTexture(Block::BlockFaces::Front), frontChunk ? frontChunk->GetLightAt(x, y, LAST_BLOCK_IDX) : 0xF000);
                     }
                 }
                 else
                 {
                     if (!HasBlockAt(idx - WIDTH))
                     {
-                        AddFrontFace(blockPos, block.GetFaceTexture(Block::BlockFaces::Front), GetLightmapRef().GetLight(idx - WIDTH));
+                        AddFrontFace(blockPos, block.GetFaceTexture(Block::BlockFaces::Front), GetLightAt(idx - WIDTH));
                     }
                 }
                 if (z == LAST_BLOCK_IDX)
                 {
                     if (!(backChunk && backChunk->HasBlockAt(x, y, 0)))
                     {
-                        AddBackFace(blockPos, block.GetFaceTexture(Block::BlockFaces::Back), backChunk ? backChunk->GetLightmapRef().GetLight(x, y, 0) : 0);
+                        AddBackFace(blockPos, block.GetFaceTexture(Block::BlockFaces::Back), backChunk ? backChunk->GetLightAt(x, y, 0) : 0xF000);
                     }
                 }
                 else
                 {
                     if (!HasBlockAt(idx + WIDTH))
                     {
-                        AddBackFace(blockPos, block.GetFaceTexture(Block::BlockFaces::Back), GetLightmapRef().GetLight(idx + WIDTH));
+                        AddBackFace(blockPos, block.GetFaceTexture(Block::BlockFaces::Back), GetLightAt(idx + WIDTH));
                     }
                 }
                 if (pos.y == HIGHEST_BLOCK_IDX || !HasBlockAt(idx + SQ_WIDTH))
                 {
-                    AddTopFace(blockPos, block.GetFaceTexture(Block::BlockFaces::Top), GetLightmapRef().GetLight(idx + SQ_WIDTH));
+                    AddTopFace(blockPos, block.GetFaceTexture(Block::BlockFaces::Top), GetLightAt(idx + SQ_WIDTH));
                 }
                 if (pos.y == 0 || !HasBlockAt(idx - SQ_WIDTH))
                 {
-                    AddBottomFace(blockPos, block.GetFaceTexture(Block::BlockFaces::Bottom), GetLightmapRef().GetLight(idx - SQ_WIDTH));
+                    AddBottomFace(blockPos, block.GetFaceTexture(Block::BlockFaces::Bottom), GetLightAt(idx - SQ_WIDTH));
                 }
                 if (x == 0)
                 {
                     if (!(leftChunk && leftChunk->HasBlockAt(LAST_BLOCK_IDX, y, z)))
                     {
-                        AddLeftFace(blockPos, block.GetFaceTexture(Block::BlockFaces::Left), leftChunk ? leftChunk->GetLightmapRef().GetLight(LAST_BLOCK_IDX, y, z) : 0);
+                        AddLeftFace(blockPos, block.GetFaceTexture(Block::BlockFaces::Left), leftChunk ? leftChunk->GetLightAt(LAST_BLOCK_IDX, y, z) : 0xF000);
                     }
                 }
                 else
                 {
                     if (!HasBlockAt(idx - 1))
                     {
-                        AddLeftFace(blockPos, block.GetFaceTexture(Block::BlockFaces::Left), GetLightmapRef().GetLight(idx - 1));
+                        AddLeftFace(blockPos, block.GetFaceTexture(Block::BlockFaces::Left), GetLightAt(idx - 1));
                     }
                 }
                 if (x == LAST_BLOCK_IDX)
                 {
                     if (!(rightChunk && rightChunk->HasBlockAt(0, y, z)))
                     {
-                        AddRightFace(blockPos, block.GetFaceTexture(Block::BlockFaces::Right), rightChunk ? rightChunk->GetLightmapRef().GetLight(0, y, z) : 0);
+                        AddRightFace(blockPos, block.GetFaceTexture(Block::BlockFaces::Right), rightChunk ? rightChunk->GetLightAt(0, y, z) : 0xF000);
                     }
                 }
                 else
                 {
                     if (!HasBlockAt(idx + 1))
                     {
-                        AddRightFace(blockPos, block.GetFaceTexture(Block::BlockFaces::Right), GetLightmapRef().GetLight(idx + 1));
+                        AddRightFace(blockPos, block.GetFaceTexture(Block::BlockFaces::Right), GetLightAt(idx + 1));
                     }
                     
                 }
@@ -308,6 +308,27 @@ void Chunk::UpdateBuffers(ID3D11Device* device)
 {
     BuildVertexBuffer(device);
     BuildIndexBuffer(device);
+}
+
+void Chunk::UpdateSunlight(BlockManager& blockManager) noexcept
+{
+    const int maxY = GetMaxY();
+    for (int x = 0; x < WIDTH; x++)
+    {
+        for (int z = 0; z < WIDTH; z++)
+        {
+            int y = maxY + 1;
+            while (y > 0)
+            {
+                if (blockManager.GetBlockById(GetBlock(x, y, z).GetId()).IsOpaque())
+                {
+                    break;
+                }
+                m_lightMap.SetS(x, y, z, 15);
+                y--;
+            }
+        }
+    }
 }
 
 void Chunk::BuildVertexBuffer(ID3D11Device* device)

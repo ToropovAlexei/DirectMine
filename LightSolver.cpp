@@ -170,6 +170,12 @@ void LightSolver::Solve()
 
 inline void LightSolver::TryAddLightNode(int x, int y, int z, int lightLevel, std::shared_ptr<Chunk> chunk)
 {
+	assert(x > -1);
+	assert(y > -1);
+	assert(z > -1);
+	assert(x < Chunk::WIDTH);
+	assert(z < Chunk::WIDTH);
+	assert(y < Chunk::HEIGHT);
 	int neighbourVoxelLightLevel = chunk->GetLightmapRef().GetChannel(x, y, z, m_channel);
 	if (lightLevel <= neighbourVoxelLightLevel)
 	{
@@ -185,6 +191,12 @@ inline void LightSolver::TryAddLightNode(int x, int y, int z, int lightLevel, st
 
 inline void LightSolver::TryAddLightRemovalNode(int x, int y, int z, int lightLevel, std::shared_ptr<Chunk> chunk)
 {
+	assert(x > -1);
+	assert(y > -1);
+	assert(z > -1);
+	assert(x < Chunk::WIDTH);
+	assert(z < Chunk::WIDTH);
+	assert(y < Chunk::HEIGHT);
 	int neighbourVoxelLightLevel = chunk->GetLightmapRef().GetChannel(x, y, z, m_channel);
 	if (neighbourVoxelLightLevel != 0 && neighbourVoxelLightLevel < lightLevel)
 	{
