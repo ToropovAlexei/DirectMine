@@ -28,7 +28,7 @@ public:
 
 	void UpdateMeshWithoutBuffers(BlockManager& blockManager, 
 		std::shared_ptr<Chunk> leftChunk, std::shared_ptr<Chunk> rightChunk, 
-		std::shared_ptr<Chunk> frontChunk, std::shared_ptr<Chunk> backChunk);
+		std::shared_ptr<Chunk> frontChunk, std::shared_ptr<Chunk> backChunk) noexcept;
 
 	void UpdateBuffers(ID3D11Device* device);
 

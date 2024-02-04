@@ -160,7 +160,6 @@ inline void Chunk::AddRightFace(DirectX::XMFLOAT3& pos, std::string& texture, ui
 
 inline void Chunk::ShrinkAirBlocks() noexcept
 {
-
     const size_t prevY = (static_cast<size_t>(m_blocks.size()) / SQ_WIDTH) - 1;
     bool isAirOnly = true;
     for (size_t i = prevY * SQ_WIDTH; i < m_blocks.size(); i++)
@@ -182,9 +181,9 @@ inline size_t Chunk::GetIdxFromCoords(int x, int y, int z) const noexcept
     return static_cast<size_t>(x + z * WIDTH + y * SQ_WIDTH);
 }
 
-void Chunk::UpdateMeshWithoutBuffers(BlockManager& blockManager, 
+void Chunk::UpdateMeshWithoutBuffers(BlockManager& blockManager,
     std::shared_ptr<Chunk> leftChunk, std::shared_ptr<Chunk> rightChunk,
-    std::shared_ptr<Chunk> frontChunk, std::shared_ptr<Chunk> backChunk)
+    std::shared_ptr<Chunk> frontChunk, std::shared_ptr<Chunk> backChunk) noexcept
 {
     m_vertices.clear();
     m_indices.clear();
@@ -192,23 +191,23 @@ void Chunk::UpdateMeshWithoutBuffers(BlockManager& blockManager,
     m_vertices.reserve(20000);
     m_indices.reserve(20000);
     const int maxY = static_cast<int>(m_blocks.size()) / SQ_WIDTH;
+    const int chunkX = m_x * Chunk::WIDTH;
+    const int chunkZ = m_z * Chunk::WIDTH;
+    size_t prevIdx = 0;
     for (int y = 0; y < maxY; y++)
     {
         for (int z = 0; z < WIDTH; z++)
         {
             for (int x = 0; x < WIDTH; x++)
             {
-                const size_t idx = GetIdxFromCoords(x, y, z);
+                const size_t idx = prevIdx++;
                 BlockId blockId = m_blocks[idx].GetId();
                 if (blockId == BlockId::Air)
                 {
                     continue;
                 }
-                WorldPos blockChunkPos = WorldPos(x, y, z);
-                WorldPos pos = WorldPos(x + m_x * Chunk::WIDTH, y, z + m_z * Chunk::WIDTH);
-
                 Block& block = blockManager.GetBlockById(blockId);
-                DirectX::XMFLOAT3 blockPos = DirectX::XMFLOAT3(static_cast<float>(pos.x), static_cast<float>(pos.y), static_cast<float>(pos.z));
+                DirectX::XMFLOAT3 blockPos = DirectX::XMFLOAT3(static_cast<float>(x + chunkX), static_cast<float>(y), static_cast<float>(z + chunkZ));
 
                 if (z == 0)
                 {
@@ -238,11 +237,11 @@ void Chunk::UpdateMeshWithoutBuffers(BlockManager& blockManager,
                         AddBackFace(blockPos, block.GetFaceTexture(Block::BlockFaces::Back), GetLightAt(idx + WIDTH));
                     }
                 }
-                if (pos.y == HIGHEST_BLOCK_IDX || !HasBlockAt(idx + SQ_WIDTH))
+                if (y == HIGHEST_BLOCK_IDX || !HasBlockAt(idx + SQ_WIDTH))
                 {
                     AddTopFace(blockPos, block.GetFaceTexture(Block::BlockFaces::Top), GetLightAt(idx + SQ_WIDTH));
                 }
-                if (pos.y == 0 || !HasBlockAt(idx - SQ_WIDTH))
+                if (y == 0 || !HasBlockAt(idx - SQ_WIDTH))
                 {
                     AddBottomFace(blockPos, block.GetFaceTexture(Block::BlockFaces::Bottom), GetLightAt(idx - SQ_WIDTH));
                 }
@@ -273,7 +272,7 @@ void Chunk::UpdateMeshWithoutBuffers(BlockManager& blockManager,
                     {
                         AddRightFace(blockPos, block.GetFaceTexture(Block::BlockFaces::Right), GetLightAt(idx + 1));
                     }
-                    
+
                 }
             }
         }
