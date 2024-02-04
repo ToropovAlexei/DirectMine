@@ -195,7 +195,7 @@ void ChunksManager::LoadChunks()
 {
 	std::shared_lock<std::shared_mutex> lock(m_mutex);
 	std::vector<std::pair<int, int>> chunksToLoad;
-	const size_t centerIdx = GetChunkIdx(m_centerX, m_centerZ);
+	const size_t centerIdx = GetCenterIdx();
 
 	if (m_chunks[centerIdx] == nullptr)
 	{
@@ -247,7 +247,7 @@ void ChunksManager::LoadChunks()
 	std::for_each(std::execution::par, chunksToLoad.begin(), chunksToLoad.end(), [this](std::pair<int, int>& coords) {
 		auto chunk = m_worldGenerator->GenerateChunk(coords.first, coords.second);
 		chunk.UpdateSunlight(m_blockManager);
-		InsertChunk(chunk);
+			InsertChunk(chunk);
 		});
 }
 
@@ -261,7 +261,7 @@ void ChunksManager::UpdateModifiedChunks()
 {
 	std::vector<std::shared_ptr<Chunk>> chunksToUpdate;
 	std::shared_lock<std::shared_mutex> lock(m_mutex);
-	const size_t centerIdx = GetChunkIdx(m_centerX, m_centerZ);
+	const size_t centerIdx = GetCenterIdx();
 
 	if (m_chunks[centerIdx] && m_chunks[centerIdx]->IsModified())
 	{
@@ -314,12 +314,11 @@ void ChunksManager::UpdateModifiedChunks()
 	}
 
 	std::for_each(std::execution::par, chunksToUpdate.begin(), chunksToUpdate.end(), [this](std::shared_ptr<Chunk> chunk) {
-		int cx = chunk->GetX();
-		int cz = chunk->GetZ();
-		auto leftChunk = GetChunkAt(cx - 1, cz);
-		auto rightChunk = GetChunkAt(cx + 1, cz);
-		auto frontChunk = GetChunkAt(cx, cz - 1);
-		auto backChunk = GetChunkAt(cx, cz + 1);
+		const size_t idx = GetChunkIdx(chunk->GetX(), chunk->GetZ());
+		auto leftChunk = GetChunkAt(idx - 1);
+		auto rightChunk = GetChunkAt(idx + 1);
+		auto frontChunk = GetChunkAt(idx - chunksArrSideSize);
+		auto backChunk = GetChunkAt(idx + chunksArrSideSize);
 		chunk->UpdateMeshWithoutBuffers(m_blockManager,
 			leftChunk, rightChunk,
 			frontChunk, backChunk);

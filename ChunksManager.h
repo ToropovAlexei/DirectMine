@@ -38,6 +38,10 @@ private:
 	inline std::shared_ptr<Chunk> GetChunkAt(int x, int z) noexcept
 	{
 		const size_t idx = GetChunkIdx(x, z);
+		return GetChunkAt(idx);
+	}
+	inline std::shared_ptr<Chunk> GetChunkAt(size_t idx) noexcept
+	{
 		if (idx >= m_chunks.size())
 		{
 			return nullptr;
@@ -48,16 +52,20 @@ private:
 	{
 		return (x - m_centerX + loadDistance) + (z - m_centerZ + loadDistance) * chunksArrSideSize;
 	}
+	inline size_t GetCenterIdx() const noexcept
+	{
+		return loadDistance + loadDistance * chunksArrSideSize;
+	}
 
 private:
 #ifdef NDEBUG
-	static const int loadDistance = 32;
-	static const int maxAsyncChunksLoading = 64;
-	static const int maxAsyncChunksToUpdate = 32;
+	static const int loadDistance = 100;
+	static const int maxAsyncChunksLoading = 4096;
+	static const int maxAsyncChunksToUpdate = 256;
 #else
 	static const int loadDistance = 32;
-	static const int maxAsyncChunksLoading = 64;
-	static const int maxAsyncChunksToUpdate = 32;
+	static const int maxAsyncChunksLoading = 4096;
+	static const int maxAsyncChunksToUpdate = 256;
 #endif
 	static const int chunksArrSideSize = loadDistance * 2 + 1;
 	int m_centerX;

@@ -60,6 +60,7 @@
 #include <shared_mutex>
 #include <queue>
 #include <execution>
+#include <ranges>
 
 #ifdef _DEBUG
 #include <dxgidebug.h>
