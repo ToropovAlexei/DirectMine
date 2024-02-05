@@ -322,12 +322,8 @@ void ChunksManager::UpdateModifiedChunks()
 		chunk->UpdateMeshWithoutBuffers(m_blockManager,
 			leftChunk, rightChunk,
 			frontChunk, backChunk);
-		});
-
-	for (auto& chunk : chunksToUpdate)
-	{
 		chunk->UpdateBuffers(m_deviceResources->GetD3DDevice());
 		chunk->SetShouldRender(true);
 		chunk->SetIsModified(false);
-	}
+		});
 }

@@ -74,6 +74,9 @@ void World::Update(DX::StepTimer const& timer)
 	auto mouse = m_mouse->GetState();
 	m_tracker->Update(mouse);
 
+	std::string fpsCounter = "DirectMine FPS: " + std::to_string(timer.GetFramesPerSecond());
+	SetWindowTextA(GetActiveWindow(), fpsCounter.c_str());
+
 	if (mouse.positionMode == DirectX::Mouse::MODE_RELATIVE)
 	{
 		float dx = DirectX::XMConvertToRadians(0.05f * static_cast<float>(mouse.x));

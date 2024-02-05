@@ -185,8 +185,8 @@ void Chunk::UpdateMeshWithoutBuffers(BlockManager& blockManager,
     std::shared_ptr<Chunk> leftChunk, std::shared_ptr<Chunk> rightChunk,
     std::shared_ptr<Chunk> frontChunk, std::shared_ptr<Chunk> backChunk) noexcept
 {
-    m_vertices.clear();
-    m_indices.clear();
+    assert(m_vertices.empty());
+    assert(m_indices.empty());
     // Эти числа взяты из среднего значения в чанках
     m_vertices.reserve(20000);
     m_indices.reserve(20000);
@@ -277,8 +277,6 @@ void Chunk::UpdateMeshWithoutBuffers(BlockManager& blockManager,
             }
         }
     }
-    m_vertices.shrink_to_fit();
-    m_indices.shrink_to_fit();
 }
 
 inline bool Chunk::HasBlockAt(int x, int y, int z) const noexcept
@@ -307,6 +305,11 @@ void Chunk::UpdateBuffers(ID3D11Device* device)
 {
     BuildVertexBuffer(device);
     BuildIndexBuffer(device);
+    m_indicesCount = m_indices.size();
+    m_vertices.clear();
+    m_indices.clear();
+    m_vertices.shrink_to_fit();
+    m_indices.shrink_to_fit();
 }
 
 void Chunk::UpdateSunlight(BlockManager& blockManager) noexcept

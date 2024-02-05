@@ -73,6 +73,7 @@ public:
 
 	inline std::vector<Vertex>& GetVertices() noexcept { return m_vertices; };
 	inline std::vector<UINT>& GetIndices() noexcept { return m_indices; };
+	inline size_t GetIndicesCount() const noexcept { return m_indicesCount; };
 	inline Microsoft::WRL::ComPtr<ID3D11Buffer> GetVertexBuffer() noexcept { return m_vertexBuffer; };
 	inline Microsoft::WRL::ComPtr<ID3D11Buffer> GetIndexBuffer() noexcept { return m_indexBuffer; };
 
@@ -98,6 +99,7 @@ private:
 
 	std::vector<Vertex> m_vertices;
 	std::vector<UINT> m_indices;
+	size_t m_indicesCount;
 
 	Microsoft::WRL::ComPtr<ID3D11Buffer> m_vertexBuffer;
 	Microsoft::WRL::ComPtr<ID3D11Buffer> m_indexBuffer;

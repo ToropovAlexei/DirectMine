@@ -34,7 +34,7 @@ void ChunkRenderer::RenderChunks(std::vector<std::shared_ptr<Chunk>>& chunks)
         }
         context->IASetVertexBuffers(0u, 1u, chunk->GetVertexBuffer().GetAddressOf(), &m_stride, &m_offset);
         context->IASetIndexBuffer(chunk->GetIndexBuffer().Get(), DXGI_FORMAT_R32_UINT, 0u);
-        context->DrawIndexed(static_cast<UINT>(chunk->GetIndices().size()), 0u, 0u);
+        context->DrawIndexed(static_cast<UINT>(chunk->GetIndicesCount()), 0u, 0u);
     }
 }
 
@@ -58,7 +58,7 @@ void ChunkRenderer::BuildInputLayout()
 void ChunkRenderer::BuildSampler()
 {
     D3D11_SAMPLER_DESC samplerDesc = {};
-    samplerDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_POINT;
+    samplerDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR;
     samplerDesc.AddressU = D3D11_TEXTURE_ADDRESS_CLAMP;
     samplerDesc.AddressV = D3D11_TEXTURE_ADDRESS_CLAMP;
     samplerDesc.AddressW = D3D11_TEXTURE_ADDRESS_CLAMP;
