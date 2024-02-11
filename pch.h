@@ -38,6 +38,7 @@
 
 #include <DirectXMath.h>
 #include <DirectXColors.h>
+#include <DirectXCollision.h>
 
 #include <algorithm>
 #include <cmath>
