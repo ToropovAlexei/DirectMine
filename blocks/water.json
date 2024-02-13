@@ -1,0 +1,6 @@
+{
+  "id": 15,
+  "name": "water",
+  "textures": ["water"],
+  "is_opaque": false
+}

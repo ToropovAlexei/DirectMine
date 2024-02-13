@@ -16,6 +16,8 @@ enum class BlockId : uint16_t
 	Obsidian = 11,
 	RedstoneOre = 12,
 	Glowstone = 13,
+	Sand = 14,
+	Water = 15,
 	Count
 };
 
