@@ -61,5 +61,21 @@ void Block::BuildTextures(std::vector<std::string> textures)
 		m_textures[static_cast<size_t>(BlockFaces::Right)] = textures[1];
 		return;
 	}
+	if (textures.size() == 6)
+	{
+		// Front
+		m_textures[static_cast<size_t>(BlockFaces::Front)] = textures[0];
+		// Back
+		m_textures[static_cast<size_t>(BlockFaces::Back)] = textures[1];
+		// Top
+		m_textures[static_cast<size_t>(BlockFaces::Top)] = textures[2];
+		// Bottom
+		m_textures[static_cast<size_t>(BlockFaces::Bottom)] = textures[3];
+		// Left
+		m_textures[static_cast<size_t>(BlockFaces::Left)] = textures[4];
+		// Right
+		m_textures[static_cast<size_t>(BlockFaces::Right)] = textures[5];
+		return;
+	}
 	throw std::runtime_error("Failed to build textures for block " + m_name);
 }

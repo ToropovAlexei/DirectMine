@@ -27,7 +27,7 @@ void Lighting::HandleBlockSet(int x, int y, int z, std::shared_ptr<Chunk> chunk,
 		// Если солнечный свет над блоком == 15, то пропускаем его ниже, т.к. блок прозрачный
 		if (chunk->GetLightmapRef().GetS(x, y + 1, z) == 0xF)
 		{
-			for (int curY = y; y > 0; curY--)
+			for (int curY = y; curY > 0; curY--)
 			{
 				if (m_blockManager.GetBlockById(chunk->GetBlock(x, curY, z).GetId()).IsOpaque())
 				{

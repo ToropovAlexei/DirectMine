@@ -1,0 +1,6 @@
+{
+  "id": 16,
+  "name": "leaves",
+  "textures": ["leaves"],
+  "is_opaque": false
+}

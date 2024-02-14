@@ -18,6 +18,8 @@ enum class BlockId : uint16_t
 	Glowstone = 13,
 	Sand = 14,
 	Water = 15,
+	Leaves = 16,
+	Debug = 17,
 	Count
 };
 
