@@ -50,6 +50,11 @@ void BlockLoader::LoadBlock(std::filesystem::path filePath)
 	{
 		isOpaque = blockData["is_opaque"];
 	}
+	int drawGroup = 0;
+	if (blockData.contains("draw_group"))
+	{
+		drawGroup = blockData["draw_group"];
+	}
 
-	m_blocks.push_back(Block(id, name, textures, emission, isOpaque));
+	m_blocks.push_back(Block(id, name, textures, emission, isOpaque, drawGroup));
 }

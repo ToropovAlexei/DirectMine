@@ -34,14 +34,37 @@ public:
 
 	void UpdateSunlight(BlockManager& blockManager) noexcept;
 
-	inline bool HasBlockAt(int x, int y, int z) const noexcept;
-	inline bool HasBlockAt(size_t idx) const noexcept;
+	inline bool HasBlockAt(int x, int y, int z) const noexcept
+	{
+		assert(x < Chunk::WIDTH);
+		//assert(chunkPos.y < Chunk::HEIGHT);
+		assert(z < Chunk::WIDTH);
+		const size_t idx = GetIdxFromCoords(x, y, z);
+		if (idx >= m_blocks.size())
+		{
+			return false;
+		}
+		return m_blocks[idx].GetId() != BlockId::Air;
+	};
+	inline bool HasBlockAt(size_t idx) const noexcept
+	{
+		if (idx >= m_blocks.size())
+		{
+			return false;
+		}
+		return m_blocks[idx].GetId() != BlockId::Air;
+	};
+	inline bool HasOpaqueBlockAt(int x, int y, int z, BlockManager& blockManager) const noexcept;
+	inline bool HasOpaqueBlockAt(size_t idx, BlockManager& blockManager) const noexcept;
 
 	inline bool IsModified() const noexcept { return m_isModified; };
 	inline void SetIsModified(bool isModified) noexcept { m_isModified = isModified; };
 
 	inline bool ShouldRender() const noexcept { return m_shouldRender; };
 	inline void SetShouldRender(bool shouldRender) noexcept { m_shouldRender = shouldRender; };
+
+	bool CanAddFace(int x, int y, int z, BlockManager& blockManager, ChunkBlock& block) noexcept;
+	bool CanAddFace(size_t idx, BlockManager& blockManager, ChunkBlock& block) noexcept;
 
 	inline Lightmap& GetLightmapRef() noexcept { return m_lightMap; };
 
@@ -71,19 +94,17 @@ public:
 	inline int GetX() const noexcept { return m_x; };
 	inline int GetZ() const noexcept { return m_z; };
 
-	inline std::vector<Vertex>& GetVertices() noexcept { return m_vertices; };
-	inline std::vector<UINT>& GetIndices() noexcept { return m_indices; };
-	inline size_t GetIndicesCount() const noexcept { return m_indicesCount; };
-	inline Microsoft::WRL::ComPtr<ID3D11Buffer> GetVertexBuffer() noexcept { return m_vertexBuffer; };
-	inline Microsoft::WRL::ComPtr<ID3D11Buffer> GetIndexBuffer() noexcept { return m_indexBuffer; };
+	inline size_t GetIndicesCount(int drawGroup) const noexcept { return m_indicesCount[drawGroup]; };
+	inline Microsoft::WRL::ComPtr<ID3D11Buffer> GetVertexBuffer(int drawGroup) noexcept { return m_vertexBuffer[drawGroup]; };
+	inline Microsoft::WRL::ComPtr<ID3D11Buffer> GetIndexBuffer(int drawGroup) noexcept { return m_indexBuffer[drawGroup]; };
 
 private:
-	inline void AddFrontFace(DirectX::XMFLOAT3& pos, std::string& texture, uint16_t light) noexcept;
-	inline void AddBackFace(DirectX::XMFLOAT3& pos, std::string& texture, uint16_t light) noexcept;
-	inline void AddTopFace(DirectX::XMFLOAT3& pos, std::string& texture, uint16_t light) noexcept;
-	inline void AddBottomFace(DirectX::XMFLOAT3& pos, std::string& texture, uint16_t light) noexcept;
-	inline void AddLeftFace(DirectX::XMFLOAT3& pos, std::string& texture, uint16_t light) noexcept;
-	inline void AddRightFace(DirectX::XMFLOAT3& pos, std::string& texture, uint16_t light) noexcept;
+	inline void AddFrontFace(int drawGroup, DirectX::XMFLOAT3& pos, std::string& texture, uint16_t light) noexcept;
+	inline void AddBackFace(int drawGroup, DirectX::XMFLOAT3& pos, std::string& texture, uint16_t light) noexcept;
+	inline void AddTopFace(int drawGroup, DirectX::XMFLOAT3& pos, std::string& texture, uint16_t light) noexcept;
+	inline void AddBottomFace(int drawGroup, DirectX::XMFLOAT3& pos, std::string& texture, uint16_t light) noexcept;
+	inline void AddLeftFace(int drawGroup, DirectX::XMFLOAT3& pos, std::string& texture, uint16_t light) noexcept;
+	inline void AddRightFace(int drawGroup, DirectX::XMFLOAT3& pos, std::string& texture, uint16_t light) noexcept;
 
 	inline void ShrinkAirBlocks() noexcept;
 
@@ -97,12 +118,12 @@ private:
 	std::vector<ChunkBlock> m_blocks;
 	Lightmap m_lightMap;
 
-	std::vector<Vertex> m_vertices;
-	std::vector<UINT> m_indices;
-	size_t m_indicesCount;
+	std::array<std::vector<Vertex>, 4> m_vertices;
+	std::array<std::vector<UINT>, 4> m_indices;
+	std::array<size_t, 4> m_indicesCount;
 
-	Microsoft::WRL::ComPtr<ID3D11Buffer> m_vertexBuffer;
-	Microsoft::WRL::ComPtr<ID3D11Buffer> m_indexBuffer;
+	std::array<Microsoft::WRL::ComPtr<ID3D11Buffer>, 4> m_vertexBuffer;
+	std::array<Microsoft::WRL::ComPtr<ID3D11Buffer>, 4> m_indexBuffer;
 
 	void BuildVertexBuffer(ID3D11Device* device);
 	void BuildIndexBuffer(ID3D11Device* device);

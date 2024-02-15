@@ -31,6 +31,16 @@ Block::Block(BlockId id, std::string name, std::vector<std::string> textures, st
 	BuildTextures(textures);
 }
 
+Block::Block(BlockId id, std::string name, std::vector<std::string> textures, std::array<uint8_t, 3u> emission, bool isOpaque, int drawGroup) :
+	m_name(name),
+	m_id(id),
+	m_emission(emission),
+	m_isOpaque(isOpaque),
+	m_drawGroup(drawGroup)
+{
+	BuildTextures(textures);
+}
+
 void Block::BuildTextures(std::vector<std::string> textures)
 {
 	if (textures.empty())

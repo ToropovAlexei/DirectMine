@@ -26,7 +26,7 @@ World::World(std::unique_ptr<DX::DeviceResources>& deviceResources,
 
 	TextureAtlas::BuildAtlas(m_deviceResources->GetD3DDevice(), m_deviceResources->GetD3DDeviceContext());
 	m_cam = std::make_unique<Camera>();
-	m_cam->SetPosition({-63.0f, 60.0f, 32.0f});
+	m_cam->SetPosition({-9.0f, 60.0f, 20.0f});
 	m_cam->UpdateViewMatrix();
 	DirectX::XMFLOAT3 playerPos = m_cam->GetPosition3f();
 	m_chunksManager = std::make_unique<ChunksManager>(m_deviceResources, playerPos);
@@ -92,7 +92,7 @@ void World::Update(DX::StepTimer const& timer)
 	{
 		WorldPos offset = WorldUtils::GetOffsetByBlockDirection(rayCastResult.value().second);
 		WorldPos placePos = rayCastResult.value().first + offset;
-		m_chunksManager->PlaceBlockAt(placePos, ChunkBlock(BlockId::Stone));
+		m_chunksManager->PlaceBlockAt(placePos, ChunkBlock(BlockId::Leaves));
 	}
 
 	m_cam->UpdateViewMatrix();

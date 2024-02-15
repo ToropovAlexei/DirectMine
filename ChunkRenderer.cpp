@@ -26,15 +26,18 @@ void ChunkRenderer::RenderChunks(std::vector<std::shared_ptr<Chunk>>& chunks)
     context->PSSetShaderResources(0u, 1u, TextureAtlas::Get3dTextureSRV().GetAddressOf());
     context->RSSetState(m_rasterState.Get());
 
-    for (auto& chunk : chunks)
+    for (int drawGroup = 0; drawGroup < 4; drawGroup++)
     {
-        if (!chunk || !chunk->ShouldRender())
+        for (auto& chunk : chunks)
         {
-            continue;
+            if (!chunk || !chunk->ShouldRender() || chunk->GetIndicesCount(drawGroup) == 0)
+            {
+                continue;
+            }
+            context->IASetVertexBuffers(0u, 1u, chunk->GetVertexBuffer(drawGroup).GetAddressOf(), &m_stride, &m_offset);
+            context->IASetIndexBuffer(chunk->GetIndexBuffer(drawGroup).Get(), DXGI_FORMAT_R32_UINT, 0u);
+            context->DrawIndexed(static_cast<UINT>(chunk->GetIndicesCount(drawGroup)), 0u, 0u);
         }
-        context->IASetVertexBuffers(0u, 1u, chunk->GetVertexBuffer().GetAddressOf(), &m_stride, &m_offset);
-        context->IASetIndexBuffer(chunk->GetIndexBuffer().Get(), DXGI_FORMAT_R32_UINT, 0u);
-        context->DrawIndexed(static_cast<UINT>(chunk->GetIndicesCount()), 0u, 0u);
     }
 }
 

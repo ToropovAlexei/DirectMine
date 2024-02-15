@@ -13,8 +13,10 @@ public:
 
 private:
 	FastNoise::SmartNode<FastNoise::OpenSimplex2> fnSimplex;
+	FastNoise::SmartNode<FastNoise::OpenSimplex2> tempNoise;
 	static const int maxHeight = 64;
 	static const int minHeight = 20;
+	static const int waterLevel = 56;
 	BlockManager& m_blockManager;
 };
 
