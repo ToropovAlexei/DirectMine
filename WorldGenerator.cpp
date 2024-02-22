@@ -5,48 +5,21 @@
 WorldGenerator::WorldGenerator(BlockManager& blockManager) :
     m_blockManager(blockManager)
 {
-    fnSimplex = FastNoise::New<FastNoise::OpenSimplex2>();
+    heightGenNoise = FastNoise::New<FastNoise::OpenSimplex2>();
+    heightGenFBm = FastNoise::New<FastNoise::FractalFBm>();
+    heightGenFBm->SetSource(heightGenNoise);
+    heightGenFBm->SetOctaveCount(2);
     tempNoise = FastNoise::New<FastNoise::OpenSimplex2>();
+    node = FastNoise::NewFromEncodedNodeTree("EQACAAAAAAAgQBAAAAAAQBkAEwDD9Sg/DQAEAAAAAAAgQAkAAGZmJj8AAAAAPwEEAAAAAAAAAEBAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAM3MTD4AMzMzPwAAAAA/");
 }
 
 Chunk WorldGenerator::GenerateChunk(int cx, int cz)
 {
     Chunk chunk = Chunk(cx, cz);
-    //for (int x = 0; x < Chunk::WIDTH; x++)
-    //{
-    //    for (int z = 0; z < Chunk::WIDTH; z++)
-    //    {
-    //        for (int y = 0; y < 50; y++)
-    //        {
-    //            chunk.SetBlock(x, y, z, BlockId::Water);
-    //        }
-    //    }
-    //}
-    //for (int x = 5; x < 6; x++)
-    //{
-    //    for (int z = 5; z < 6; z++)
-    //    {
-    //        for (int y = 49; y < 50; y++)
-    //        {
-    //            chunk.SetBlock(x, y, z, BlockId::Debug);
-    //        }
-    //    }
-    //}
-    //for (int y = 49; y < 50; y++)
-    //{
-    //    chunk.SetBlock(4, y, 4, BlockId::Leaves);
-    //    chunk.SetBlock(4, y, 5, BlockId::Leaves);
-    //    chunk.SetBlock(4, y, 6, BlockId::Leaves);
-    //    chunk.SetBlock(5, y, 6, BlockId::Leaves);
-    //    chunk.SetBlock(5, y, 4, BlockId::Leaves);
-    //    chunk.SetBlock(6, y, 4, BlockId::Leaves);
-    //    chunk.SetBlock(6, y, 5, BlockId::Leaves);
-    //    chunk.SetBlock(6, y, 6, BlockId::Leaves);
-    //}
     std::vector<float> heights(Chunk::SQ_WIDTH);
     std::vector<float> temps(Chunk::SQ_WIDTH);
-    fnSimplex->GenUniformGrid2D(heights.data(), cx * Chunk::WIDTH, cz * Chunk::WIDTH, Chunk::WIDTH, Chunk::WIDTH, 0.005f, 1337);
-    tempNoise->GenUniformGrid2D(temps.data(), cx * Chunk::WIDTH, cz * Chunk::WIDTH, Chunk::WIDTH, Chunk::WIDTH, 0.001f, 1337);
+    heightGenFBm->GenUniformGrid2D(heights.data(), cx * Chunk::WIDTH, cz * Chunk::WIDTH, Chunk::WIDTH, Chunk::WIDTH, 0.005f, 1337);
+    tempNoise->GenUniformGrid2D(temps.data(), cx * Chunk::WIDTH, cz * Chunk::WIDTH, Chunk::WIDTH, Chunk::WIDTH, 0.002f, 1337);
 
     size_t idx = 0;
     for (int z = 0; z < Chunk::WIDTH; ++z) {

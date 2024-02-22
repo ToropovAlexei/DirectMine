@@ -12,11 +12,13 @@ public:
 	Chunk GenerateChunk(int cx, int cz);
 
 private:
-	FastNoise::SmartNode<FastNoise::OpenSimplex2> fnSimplex;
+	FastNoise::SmartNode<FastNoise::OpenSimplex2> heightGenNoise;
+	FastNoise::SmartNode<FastNoise::FractalFBm> heightGenFBm;
 	FastNoise::SmartNode<FastNoise::OpenSimplex2> tempNoise;
-	static const int maxHeight = 64;
-	static const int minHeight = 20;
-	static const int waterLevel = 56;
+	FastNoise::SmartNode<> node;
+	static const int maxHeight = 128;
+	static const int minHeight = 45;
+	static const int waterLevel = 62;
 	BlockManager& m_blockManager;
 };
 

@@ -63,7 +63,7 @@ private:
 	static const int maxAsyncChunksLoading = 4096;
 	static const int maxAsyncChunksToUpdate = 256;
 #else
-	static const int loadDistance = 3;
+	static const int loadDistance = 32;
 	static const int maxAsyncChunksLoading = 4096;
 	static const int maxAsyncChunksToUpdate = 256;
 #endif

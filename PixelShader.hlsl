@@ -1,4 +1,4 @@
-Texture3D tex : register(t0);
+Texture2DArray tex : register(t0);
 SamplerState splr : register(s0);
 
 struct VertexOut
