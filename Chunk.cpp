@@ -50,7 +50,7 @@ ChunkBlock Chunk::GetBlock(int x, int y, int z) noexcept
     return m_blocks[index];
 }
 
-inline void Chunk::AddFrontFace(int drawGroup, DirectX::XMFLOAT3& pos, std::string& texture, uint16_t light) noexcept
+inline void Chunk::AddFrontFace(int drawGroup, DirectX::XMFLOAT3& pos, std::string_view texture, uint16_t light) noexcept
 {
     float idx = TextureAtlas::GetTextureIdx(texture);
     UINT offset = static_cast<UINT>(m_vertices[drawGroup].size());
@@ -68,7 +68,7 @@ inline void Chunk::AddFrontFace(int drawGroup, DirectX::XMFLOAT3& pos, std::stri
     m_indices[drawGroup].emplace_back(2 + offset);
 }
 
-inline void Chunk::AddBackFace(int drawGroup, DirectX::XMFLOAT3& pos, std::string& texture, uint16_t light) noexcept
+inline void Chunk::AddBackFace(int drawGroup, DirectX::XMFLOAT3& pos, std::string_view texture, uint16_t light) noexcept
 {
     float idx = TextureAtlas::GetTextureIdx(texture);
     UINT offset = static_cast<UINT>(m_vertices[drawGroup].size());
@@ -86,7 +86,7 @@ inline void Chunk::AddBackFace(int drawGroup, DirectX::XMFLOAT3& pos, std::strin
     m_indices[drawGroup].emplace_back(3 + offset);
 }
 
-inline void Chunk::AddTopFace(int drawGroup, DirectX::XMFLOAT3& pos, std::string& texture, uint16_t light) noexcept
+inline void Chunk::AddTopFace(int drawGroup, DirectX::XMFLOAT3& pos, std::string_view texture, uint16_t light) noexcept
 {
     float idx = TextureAtlas::GetTextureIdx(texture);
     UINT offset = static_cast<UINT>(m_vertices[drawGroup].size());
@@ -104,7 +104,7 @@ inline void Chunk::AddTopFace(int drawGroup, DirectX::XMFLOAT3& pos, std::string
     m_indices[drawGroup].emplace_back(2 + offset);
 }
 
-inline void Chunk::AddBottomFace(int drawGroup, DirectX::XMFLOAT3& pos, std::string& texture, uint16_t light) noexcept
+inline void Chunk::AddBottomFace(int drawGroup, DirectX::XMFLOAT3& pos, std::string_view texture, uint16_t light) noexcept
 {
     float idx = TextureAtlas::GetTextureIdx(texture);
     UINT offset = static_cast<UINT>(m_vertices[drawGroup].size());
@@ -122,7 +122,7 @@ inline void Chunk::AddBottomFace(int drawGroup, DirectX::XMFLOAT3& pos, std::str
     m_indices[drawGroup].emplace_back(3 + offset);
 }
 
-inline void Chunk::AddLeftFace(int drawGroup, DirectX::XMFLOAT3& pos, std::string& texture, uint16_t light) noexcept
+inline void Chunk::AddLeftFace(int drawGroup, DirectX::XMFLOAT3& pos, std::string_view texture, uint16_t light) noexcept
 {
     float idx = TextureAtlas::GetTextureIdx(texture);
     UINT offset = static_cast<UINT>(m_vertices[drawGroup].size());
@@ -140,7 +140,7 @@ inline void Chunk::AddLeftFace(int drawGroup, DirectX::XMFLOAT3& pos, std::strin
     m_indices[drawGroup].emplace_back(2 + offset);
 }
 
-inline void Chunk::AddRightFace(int drawGroup, DirectX::XMFLOAT3& pos, std::string& texture, uint16_t light) noexcept
+inline void Chunk::AddRightFace(int drawGroup, DirectX::XMFLOAT3& pos, std::string_view texture, uint16_t light) noexcept
 {
     float idx = TextureAtlas::GetTextureIdx(texture);
     UINT offset = static_cast<UINT>(m_vertices[drawGroup].size());
@@ -185,15 +185,14 @@ void Chunk::UpdateMeshWithoutBuffers(BlockManager& blockManager,
     std::shared_ptr<Chunk> leftChunk, std::shared_ptr<Chunk> rightChunk,
     std::shared_ptr<Chunk> frontChunk, std::shared_ptr<Chunk> backChunk) noexcept
 {
-
-    // Эти числа взяты из среднего значения в чанках
     for (int drawGroup = 0; drawGroup < 4; drawGroup++)
     {
         assert(m_vertices[drawGroup].empty());
         assert(m_indices[drawGroup].empty());
-        m_vertices[drawGroup].reserve(20000);
-        m_indices[drawGroup].reserve(20000);
     }
+    // Эти числа взяты из среднего значения в чанках
+    m_vertices[0].reserve(5000);
+    m_indices[0].reserve(10000);
     const int maxY = static_cast<int>(m_blocks.size()) / SQ_WIDTH;
     const int chunkX = m_x * Chunk::WIDTH;
     const int chunkZ = m_z * Chunk::WIDTH;

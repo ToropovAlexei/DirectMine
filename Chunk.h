@@ -99,12 +99,12 @@ public:
 	inline Microsoft::WRL::ComPtr<ID3D11Buffer> GetIndexBuffer(int drawGroup) noexcept { return m_indexBuffer[drawGroup]; };
 
 private:
-	inline void AddFrontFace(int drawGroup, DirectX::XMFLOAT3& pos, std::string& texture, uint16_t light) noexcept;
-	inline void AddBackFace(int drawGroup, DirectX::XMFLOAT3& pos, std::string& texture, uint16_t light) noexcept;
-	inline void AddTopFace(int drawGroup, DirectX::XMFLOAT3& pos, std::string& texture, uint16_t light) noexcept;
-	inline void AddBottomFace(int drawGroup, DirectX::XMFLOAT3& pos, std::string& texture, uint16_t light) noexcept;
-	inline void AddLeftFace(int drawGroup, DirectX::XMFLOAT3& pos, std::string& texture, uint16_t light) noexcept;
-	inline void AddRightFace(int drawGroup, DirectX::XMFLOAT3& pos, std::string& texture, uint16_t light) noexcept;
+	inline void AddFrontFace(int drawGroup, DirectX::XMFLOAT3& pos, std::string_view texture, uint16_t light) noexcept;
+	inline void AddBackFace(int drawGroup, DirectX::XMFLOAT3& pos, std::string_view texture, uint16_t light) noexcept;
+	inline void AddTopFace(int drawGroup, DirectX::XMFLOAT3& pos, std::string_view texture, uint16_t light) noexcept;
+	inline void AddBottomFace(int drawGroup, DirectX::XMFLOAT3& pos, std::string_view texture, uint16_t light) noexcept;
+	inline void AddLeftFace(int drawGroup, DirectX::XMFLOAT3& pos, std::string_view texture, uint16_t light) noexcept;
+	inline void AddRightFace(int drawGroup, DirectX::XMFLOAT3& pos, std::string_view texture, uint16_t light) noexcept;
 
 	inline void ShrinkAirBlocks() noexcept;
 

@@ -26,7 +26,7 @@ World::World(std::unique_ptr<DX::DeviceResources>& deviceResources,
 
 	TextureAtlas::BuildAtlas(m_deviceResources->GetD3DDevice(), m_deviceResources->GetD3DDeviceContext());
 	m_cam = std::make_unique<Camera>();
-	m_cam->SetPosition({-9.0f, 60.0f, 20.0f});
+	m_cam->SetPosition({-9.0f, 120.0f, 20.0f});
 	m_cam->UpdateViewMatrix();
 	DirectX::XMFLOAT3 playerPos = m_cam->GetPosition3f();
 	m_chunksManager = std::make_unique<ChunksManager>(m_deviceResources, playerPos);
@@ -49,7 +49,7 @@ void World::Update(DX::StepTimer const& timer)
 	m_chunksManager->UpdatePlayerPos(playerPos);
 	auto kb = m_keyboard->GetState();
 	m_keysTracker->Update(kb);
-	const float speed = 25.0f;
+	const float speed = 750.0f;
 	if (kb.A)
 	{
 		m_cam->Strafe(-speed * elapsedTime);

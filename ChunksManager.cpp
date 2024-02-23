@@ -43,15 +43,16 @@ void ChunksManager::RemoveChunk(int x, int z)
 	}
 }
 
-void ChunksManager::InsertChunk(Chunk& chunk)
+void ChunksManager::InsertChunk(std::unique_ptr<Chunk>& chunk)
 {
 	std::unique_lock<std::shared_mutex> lock(m_mutex);
-	size_t chunkIdx = GetChunkIdx(chunk.GetX(), chunk.GetZ());
+	size_t chunkIdx = GetChunkIdx(chunk->GetX(), chunk->GetZ());
 	if (chunkIdx >= m_chunks.size())
 	{
 		return;
 	}
-	m_chunks[chunkIdx] = std::make_shared<Chunk>(chunk);
+	// TODO Если есть утечка памяти, то потенциально здесь, почему-то ее использование с std::move увеличилось
+	m_chunks[chunkIdx] = std::move(chunk);
 	std::array<size_t, 4> nextChunks = { chunkIdx - 1, chunkIdx + 1, chunkIdx + chunksArrSideSize, chunkIdx - chunksArrSideSize };
 	const size_t chunksCount = m_chunks.size();
 	for (size_t nextChunkIdx : nextChunks)
@@ -246,9 +247,9 @@ void ChunksManager::LoadChunks()
 
 	std::for_each(std::execution::par, chunksToLoad.begin(), chunksToLoad.end(), [this](std::pair<int, int>& coords) {
 		auto chunk = m_worldGenerator->GenerateChunk(coords.first, coords.second);
-		chunk.UpdateSunlight(m_blockManager);
-			InsertChunk(chunk);
-		});
+		chunk->UpdateSunlight(m_blockManager);
+		InsertChunk(chunk);
+	});
 }
 
 void ChunksManager::CalculateLighting()

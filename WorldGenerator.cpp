@@ -13,9 +13,9 @@ WorldGenerator::WorldGenerator(BlockManager& blockManager) :
     node = FastNoise::NewFromEncodedNodeTree("EQACAAAAAAAgQBAAAAAAQBkAEwDD9Sg/DQAEAAAAAAAgQAkAAGZmJj8AAAAAPwEEAAAAAAAAAEBAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAM3MTD4AMzMzPwAAAAA/");
 }
 
-Chunk WorldGenerator::GenerateChunk(int cx, int cz)
+std::unique_ptr<Chunk> WorldGenerator::GenerateChunk(int cx, int cz)
 {
-    Chunk chunk = Chunk(cx, cz);
+    auto chunk = std::make_unique<Chunk>(cx, cz);
     std::vector<float> heights(Chunk::SQ_WIDTH);
     std::vector<float> temps(Chunk::SQ_WIDTH);
     heightGenFBm->GenUniformGrid2D(heights.data(), cx * Chunk::WIDTH, cz * Chunk::WIDTH, Chunk::WIDTH, Chunk::WIDTH, 0.005f, 1337);
@@ -32,10 +32,10 @@ Chunk WorldGenerator::GenerateChunk(int cx, int cz)
             for (int y = 0; y < std::max(height, waterLevel); ++y) {
                 if (y > height)
                 {
-                    chunk.SetBlock(x, y, z, BlockId::Water);
+                    chunk->SetBlock(x, y, z, BlockId::Water);
                     continue;
                 }
-                chunk.SetBlock(x, y, z, temps[activeIdx] > 0.5 ? BlockId::Sand : BlockId::Grass);
+                chunk->SetBlock(x, y, z, temps[activeIdx] > 0.5 ? BlockId::Sand : BlockId::Grass);
                 //if (y == 0)
                 //{
                 //    chunk.SetBlock(x, y, z, BlockId::Bedrock);

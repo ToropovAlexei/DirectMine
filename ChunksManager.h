@@ -15,7 +15,7 @@ public:
 	~ChunksManager();
 
 	void RemoveChunk(int x, int z);
-	void InsertChunk(Chunk& chunk);
+	void InsertChunk(std::unique_ptr<Chunk>& chunk);
 	void UpdatePlayerPos(DirectX::XMFLOAT3& playerPos) noexcept;
 	void RenderChunks();
 	void RemoveBlockAt(WorldPos& worldPos);
@@ -59,7 +59,7 @@ private:
 
 private:
 #ifdef NDEBUG
-	static const int loadDistance = 32;
+	static const int loadDistance = 64;
 	static const int maxAsyncChunksLoading = 4096;
 	static const int maxAsyncChunksToUpdate = 256;
 #else

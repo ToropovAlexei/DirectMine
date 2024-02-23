@@ -4,7 +4,7 @@
 
 Microsoft::WRL::ComPtr<ID3D11Texture2D> TextureAtlas::atlas3d;
 Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> TextureAtlas::texture3dSRV;
-std::unordered_map<std::string, float> TextureAtlas::texturesIndices;
+std::unordered_map<std::string, float, TextureAtlas::string_hash, std::equal_to<>> TextureAtlas::texturesIndices;
 
 void TextureAtlas::BuildAtlas(ID3D11Device* device, ID3D11DeviceContext* context)
 {
