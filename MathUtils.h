@@ -1,8 +1,11 @@
 #pragma once
+
+#include <cmath>
+
 class MathUtils
 {
 public:
-    static inline const int GetNearestSquareNumber(int number) noexcept
+    static inline int GetNearestSquareNumber(int number) noexcept
     {
         int squareRoot = static_cast<int>(std::sqrt(number));
         int nearestSquareNumber = squareRoot * squareRoot;
@@ -13,7 +16,7 @@ public:
         return squareRoot;
     }
 
-    static inline const unsigned int GetNextPowerOfTwo(unsigned int number) noexcept
+    static inline unsigned int GetNextPowerOfTwo(unsigned int number) noexcept
     {
         --number;
         number |= number >> 1;
@@ -25,31 +28,31 @@ public:
         return number;
     }
 
-    static inline const int RoundUp(int numToRound, int multiple) noexcept
+    static inline int RoundUp(int numToRound, int multiple) noexcept
     {
-        int remainder = abs(numToRound) % multiple;
+        int remainder = std::abs(numToRound) % multiple;
         if (remainder == 0)
         {
             return numToRound;
         }
         if (numToRound < 0)
         {
-            return -(abs(numToRound) - remainder);
+            return -(std::abs(numToRound) - remainder);
         }
 
         return numToRound + multiple - remainder;
     }
 
-    static inline const int RoundDown(int numToRound, int multiple) noexcept
+    static inline int RoundDown(int numToRound, int multiple) noexcept
     {
-        int remainder = abs(numToRound) % multiple;
+        int remainder = std::abs(numToRound) % multiple;
         if (remainder == 0)
         {
             return numToRound;
         }
         if (numToRound < 0)
         {
-            return -(abs(numToRound) + multiple - remainder);
+            return -(std::abs(numToRound) + multiple - remainder);
         }
 
         return numToRound - remainder;

@@ -4,8 +4,8 @@
 #include "ChunksManager.h"
 
 LightSolver::LightSolver(ChunksManager* chunksManager, BlockManager& blockManager, int channel):
-	m_blockManager(blockManager),
 	m_chunksManager(chunksManager),
+	m_blockManager(blockManager),
 	m_channel(channel)
 {
 }

@@ -40,7 +40,6 @@ int Lightmap::GetG(int x, int y, int z) noexcept
 int Lightmap::GetB(int x, int y, int z) noexcept
 {
     const size_t idx = GetIdx(x, y, z);
-    (x, y, z);
     if (idx >= m_lightMap.size())
     {
         return 0;
@@ -88,12 +87,7 @@ void Lightmap::SetB(int x, int y, int z, int val) noexcept
     m_lightMap[idx] = static_cast<uint16_t>((m_lightMap[idx] & 0xFFF0) | val);
 }
 
-inline size_t Lightmap::GetIdx(int x, int y, int z) noexcept
-{
-	return static_cast<size_t>(x + z * Chunk::WIDTH + y * Chunk::SQ_WIDTH);
-}
-
-inline void Lightmap::ExtendMapTo(int y) noexcept
+void Lightmap::ExtendMapTo(int y) noexcept
 {
     const int prevY = (static_cast<int>(m_lightMap.size()) / Chunk::SQ_WIDTH) - 1;
     if (prevY < y)
@@ -102,3 +96,8 @@ inline void Lightmap::ExtendMapTo(int y) noexcept
         m_lightMap.resize(newSize);
     }
 }
+
+size_t Lightmap::GetIdx(int x, int y, int z) noexcept
+{
+    return static_cast<size_t>(x + z * Chunk::WIDTH + y * Chunk::SQ_WIDTH);
+};

@@ -1,16 +1,20 @@
 #pragma once
+#include <cstdint>
+#include <vector>
+
+class Chunk;
 
 class Lightmap
 {
 public:
 	Lightmap();
 
-	inline uint16_t GetLight(int x, int y, int z) noexcept
+	inline std::uint16_t GetLight(int x, int y, int z) noexcept
 	{
 		const size_t idx = GetIdx(x, y, z);
 		return GetLight(idx);
 	}
-	inline uint16_t GetLight(size_t idx) const noexcept
+	inline std::uint16_t GetLight(size_t idx) const noexcept
 	{
 		if (idx >= m_lightMap.size())
 		{
@@ -44,7 +48,7 @@ public:
 		{
 			ExtendMapTo(y);
 		}
-		m_lightMap[idx] = static_cast<uint16_t>((m_lightMap[idx] & ~(0xF << (channel * 4))) | (val << (channel * 4)));
+		m_lightMap[idx] = static_cast<std::uint16_t>((m_lightMap[idx] & ~(0xF << (channel * 4))) | (val << (channel * 4)));
 	};
 	void SetS(int x, int y, int z, int val) noexcept;
 	void SetR(int x, int y, int z, int val) noexcept;
@@ -52,10 +56,10 @@ public:
 	void SetB(int x, int y, int z, int val) noexcept;
 
 private:
-	inline size_t GetIdx(int x, int y, int z) noexcept;
-	inline void ExtendMapTo(int y) noexcept;
+	size_t GetIdx(int x, int y, int z) noexcept;
+	void ExtendMapTo(int y) noexcept;
 
 private:
-	std::vector<uint16_t> m_lightMap;
+	std::vector<std::uint16_t> m_lightMap;
 };
 

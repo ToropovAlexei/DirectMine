@@ -1,5 +1,8 @@
 #pragma once
 
+#include <array>
+#include <string>
+#include <vector>
 #include "BlockId.h"
 
 class Block
@@ -50,9 +53,9 @@ private:
 	void BuildTextures(std::vector<std::string>);
 
 private:
+	BlockId m_id;
 	std::string m_name;
 	bool m_isOpaque;
-	BlockId m_id;
 	int m_drawGroup;
 	std::array<std::string, 6u> m_textures; // Front, Back, Top, Bottom, Left, Right
 	std::array<uint8_t, 3u> m_emission; // RGB

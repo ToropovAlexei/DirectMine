@@ -176,11 +176,6 @@ inline void Chunk::ShrinkAirBlocks() noexcept
     }
 }
 
-inline size_t Chunk::GetIdxFromCoords(int x, int y, int z) const noexcept
-{
-    return static_cast<size_t>(x + z * WIDTH + y * SQ_WIDTH);
-}
-
 void Chunk::UpdateMeshWithoutBuffers(BlockManager& blockManager,
     std::shared_ptr<Chunk> leftChunk, std::shared_ptr<Chunk> rightChunk,
     std::shared_ptr<Chunk> frontChunk, std::shared_ptr<Chunk> backChunk) noexcept

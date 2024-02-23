@@ -3,8 +3,8 @@
 #include "MathUtils.h"
 
 ChunksManager::ChunksManager(std::unique_ptr<DX::DeviceResources>& deviceResources, DirectX::XMFLOAT3& playerPos) :
-	m_deviceResources(deviceResources),
-	m_playerPos(playerPos)
+	m_playerPos(playerPos),
+	m_deviceResources(deviceResources)
 {
 	m_blockManager = BlockManager();
 	m_blockManager.LoadBlocks();

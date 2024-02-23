@@ -108,7 +108,10 @@ private:
 
 	inline void ShrinkAirBlocks() noexcept;
 
-	inline size_t GetIdxFromCoords(int x, int y, int z) const noexcept;
+	inline size_t GetIdxFromCoords(int x, int y, int z) const noexcept
+	{
+		return static_cast<size_t>(x + z * WIDTH + y * SQ_WIDTH);
+	};
 
 private:
 	int m_x;

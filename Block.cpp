@@ -7,36 +7,36 @@ Block::Block() :
 }
 
 Block::Block(BlockId id, std::string name, std::vector<std::string> textures) :
-	m_name(name),
 	m_id(id),
+	m_name(name),
 	m_emission({})
 {
 	BuildTextures(textures);
 }
 
 Block::Block(BlockId id, std::string name, std::vector<std::string> textures, std::array<uint8_t, 3u> emission) :
-	m_name(name),
 	m_id(id),
+	m_name(name),
 	m_emission(emission)
 {
 	BuildTextures(textures);
 }
 
 Block::Block(BlockId id, std::string name, std::vector<std::string> textures, std::array<uint8_t, 3u> emission, bool isOpaque) :
-	m_name(name),
 	m_id(id),
-	m_emission(emission),
-	m_isOpaque(isOpaque)
+	m_name(name),
+	m_isOpaque(isOpaque),
+	m_emission(emission)
 {
 	BuildTextures(textures);
 }
 
 Block::Block(BlockId id, std::string name, std::vector<std::string> textures, std::array<uint8_t, 3u> emission, bool isOpaque, int drawGroup) :
-	m_name(name),
 	m_id(id),
-	m_emission(emission),
+	m_name(name),
 	m_isOpaque(isOpaque),
-	m_drawGroup(drawGroup)
+	m_drawGroup(drawGroup),
+	m_emission(emission)
 {
 	BuildTextures(textures);
 }

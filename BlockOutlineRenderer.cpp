@@ -1,10 +1,11 @@
 #include "pch.h"
 #include "BlockOutlineRenderer.h"
 #include "ShadersLoader.h"
+#include <optional>
 
 BlockOutlineRenderer::BlockOutlineRenderer(std::unique_ptr<DX::DeviceResources>& deviceResources) :
-	m_deviceResources(deviceResources),
-    m_worldPos(std::nullopt)
+    m_worldPos(std::nullopt),
+    m_deviceResources(deviceResources)
 {
     BuildInputLayout();
     BuildIndices();

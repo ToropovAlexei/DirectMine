@@ -60,8 +60,8 @@ private:
 private:
 #ifdef NDEBUG
 	static const int loadDistance = 64;
-	static const int maxAsyncChunksLoading = 4096;
-	static const int maxAsyncChunksToUpdate = 256;
+	static const int maxAsyncChunksLoading = 2048;
+	static const int maxAsyncChunksToUpdate = 128;
 #else
 	static const int loadDistance = 32;
 	static const int maxAsyncChunksLoading = 4096;
